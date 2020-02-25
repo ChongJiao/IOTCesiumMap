@@ -11,6 +11,8 @@
     "build": "node build/build.js"
   },
   "dependencies": {
+    "mem": ">=4.0.0",
+    "strophe.js": "^1.3.4",
     "vue": "^2.5.2",
     "vue-cesium": "^2.0.5",
     "vue-router": "^3.0.1"
