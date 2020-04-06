@@ -4,10 +4,10 @@
       <vc-layer-imagery :alpha="alpha" :imageryProvider="imageryProvider" :brightness="brightness" :contrast="contrast">
       </vc-layer-imagery>
       <vc-layer-imagery :alpha="alpha" :brightness="brightness" :contrast="contrast">
-        <vc-provider-imagery-tile-mapservice
-          :url="url"
-          @readyPromise="imageryReady"
-        ></vc-provider-imagery-tile-mapservice>
+<!--        <vc-provider-imagery-tile-mapservice-->
+<!--          :url="url"-->
+<!--          @readyPromise="imageryReady"-->
+<!--        ></vc-provider-imagery-tile-mapservice>-->
       </vc-layer-imagery>
     </vc-viewer>
   </div>
@@ -58,6 +58,8 @@ export default {
 </script>
 <style>
   .viewer {
+    position: relative;
+    z-index: -1;
     width: 100%;
     height: 100%;
   }
