@@ -3,25 +3,27 @@
     <vc-viewer @ready="ready">
       <vc-layer-imagery :alpha="alpha" :imageryProvider="imageryProvider" :brightness="brightness" :contrast="contrast">
       </vc-layer-imagery>
-      <vc-layer-imagery :alpha="alpha" :brightness="brightness" :contrast="contrast">
+<!--      <vc-layer-imagery :alpha="alpha" :brightness="brightness" :contrast="contrast">-->
 <!--        <vc-provider-imagery-tile-mapservice-->
 <!--          :url="url"-->
 <!--          @readyPromise="imageryReady"-->
 <!--        ></vc-provider-imagery-tile-mapservice>-->
-      </vc-layer-imagery>
+<!--      </vc-layer-imagery>-->
     </vc-viewer>
   </div>
 </template>
 <script>
 export default {
   name: 'CesiumMap',
+  props: {
+    url: 'http://localhost:8000/GFData/tileData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806'
+  },
   data () {
     return {
       alpha: 1,
       brightness: 1,
       contrast: 1,
       imageryProvider: {},
-      url: 'http://localhost:8000/GFData/test/testtile',
       bmKey: 'AgcbDCAOb9zMfquaT4Z-MdHX4AsHUNvs7xgdHefEA5myMHxZk87NTNgdLbG90IE-'
     }
   },
@@ -58,9 +60,6 @@ export default {
 </script>
 <style>
   .viewer {
-    position: relative;
-    z-index: -1;
     width: 100%;
-    height: 100%;
   }
 </style>

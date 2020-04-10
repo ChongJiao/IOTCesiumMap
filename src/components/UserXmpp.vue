@@ -1,34 +1,38 @@
 <template>
-    <div>
-      <el-form size="small" v-show="!connectFlag" ref="userValidateForm" style="border: 0.1rem solid #66ccee; padding: 0.2rem">
-        <el-tag>用户登陆</el-tag>
-        <el-form-item
-          prop="userJID"
-          label="JID号">
-          <el-input placeholder="请输入用户名JID"
-                    v-model="userJid"
-                    clearable></el-input>
-        </el-form-item>
+    <div class="body">
+      <div class="login" v-show="!connectFlag">
+        <div class = "login-body">
+          <el-form size="small" ref="userValidateForm">
+            <el-tag>用户登陆</el-tag>
+            <el-form-item
+              prop="userJID"
+              label="JID号">
+              <el-input placeholder="请输入用户名JID"
+                        v-model="userJid"
+                        clearable></el-input>
+            </el-form-item>
 
-        <el-form-item
-          prop="userJID"
-          label="密码">
-          <el-input placeholder="请输入用户密码"
-                    v-model="userPassword"
-                    type="password"
-                    clearable></el-input>
-        </el-form-item>
+            <el-form-item
+              prop="userJID"
+              label="密码">
+              <el-input placeholder="请输入用户密码"
+                        v-model="userPassword"
+                        type="password"
+                        clearable></el-input>
+            </el-form-item>
 
-        <el-form-item>
-          <el-button type="primary" @click="connecting()">登陆</el-button>
-          <el-button @click="resetForm('userValidateForm')">重置</el-button>
-        </el-form-item>
-      </el-form>
-      <el-row style="width: 100%">
-        <el-tag>用户状态</el-tag>
+            <el-form-item>
+              <el-button type="primary" @click="connecting()">登陆</el-button>
+              <el-button @click="resetForm('userValidateForm')">重置</el-button>
+            </el-form-item>
+          </el-form>
+        </div>
+      </div>
+
+      <el-row>
+        <el-tag style="margin-right: 1rem">用户状态</el-tag>
         {{connectCode}}
       </el-row>
-      <div></div>
       <el-table
         :data="SatelliteData"
         style="width: 100%"
@@ -39,24 +43,24 @@
           width="120">
         </el-table-column>
         <el-table-column
-          prop="url"
-          label="地址"
-          width="120">
-        </el-table-column>
-        <el-table-column
-          fixed="right"
           label="操作"
-          width="60">
-          <template slot-scope="scope">
-            <el-button
-              @click.native.prevent="MakeTask(scope.$index, SatelliteData)"
-              type="text"
-              size="small">
-              处理任务
-            </el-button>
-          </template>
+          width="120">
+          <el-button @click.native.prevent="MakeTask(scope.$index, SatelliteData)"
+          type="text">
+          处理任务
+        </el-button>
         </el-table-column>
       </el-table>
+
+<!--      <div v-for="(item, i) in taskData" >-->
+<!--        <div>-->
+<!--          <p>{{item.id}}</p>-->
+<!--          <div v-for="itemStatus in taskData[i].data">-->
+<!--            <p>{{itemStatus.status}}</p>-->
+<!--            <p>{{itemStatus.url}}</p>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </div>-->
 
       <el-container class="Task" v-show="taskSendFlag">
         <el-row id="flow" style="width: 100%; margin: auto; padding-left: 1rem; padding-right: 1rem">
@@ -69,11 +73,13 @@
           </el-steps>
         </el-row>
       </el-container>
+      <div style="width: 100%"><CesiumMap :url="tileUrl"></CesiumMap></div>
     </div>
 </template>
 
 <script>
 import Strophe from 'strophe.js'
+import CesiumMap from './CesiumMap'
 String.format = function (src) {
   if (arguments.length === 0) return null
 
@@ -84,8 +90,13 @@ String.format = function (src) {
   })
 }
 export default {
+  components: {CesiumMap},
   name: 'UserXmpp',
 
+  mounted () {
+    console.log('自动登陆')
+    this.connecting()
+  },
   methods: {
     connecting () {
       if (this.userJid === '' || this.userPassword === '') {
@@ -111,11 +122,17 @@ export default {
         this.connectCode = '连接成功，可以开始聊天'
         this.connectFlag = true
 
-        // 当接收到<message>节，调用onMessage回调函数
+        // 当接收到<message>节
         this.conn.addHandler(this.onMessage, null, 'message', null, null, null)
 
         // 首先要发送一个<presence>给服务器（initial presence）
         this.conn.send(Strophe.$pres().tree())
+
+        // 发送成功即获取当前用的任务管理流程
+        this.ObtainAllTaskContent()
+      } else {
+        this.connectCode = '自动登陆失败'
+        this.connectFlag = false
       }
     },
     onMessage (msg) {
@@ -131,7 +148,6 @@ export default {
         msgContent = msgContent.replace(/&quot;/g, '"')
         if (this.isJsonStr(msgContent)) {
           let replyJson = JSON.parse(msgContent)
-          console.log(replyJson)
           switch (replyJson['type']) {
             case 'satellite':
               this.SatelliteData = JSON.parse(replyJson['data'])
@@ -141,6 +157,7 @@ export default {
               for (let key in resultsUrlList) {
                 console.log(resultsUrlList[key])
               }
+              if (resultsUrlList.length <= 2) { console.log('error finished') } else { this.tileUrl = resultsUrlList[resultsUrlList.length - 1] }
               this.taskSendFlag = false
               break
             case 'status' :
@@ -154,6 +171,20 @@ export default {
               console.log('task Id is')
               console.log(this.processTaskId)
               break
+            case 'taskList':
+              let contents = replyJson['tasks']
+              let jsonContent = JSON.parse(contents)
+              if (this.taskData.length > 0) { this.taskData = [] }
+              for (let key in jsonContent) {
+                jsonContent[key]['data'] = JSON.parse(jsonContent[key]['data'])
+                this.taskData.push(jsonContent[key])
+              }
+              if (this.taskData[this.taskData.length - 1]['data'].length <= 2) {
+                this.processTaskId = this.taskData[this.taskData.length - 1]['id']
+                this.taskSendFlag = true
+                setInterval(this.ObtainTaskStatus, 5000)
+              }
+              console.log(this.taskData)
           }
         } else {
           console.log(fromJid + ' send message to ' + toJid + ' and the message content is ' + msgContent)
@@ -161,14 +192,18 @@ export default {
       }
       return true
     },
-    GetDataUrlSource (toJid) {
+    ObtainDataUrlSource (toJid) {
       let msgContent = '{\'type\': \'satellite\'}'
       this.SendMessage(toJid, msgContent)
     },
-    GetTaskStatus () {
+    ObtainAllTaskContent () {
+      let msgContent = '{\'type\': \'queryTask\'}'
+      this.SendMessage(this.serverJid, msgContent)
+    },
+    ObtainTaskStatus () {
       if (this.taskSendFlag) {
         console.log('obtain task id')
-        let msgContent = '{\'type\': \'queryTask\', \'taskId\': {0}}'
+        let msgContent = '{\'type\': \'queryStatus\', \'taskId\': {0}}'
         msgContent = String.format(msgContent, this.processTaskId)
         console.log(msgContent)
         this.SendMessage(this.serverJid, msgContent)
@@ -188,7 +223,7 @@ export default {
       console.log('send message is' + msgContent)
       this.SendMessage(this.serverJid, msgContent)
       this.taskSendFlag = true
-      setInterval(this.GetTaskStatus, 5000)
+      setInterval(this.ObtainTaskStatus, 5000)
     },
     SendMessage (toJid, message) {
       if (this.connectFlag) {
@@ -218,29 +253,56 @@ export default {
   data () {
     return {
       conn: null,
-      connectFlag: false,
+      connectFlag: true,
       processTaskId: 0,
       taskSendFlag: false,
       taskLoading: true,
       taskActiveCode: 1,
       connectCode: '未连接',
-      userJid: '',
-      userPassword: '',
+      userJid: 'jc@desktop-98tu7o0',
+      userPassword: 'jiaochong123',
       serverJid: 'admin@desktop-98tu7o0',
       BOSH_SERVER: 'http://localhost:7070/http-bind/',
       SatelliteData: [{name: '高分一号', url: 'https://t127.0.0.1:8000/GFData/srcData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806'}],
-      taskFlowList: ['fileserver@desktop-98tu7o0', 'imgenhance@desktop-98tu7o0', 'fileserver@desktop-98tu7o0']
+      taskData: [{id: 1,
+        data: [{'status': 0, 'url': 'srcData/test.png'}, {'status': 1, 'url': 'imgEnData/test.png'},
+          {'status': '2', 'url': 'imgTailData/test.png'}, {'status': 3, 'url': 'imgDeTailData/test.png'}]}],
+      taskFlowList: ['fileserver@desktop-98tu7o0', 'imgenhance@desktop-98tu7o0', 'fileserver@desktop-98tu7o0'],
+      tileUrl: 'http://localhost:8000/GFData/tileData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806'
     }
   }
 }
 </script>
 
 <style scoped>
-.Task{
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;background: rgba(0, 0, 0, 0.5);
-}
+  .body{
+    width: 100%;
+  }
+  .login{
+    position: fixed;
+    z-index: 2;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(255, 255, 255, 0.7);
+  }
+  .login-body{
+    width: 25rem;
+    margin-top: 15rem;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0.5rem;
+    background-color: #21abe5;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04); border-radius: 1rem
+  }
+  .Task{
+    position: fixed;
+    z-index: 2;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.5);
+  }
 </style>
