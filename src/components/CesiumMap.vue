@@ -3,12 +3,12 @@
     <vc-viewer @ready="ready">
       <vc-layer-imagery :alpha="alpha" :imageryProvider="imageryProvider" :brightness="brightness" :contrast="contrast">
       </vc-layer-imagery>
-<!--      <vc-layer-imagery :alpha="alpha" :brightness="brightness" :contrast="contrast">-->
-<!--        <vc-provider-imagery-tile-mapservice-->
-<!--          :url="url"-->
-<!--          @readyPromise="imageryReady"-->
-<!--        ></vc-provider-imagery-tile-mapservice>-->
-<!--      </vc-layer-imagery>-->
+      <vc-layer-imagery :alpha="alpha" :brightness="brightness" :contrast="contrast">
+        <vc-provider-imagery-tile-mapservice
+          :url="tileUrl"
+          @readyPromise="imageryReady"
+        ></vc-provider-imagery-tile-mapservice>
+      </vc-layer-imagery>
     </vc-viewer>
   </div>
 </template>
@@ -16,7 +16,10 @@
 export default {
   name: 'CesiumMap',
   props: {
-    url: 'http://localhost:8000/GFData/tileData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806'
+    tileUrl: {
+      type: String,
+      default: 'http://localhost:8000/GFData/tileData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806'
+    }
   },
   data () {
     return {
@@ -58,7 +61,7 @@ export default {
   }
 }
 </script>
-<style>
+<style scoped>
   .viewer {
     width: 100%;
   }

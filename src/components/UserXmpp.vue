@@ -32,6 +32,7 @@
       <el-row>
         <el-tag style="margin-right: 1rem">用户状态</el-tag>
         {{connectCode}}
+        <el-button v-on:click="showTaskWindow" variant="danger">用户已处理卫星数据列表</el-button>
       </el-row>
       <el-table
         :data="SatelliteData"
@@ -39,7 +40,7 @@
         max-height="250">
         <el-table-column
           prop="name"
-          label="姓名"
+          label="类型"
           width="120">
         </el-table-column>
         <el-table-column
@@ -52,16 +53,6 @@
         </el-table-column>
       </el-table>
 
-<!--      <div v-for="(item, i) in taskData" >-->
-<!--        <div>-->
-<!--          <p>{{item.id}}</p>-->
-<!--          <div v-for="itemStatus in taskData[i].data">-->
-<!--            <p>{{itemStatus.status}}</p>-->
-<!--            <p>{{itemStatus.url}}</p>-->
-<!--          </div>-->
-<!--        </div>-->
-<!--      </div>-->
-
       <el-container class="Task" v-show="taskSendFlag">
         <el-row id="flow" style="width: 100%; margin: auto; padding-left: 1rem; padding-right: 1rem">
           <el-steps :active="taskActiveCode" simple>
@@ -73,13 +64,16 @@
           </el-steps>
         </el-row>
       </el-container>
-      <div style="width: 100%"><CesiumMap :url="tileUrl"></CesiumMap></div>
+      <div style="width: 100%"><CesiumMap :tileUrl="tileUrl"></CesiumMap></div>
+      <Window :show="WindowPopUpShow" :title="WindowPopUpTitle" :data="taskData" @closed="closeTasksWindow">
+      </Window>
     </div>
 </template>
 
 <script>
 import Strophe from 'strophe.js'
 import CesiumMap from './CesiumMap'
+import Window from './UserTaskWindow'
 String.format = function (src) {
   if (arguments.length === 0) return null
 
@@ -90,7 +84,7 @@ String.format = function (src) {
   })
 }
 export default {
-  components: {CesiumMap},
+  components: {CesiumMap, Window},
   name: 'UserXmpp',
 
   mounted () {
@@ -119,7 +113,7 @@ export default {
         this.connectCode = '登陆失败'
         this.connectFlag = false
       } else if (status === Strophe.Strophe.Status.CONNECTED) {
-        this.connectCode = '连接成功，可以开始聊天'
+        this.connectCode = '已登陆'
         this.connectFlag = true
 
         // 当接收到<message>节
@@ -128,7 +122,7 @@ export default {
         // 首先要发送一个<presence>给服务器（initial presence）
         this.conn.send(Strophe.$pres().tree())
 
-        // 发送成功即获取当前用的任务管理流程
+        // 发送成功即获取当前用户的所有已处理任务
         this.ObtainAllTaskContent()
       } else {
         this.connectCode = '自动登陆失败'
@@ -248,6 +242,12 @@ export default {
     resetForm (formName) {
       console.log('reset')
       this.$refs[formName].resetFields()
+    },
+    showTaskWindow: function () {
+      this.WindowPopUpShow = true
+    },
+    closeTasksWindow: function () {
+      this.WindowPopUpShow = false
     }
   },
   data () {
@@ -256,19 +256,21 @@ export default {
       connectFlag: true,
       processTaskId: 0,
       taskSendFlag: false,
-      taskLoading: true,
       taskActiveCode: 1,
       connectCode: '未连接',
       userJid: 'jc@desktop-98tu7o0',
       userPassword: 'jiaochong123',
       serverJid: 'admin@desktop-98tu7o0',
       BOSH_SERVER: 'http://localhost:7070/http-bind/',
-      SatelliteData: [{name: '高分一号', url: 'https://t127.0.0.1:8000/GFData/srcData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806'}],
+      SatelliteData: [{name: '高分一号', url: 'https://127.0.0.1:8000/GFData/srcData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806'}],
       taskData: [{id: 1,
-        data: [{'status': 0, 'url': 'srcData/test.png'}, {'status': 1, 'url': 'imgEnData/test.png'},
+        data: [{'status': 0, 'url': 'http://127.0.0.1:8000/GFData/imgSrcData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806.png'}, {'status': 1, 'url': 'imgEnData/test.png'},
           {'status': '2', 'url': 'imgTailData/test.png'}, {'status': 3, 'url': 'imgDeTailData/test.png'}]}],
       taskFlowList: ['fileserver@desktop-98tu7o0', 'imgenhance@desktop-98tu7o0', 'fileserver@desktop-98tu7o0'],
-      tileUrl: 'http://localhost:8000/GFData/tileData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806'
+      tileUrl: 'http://localhost:8000/GFData/tileData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806',
+      WindowPopUpTitle: '已完成任务列表',
+      WindowPopUpShow: false,
+      WindowContent: ''
     }
   }
 }
