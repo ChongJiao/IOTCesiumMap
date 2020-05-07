@@ -3,7 +3,7 @@
     <vc-viewer @ready="ready">
       <vc-layer-imagery :alpha="alpha" :imageryProvider="imageryProvider" :brightness="brightness" :contrast="contrast">
       </vc-layer-imagery>
-      <vc-layer-imagery :alpha="alpha" :brightness="brightness" :contrast="contrast">
+      <vc-layer-imagery :alpha="alpha" :brightness="brightness" :contrast="contrast" v-if="showTileMap">
         <vc-provider-imagery-tile-mapservice
           :url="tileUrl"
           @readyPromise="imageryReady"
@@ -19,6 +19,10 @@ export default {
     tileUrl: {
       type: String,
       default: 'http://localhost:8000/GFData/tileData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806'
+    },
+    showTileMap: {
+      type: Boolean,
+      default: false
     }
   },
   data () {

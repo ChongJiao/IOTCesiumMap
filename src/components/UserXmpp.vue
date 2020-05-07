@@ -28,35 +28,52 @@
           </el-form>
         </div>
       </div>
+      <div style="position:fixed; left:1rem; top:1rem; z-index: 9;">
+        <el-row>
+          <el-button style="margin-right: 1rem" type="success">用户名称：{{userJid}}</el-button>
+          <el-button style="margin-right: 1rem" type="success">登陆状态：{{connectCode}}</el-button>
+        </el-row>
+      </div>
 
-      <el-row>
-        <el-tag style="margin-right: 1rem">用户状态</el-tag>
-        {{connectCode}}
-        <el-button v-on:click="showTaskWindow" variant="danger">用户已处理卫星数据列表</el-button>
-      </el-row>
-      <el-table
-        :data="SatelliteData"
-        style="width: 100%"
-        max-height="250">
-        <el-table-column
-          prop="name"
-          label="类型"
-          width="120">
-        </el-table-column>
-        <el-table-column
-          label="操作"
-          width="120">
-          <el-button @click.native.prevent="MakeTask(scope.$index, SatelliteData)"
-          type="text">
-          处理任务
-        </el-button>
-        </el-table-column>
-      </el-table>
-
+      <div style="position:fixed; left:2rem; top:4rem; z-index: 7;">
+        <el-row style="right:1rem">
+          <el-button v-on:click="showTaskWindow" type="danger">已处理卫星列表</el-button>
+        </el-row>
+      </div>
+      <div style="position:fixed; right:1rem; top:1rem; z-index: 8;">
+                <el-table
+                  :data="SatelliteData"
+                  style="width: 100%"
+                  max-height="250">
+                  <el-table-column
+                    prop="satellite"
+                    label="影像名称"
+                    width="120">
+                  </el-table-column>
+                  <el-table-column
+                    prop="position"
+                    label="位置"
+                    width="120">
+                  </el-table-column>
+                  <el-table-column
+                    label="执行"
+                    width="120">
+                    <template slot-scope="scope">
+                      <el-button @click="MakeTask(scope.$index)"
+                      type="text">
+                      处理任务
+                      </el-button>
+                    </template>
+                  </el-table-column>
+                </el-table>
+      </div>
+<!--      <div style="position:fixed; left:1rem; top:10rem; z-index: 8;">-->
+<!--        <el-button style="margin-right: 1rem" type="success" @click="TestTile()">测试</el-button>-->
+<!--      </div>-->
       <el-container class="Task" v-show="taskSendFlag">
         <el-row id="flow" style="width: 100%; margin: auto; padding-left: 1rem; padding-right: 1rem">
           <el-steps :active="taskActiveCode" simple>
-            <el-step title="发起请求" icon="el-icon-edit"></el-step>
+            <el-step title="发起请求" icon="el-icon-edit" ></el-step>
             <el-step title="数据预处理" icon="el-icon-s-tools"></el-step>
             <el-step title="图像增强" icon = "el-icon-picture-outline"></el-step>
             <el-step title="影像生成" icon = "el-icon-cloudy"></el-step>
@@ -64,7 +81,7 @@
           </el-steps>
         </el-row>
       </el-container>
-      <div style="width: 100%"><CesiumMap :tileUrl="tileUrl"></CesiumMap></div>
+      <div style="width: 100%"><CesiumMap :tileUrl="tileUrl" :showTileMap = "tileShow"></CesiumMap></div>
       <Window :show="WindowPopUpShow" :title="WindowPopUpTitle" :data="taskData" @closed="closeTasksWindow">
       </Window>
     </div>
@@ -122,6 +139,8 @@ export default {
         // 首先要发送一个<presence>给服务器（initial presence）
         this.conn.send(Strophe.$pres().tree())
 
+        // 获取所有地理信息数据
+        this.ObtainDataUrlSource()
         // 发送成功即获取当前用户的所有已处理任务
         this.ObtainAllTaskContent()
       } else {
@@ -142,16 +161,26 @@ export default {
         msgContent = msgContent.replace(/&quot;/g, '"')
         if (this.isJsonStr(msgContent)) {
           let replyJson = JSON.parse(msgContent)
+          console.log(replyJson)
           switch (replyJson['type']) {
             case 'satellite':
+              console.log(replyJson)
               this.SatelliteData = JSON.parse(replyJson['data'])
+              console.log('SatelliteData is ')
+              console.log(this.SatelliteData)
               break
             case 'finished':
               let resultsUrlList = JSON.parse(replyJson['content'])
               for (let key in resultsUrlList) {
                 console.log(resultsUrlList[key])
               }
-              if (resultsUrlList.length <= 2) { console.log('error finished') } else { this.tileUrl = resultsUrlList[resultsUrlList.length - 1] }
+              if (resultsUrlList.length <= 2) {
+                console.log('error finished')
+              } else {
+                this.tileUrl = resultsUrlList[resultsUrlList.length - 1]
+                this.tileShow = true
+                console.log('Can show tile and Url and it is ' + this.tileUrl)
+              }
               this.taskSendFlag = false
               break
             case 'status' :
@@ -186,9 +215,9 @@ export default {
       }
       return true
     },
-    ObtainDataUrlSource (toJid) {
+    ObtainDataUrlSource () {
       let msgContent = '{\'type\': \'satellite\'}'
-      this.SendMessage(toJid, msgContent)
+      this.SendMessage(this.serverJid, msgContent)
     },
     ObtainAllTaskContent () {
       let msgContent = '{\'type\': \'queryTask\'}'
@@ -203,17 +232,20 @@ export default {
         this.SendMessage(this.serverJid, msgContent)
       }
     },
-    MakeTask (index, data) {
-      // Test pass
+    TestTile () {
+      this.tileUrl = 'http://localhost:8000/GFData/tileData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806'
+      this.tileShow = true
+    },
+    MakeTask (index) {
       let taskFlowStr = '['
       for (let v in this.taskFlowList) {
         taskFlowStr += '"' + this.taskFlowList[v] + '"' + ','
       }
       taskFlowStr = taskFlowStr.substr(0, taskFlowStr.length - 1) + ']'
       console.log(taskFlowStr)
-      console.log(data[index].url)
+      console.log(this.SatelliteData[index])
       let msgContent = '{"type": "newTask", "url":"{0}", "content": {1}}'
-      msgContent = String.format(msgContent, data[index].url, taskFlowStr)
+      msgContent = String.format(msgContent, this.SatelliteData[index].url, taskFlowStr)
       console.log('send message is' + msgContent)
       this.SendMessage(this.serverJid, msgContent)
       this.taskSendFlag = true
@@ -262,12 +294,13 @@ export default {
       userPassword: 'jiaochong123',
       serverJid: 'admin@desktop-98tu7o0',
       BOSH_SERVER: 'http://localhost:7070/http-bind/',
-      SatelliteData: [{name: '高分一号', url: 'https://127.0.0.1:8000/GFData/srcData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806'}],
+      SatelliteData: [],
       taskData: [{id: 1,
         data: [{'status': 0, 'url': 'http://127.0.0.1:8000/GFData/imgSrcData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806.png'}, {'status': 1, 'url': 'imgEnData/test.png'},
           {'status': '2', 'url': 'imgTailData/test.png'}, {'status': 3, 'url': 'imgDeTailData/test.png'}]}],
       taskFlowList: ['fileserver@desktop-98tu7o0', 'imgenhance@desktop-98tu7o0', 'fileserver@desktop-98tu7o0'],
       tileUrl: 'http://localhost:8000/GFData/tileData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806',
+      tileShow: false,
       WindowPopUpTitle: '已完成任务列表',
       WindowPopUpShow: false,
       WindowContent: ''
@@ -300,7 +333,7 @@ export default {
   }
   .Task{
     position: fixed;
-    z-index: 2;
+    z-index: 11;
     top: 0;
     bottom: 0;
     left: 0;
