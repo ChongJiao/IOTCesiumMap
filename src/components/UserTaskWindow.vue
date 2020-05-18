@@ -5,17 +5,60 @@
         <h1>{{ title }}</h1>
       </div>
       <div class="modal-main">
-        <div v-for="(item, i) in data" >
-          <el-row :gutter="20" style="border-bottom: 3px solid #0088ff">
-            <el-col :span="3">
-              <p>名称</p>
-              <p>任务{{item.id}}</p>
-            </el-col>
-            <el-col :span="5" v-for="itemStatus in data[i].data">
-              <p>状态{{itemStatus.status}}</p>
-              <a :href = itemStatus.url>结果</a>
-            </el-col>
-          </el-row>
+
+        <div>
+          <el-table
+            :data="data"
+            style="width: 100%"
+            max-height="500">
+            <el-table-column
+              prop="id"
+              label="序号"
+              width="200">
+            </el-table-column>
+            <el-table-column
+              prop="status0"
+              label="结果1"
+              width="200">
+              <template slot-scope="scope">
+                <a :href="scope.row['status0']" target="_blank">显示</a>
+              </template>
+            </el-table-column>
+            <el-table-column
+              prop="status1"
+              label="结果2"
+              width="200">
+              <template slot-scope="scope">
+                <a :href="scope.row['status1']" target="_blank">显示</a>
+              </template>
+            </el-table-column>
+            <el-table-column
+              prop="status2"
+              label="结果3"
+              width="200">
+              <template slot-scope="scope">
+                <a :href="scope.row['status2']" target="_blank">显示</a>
+              </template>
+            </el-table-column>
+            <el-table-column
+              prop="status3"
+              label="结果4"
+              width="200">
+              <template slot-scope="scope">
+                <a :href="scope.row['status3']" target="_blank">显示</a>
+              </template>
+            </el-table-column>
+            <el-table-column
+              label="执行"
+              width="120">
+              <template slot-scope="scope">
+                <el-button @click="showTile(scope.$index)"
+                           type="text">
+                  显示结果
+                </el-button>
+              </template>
+            </el-table-column>
+          </el-table>
         </div>
       </div>
       <div class="modal-footer">
@@ -45,6 +88,9 @@ export default {
   methods: {
     closed: function () {
       this.$emit('closed')
+    },
+    showTile: function (index) {
+      console.log(this.data[index])
     }
   }}
 </script>
@@ -59,7 +105,7 @@ export default {
   z-index: 10;
 }
 .modal-container {
-  width: 60vw;
+  width: 50vw;
   background: #fff;
   border-radius: 3vw;
   overflow: hidden;

@@ -182,6 +182,7 @@ export default {
                 console.log('Can show tile and Url and it is ' + this.tileUrl)
               }
               this.taskSendFlag = false
+              this.taskActiveCode = 1
               break
             case 'status' :
               this.taskActiveCode = replyJson['status'] + 1
@@ -198,11 +199,9 @@ export default {
               let contents = replyJson['tasks']
               let jsonContent = JSON.parse(contents)
               if (this.taskData.length > 0) { this.taskData = [] }
-              for (let key in jsonContent) {
-                jsonContent[key]['data'] = JSON.parse(jsonContent[key]['data'])
-                this.taskData.push(jsonContent[key])
-              }
-              if (this.taskData[this.taskData.length - 1]['data'].length <= 2) {
+              this.taskData = jsonContent
+              console.log(this.taskData)
+              if (this.taskData[this.taskData.length - 1].length <= 3) {
                 this.processTaskId = this.taskData[this.taskData.length - 1]['id']
                 this.taskSendFlag = true
                 setInterval(this.ObtainTaskStatus, 5000)
@@ -297,7 +296,7 @@ export default {
       SatelliteData: [],
       taskData: [{id: 1,
         data: [{'status': 0, 'url': 'http://127.0.0.1:8000/GFData/imgSrcData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806.png'}, {'status': 1, 'url': 'imgEnData/test.png'},
-          {'status': '2', 'url': 'imgTailData/test.png'}, {'status': 3, 'url': 'imgDeTailData/test.png'}]}],
+          {'status': 2, 'url': 'imgTailData/test.png'}, {'status': 3, 'url': 'imgDeTailData/test.png'}]}],
       taskFlowList: ['fileserver@desktop-98tu7o0', 'imgenhance@desktop-98tu7o0', 'fileserver@desktop-98tu7o0'],
       tileUrl: 'http://localhost:8000/GFData/tileData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806',
       tileShow: false,
