@@ -28,45 +28,44 @@
           </el-form>
         </div>
       </div>
-      <div style="position:fixed; left:1rem; top:1rem; z-index: 9;">
-        <el-row>
-          <el-button style="margin-right: 1rem" type="success">用户名称：{{userJid}}</el-button>
-          <el-button style="margin-right: 1rem" type="success">登陆状态：{{connectCode}}</el-button>
-        </el-row>
-      </div>
-
-      <div style="position:fixed; left:2rem; top:4rem; z-index: 7;">
-        <el-row style="right:1rem">
-          <el-button v-on:click="showTaskWindow" type="danger">已处理卫星列表</el-button>
-        </el-row>
-      </div>
-      <div style="position:fixed; right:1rem; top:1rem; z-index: 8;">
-                <el-table
-                  :data="SatelliteData"
-                  style="width: 100%"
-                  max-height="250">
-                  <el-table-column
-                    prop="satellite"
-                    label="影像名称"
-                    width="120">
-                  </el-table-column>
-                  <el-table-column
-                    prop="position"
-                    label="位置"
-                    width="120">
-                  </el-table-column>
-                  <el-table-column
-                    label="执行"
-                    width="120">
-                    <template slot-scope="scope">
-                      <el-button @click="MakeTask(scope.$index)"
-                      type="text">
-                      处理任务
-                      </el-button>
-                    </template>
-                  </el-table-column>
-                </el-table>
-      </div>
+<!--      <div style="position:fixed; left:1rem; top:1rem; z-index: 9;">-->
+<!--        <el-row>-->
+<!--          <el-button style="margin-right: 1rem" type="success">用户名称：{{userJid}}</el-button>-->
+<!--          <el-button style="margin-right: 1rem" type="success">登陆状态：{{connectCode}}</el-button>-->
+<!--        </el-row>-->
+<!--      </div>-->
+<!--      <div style="position:fixed; left:2rem; top:4rem; z-index: 7;">-->
+<!--        <el-row style="right:1rem">-->
+<!--          <el-button v-on:click="showTaskWindow" type="danger">已处理卫星列表</el-button>-->
+<!--        </el-row>-->
+<!--      </div>-->
+<!--      <div style="position:fixed; right:1rem; top:1rem; z-index: 8;">-->
+<!--                <el-table-->
+<!--                  :data="SatelliteData"-->
+<!--                  style="width: 100%"-->
+<!--                  max-height="250">-->
+<!--                  <el-table-column-->
+<!--                    prop="satellite"-->
+<!--                    label="影像名称"-->
+<!--                    width="120">-->
+<!--                  </el-table-column>-->
+<!--                  <el-table-column-->
+<!--                    prop="position"-->
+<!--                    label="位置"-->
+<!--                    width="120">-->
+<!--                  </el-table-column>-->
+<!--                  <el-table-column-->
+<!--                    label="执行"-->
+<!--                    width="120">-->
+<!--                    <template slot-scope="scope">-->
+<!--                      <el-button @click="MakeTask(scope.$index)"-->
+<!--                      type="text">-->
+<!--                      处理任务-->
+<!--                      </el-button>-->
+<!--                    </template>-->
+<!--                  </el-table-column>-->
+<!--                </el-table>-->
+<!--      </div>-->
 <!--      <div style="position:fixed; left:1rem; top:10rem; z-index: 8;">-->
 <!--        <el-button style="margin-right: 1rem" type="success" @click="TestTile()">测试</el-button>-->
 <!--      </div>-->
@@ -299,7 +298,7 @@ export default {
           {'status': 2, 'url': 'imgTailData/test.png'}, {'status': 3, 'url': 'imgDeTailData/test.png'}]}],
       taskFlowList: ['fileserver@desktop-98tu7o0', 'imgenhance@desktop-98tu7o0', 'fileserver@desktop-98tu7o0'],
       tileUrl: 'http://localhost:8000/GFData/tileData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806',
-      tileShow: false,
+      tileShow: true,
       WindowPopUpTitle: '已完成任务列表',
       WindowPopUpShow: false,
       WindowContent: ''

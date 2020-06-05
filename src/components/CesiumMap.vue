@@ -1,6 +1,6 @@
 <template>
   <div class="viewer">
-    <vc-viewer @ready="ready">
+    <vc-viewer @ready="ready" style="background-image: url(http://127.0.0.1:8000/static/assets/mapBack.png)">
       <vc-layer-imagery :alpha="alpha" :imageryProvider="imageryProvider" :brightness="brightness" :contrast="contrast">
       </vc-layer-imagery>
       <vc-layer-imagery :alpha="alpha" :brightness="brightness" :contrast="contrast" v-if="showTileMap">
@@ -37,28 +37,13 @@ export default {
   methods: {
     ready (cesiumInstance) {
       const { Cesium, viewer } = cesiumInstance
-      // this.imageryProvider = new Cesium.TileMapServiceImageryProvider({
-      //   url: 'http://localhost:8000/GFData/test/testtile4326',
-      //   fileExtension: 'png',
-      //   maximumLevel: 4
-      // })
 
+      viewer.cesiumWidget.creditContainer.style.display = 'none'
       this.imageryProvider = new Cesium.MapboxImageryProvider({
         mapId: 'mapbox.streets'
       })
-
-      // image tile地图可以正常加载
-      // this.imageryProvider = new Cesium.ArcGisMapServerImageryProvider({
-      //   url: 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer'
-      // })
       this.viewer = viewer
     },
-    // layerAdded () {
-    //   if (this.$refs.layerText.imageryLayer) {
-    //     const { viewer } = this.cesiumInstance
-    //     viewer.imageryLayers.raiseToTop(this.$refs.layerText.imageryLayer)
-    //   }
-    // }
     imageryReady (imageryProvider) {
       this.viewer.camera.flyTo({ destination: imageryProvider.rectangle })
     }
@@ -67,6 +52,7 @@ export default {
 </script>
 <style scoped>
   .viewer {
+    background-image: url("http://127.0.0.1:8000/static/assets/mapBack.png");
     width: 100%;
   }
 </style>
