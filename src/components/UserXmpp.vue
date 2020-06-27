@@ -146,6 +146,7 @@ export default {
         this.connectCode = '自动登陆失败'
         this.connectFlag = false
       }
+      console.log(this.connectCode)
     },
     onMessage (msg) {
       // 解析出<message>的from、type属性，以及body子元素
@@ -199,7 +200,7 @@ export default {
               let jsonContent = JSON.parse(contents)
               if (this.taskData.length > 0) { this.taskData = [] }
               this.taskData = jsonContent
-              console.log(this.taskData)
+              console.l
               if (this.taskData[this.taskData.length - 1].length <= 3) {
                 this.processTaskId = this.taskData[this.taskData.length - 1]['id']
                 this.taskSendFlag = true

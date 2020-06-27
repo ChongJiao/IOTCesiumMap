@@ -11,6 +11,7 @@
     "build": "node build/build.js"
   },
   "dependencies": {
+    "bootstrap-vue": "^2.15.0",
     "element-ui": "^2.13.0",
     "jquery": "^3.4.1",
     "mem": ">=4.0.0",

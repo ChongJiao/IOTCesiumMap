@@ -6,6 +6,9 @@ import router from './router'
 import VueCesium from 'vue-cesium'
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
+import BootstrapVue from 'bootstrap-vue'
+import 'bootstrap/dist/css/bootstrap.css'
+import 'bootstrap-vue/dist/bootstrap-vue.css'
 Vue.use(VueCesium, {
   // cesiumPath 是指引用的Cesium.js路径，如
   // 项目本地的Cesium Build包，vue项目需要将Cesium Build包放static目录：
@@ -20,6 +23,7 @@ Vue.use(VueCesium, {
   accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJhNDBhMWRhNy04M2E3LTQ0ZWQtYTVkMS0yNDYyOTA3ZDNjMDgiLCJpZCI6MjIyODIsInNjb3BlcyI6WyJhc2wiLCJhc3IiLCJhc3ciLCJnYyJdLCJpYXQiOjE1ODE2NzA4NDh9.Ah9tzm1Do4yiB2zSEiHr23iDU2WWgEYSp7k3RZYH2V4'
 })
 Vue.use(ElementUI)
+Vue.use(BootstrapVue)
 Vue.config.productionTip = false
 
 /* eslint-disable no-new */
