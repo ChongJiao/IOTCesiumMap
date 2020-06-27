@@ -1,7 +1,7 @@
 <template>
   <div id="left">
     <div class="icons">
-      <img ref="img1" src="../assets/earth_white.png" style="width: 50px; height: 50px" v-on:click="changeImg1">
+      <img ref="img1" src="../assets/earth_white.png" style="width: 50px; height: 50px" v-on:click="jumpToMap">
       <span style="color: white">地图</span>
     </div>
     <div class="icons">
@@ -9,7 +9,7 @@
       <span style="color: white">用户</span>
     </div>
     <div class="icons">
-      <img id="img3" src="../assets/console_yellow.png" style="width: 45px; height: 45px">
+      <img id="img3" src="../assets/console_yellow.png" style="width: 45px; height: 45px" v-on:click="jumpToDetail">
       <span style="color: white">控制台</span>
     </div>
     <!--  <el-container style="height: 100vh; border: 1px solid #eee">-->
@@ -38,12 +38,13 @@ export default {
     }
   },
   methods: {
-    changeImg1 () {
-      if (this.$refs.img1.src = '../assets/earth_white.png') {
-        this.$refs.img1.src = '../assets/earth_yellow.png'
-      } else {
-        this.$refs.img1.src = '../assets/earth_white.png'
-      }
+    jumpToMap () {
+      this.$router.push({path: '/'})
+    },
+    jumpToDetail () {
+      this.$router.push(
+        {path: '/imageProcessDetail'}
+      )
     }
 
   }
@@ -58,6 +59,7 @@ export default {
     width: 5vw;
     height: 50vh;
     border-radius: 5px;
+    z-index: 15;
   }
   .icons{
     margin-top: 15px;

@@ -14,7 +14,9 @@ export default {
   #top{
     position: relative;
     width: 100%;
+    margin-top: 0;
     height: 8vh;
+    z-index: 15;
   }
   #header{
     /*position: relative;*/
@@ -22,7 +24,7 @@ export default {
     display: inline-block;
     padding: .5em 1em .35em;
     color: white;
-    left: 50%;
+    left: 45%;
   }
   #header::before{
     content: ''; /*用伪元素来生成一个矩形*/
@@ -35,6 +37,6 @@ export default {
     background: darkgrey;
     transform: scaleY(1.5) scaleX(2.0) perspective(.5em) rotateX(-5deg);
     transform-origin: top;
-    box-shadow: 10px 10px 5px #888888;
+    box-shadow: 5px 5px 5px #888888;
   }
 </style>

@@ -1,4 +1,7 @@
 <template>
+<div>
+    <top></top>
+    <left></left>
   <div class="viewer">
     <vc-viewer @ready="ready" style="background-image: url(http://127.0.0.1:8000/static/assets/mapBack.png)">
       <vc-layer-imagery :alpha="alpha" :imageryProvider="imageryProvider" :brightness="brightness" :contrast="contrast">
@@ -11,10 +14,15 @@
       </vc-layer-imagery>
     </vc-viewer>
   </div>
+  </div>
 </template>
 <script>
+import top from './top'
+import left from './left'
+
 export default {
   name: 'CesiumMap',
+  components: {top, left},
   props: {
     tileUrl: {
       type: String,
@@ -54,5 +62,6 @@ export default {
   .viewer {
     background-image: url("http://127.0.0.1:8000/static/assets/mapBack.png");
     width: 100%;
+    margin-top: -8vh;
   }
 </style>
