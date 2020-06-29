@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Main from '@/components/Main'
+import Main from '../components/Main'
+import imageProcessDetail from '../components/imageProcessDetail'
 
 Vue.use(Router)
 
@@ -9,7 +10,13 @@ export default new Router({
     {
       path: '/',
       name: 'Main',
+      // name: 'imageProcessDetail',
       component: Main
+    },
+    {
+      path: '/imageProcessDetail',
+      name: 'imageProcessDetail',
+      component: imageProcessDetail
     }
   ]
 })

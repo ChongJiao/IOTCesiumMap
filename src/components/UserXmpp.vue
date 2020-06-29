@@ -146,6 +146,7 @@ export default {
         this.connectCode = '自动登陆失败'
         this.connectFlag = false
       }
+      console.log(this.connectCode)
     },
     onMessage (msg) {
       // 解析出<message>的from、type属性，以及body子元素
@@ -199,7 +200,6 @@ export default {
               let jsonContent = JSON.parse(contents)
               if (this.taskData.length > 0) { this.taskData = [] }
               this.taskData = jsonContent
-              console.log(this.taskData)
               if (this.taskData[this.taskData.length - 1].length <= 3) {
                 this.processTaskId = this.taskData[this.taskData.length - 1]['id']
                 this.taskSendFlag = true
@@ -288,10 +288,10 @@ export default {
       taskSendFlag: false,
       taskActiveCode: 1,
       connectCode: '未连接',
-      userJid: 'jc@desktop-98tu7o0',
-      userPassword: 'jiaochong123',
-      serverJid: 'admin@desktop-98tu7o0',
-      BOSH_SERVER: 'http://localhost:7070/http-bind/',
+      userJid: 'wz@127.0.0.1',
+      userPassword: '123456',
+      serverJid: 'admin@127.0.0.1',
+      BOSH_SERVER: 'http://127.0.0.1:7070/http-bind/',
       SatelliteData: [],
       taskData: [{id: 1,
         data: [{'status': 0, 'url': 'http://127.0.0.1:8000/GFData/imgSrcData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806.png'}, {'status': 1, 'url': 'imgEnData/test.png'},
