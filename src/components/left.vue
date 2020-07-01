@@ -1,32 +1,25 @@
 <template>
   <div id="left">
-    <div class="icons">
-      <img ref="img1" src="../assets/earth_white.png" style="width: 50px; height: 50px" v-on:click="jumpToMap">
-      <span style="color: white">地图</span>
+    <div class="title">
+      <img src="../assets/title.png" style="width: 8vw">
     </div>
-    <div class="icons">
-      <img id="img2" src="../assets/user_white.png" style="width: 50px; height: 50px">
-      <span style="color: white">用户</span>
+    <div class="center">
+      <div id="earth"  class="iconsSelect" v-on:click="jumpToMap">
+        <img src="../assets/earth_white.png" class="menu">
+        <span class="iconFont">地 图</span>
+      </div>
+      <div id="user" class="iconsDeSelect" v-on:click="jumpToUser">
+        <img src="../assets/user_white.png" class="menu">
+        <span class="iconFont">用 户</span>
+      </div>
+      <div id="console" class="iconsDeSelect" v-on:click="jumpToDetail">
+        <img src="../assets/console_white.png" class="menu">
+        <span class="iconFont">控制台</span>
+      </div>
     </div>
-    <div class="icons">
-      <img id="img3" src="../assets/console_yellow.png" style="width: 45px; height: 45px" v-on:click="jumpToDetail">
-      <span style="color: white">控制台</span>
+    <div class="bottom">
+      <img src="../assets/logo.png" style="width: 6vw;">
     </div>
-    <!--  <el-container style="height: 100vh; border: 1px solid #eee">-->
-    <!--    <el-aside width="200px" style="background-color: rgb(238, 241, 246)">-->
-    <!--      <el-menu :default-openeds="['1', '3']">-->
-    <!--        <el-submenu index="1">-->
-    <!--          <template slot="title"><i class="el-icon-message"></i>地图</template>-->
-    <!--        </el-submenu>-->
-    <!--        <el-submenu index="2">-->
-    <!--          <template slot="title"><i class="el-icon-menu"></i>用户</template>-->
-    <!--        </el-submenu>-->
-    <!--        <el-submenu index="3">-->
-    <!--          <template slot="title"><i class="el-icon-setting" v-on:click="jumpProcess"></i>控制台</template>-->
-    <!--        </el-submenu>-->
-    <!--      </el-menu>-->
-    <!--    </el-aside>-->
-    <!--  </el-container>-->
   </div>
 </template>
 
@@ -39,14 +32,33 @@ export default {
   },
   methods: {
     jumpToMap () {
-      this.$router.push({path: '/'})
+      this.setMenuClass('earth', 'user', 'console')
+      if (this.$route.path !== '/UserXmpp') {
+        this.$router.push({path: '/UserXmpp'})
+      }
     },
     jumpToDetail () {
-      this.$router.push(
-        {path: '/imageProcessDetail'}
-      )
-    }
+      this.setMenuClass('console', 'user', 'earth')
+      if (this.$route.path !== '/TaskDetail') {
+        this.$router.push({path: '/TaskDetail'})
+      }
+    },
+    jumpToUser () {
+      this.setMenuClass('user', 'console', 'earth')
+      if (this.$route.path !== '/UserCenter') {
+        this.$router.push({path: '/UserCenter'})
+      }
+    },
+    setMenuClass (name1, name2, name3) {
+      let imgDiv = document.getElementById(name1)
+      imgDiv.className = 'iconsSelect'
 
+      imgDiv = document.getElementById(name2)
+      imgDiv.className = 'iconsDeSelect'
+
+      imgDiv = document.getElementById(name3)
+      imgDiv.className = 'iconsDeSelect'
+    }
   }
 }
 </script>
@@ -54,15 +66,55 @@ export default {
 <style scoped>
   #left{
     position: absolute;
-    margin-top: 8vh;
-    background: lightslategray;
-    width: 5vw;
-    height: 50vh;
-    border-radius: 5px;
+    background: #2f2f2f;
+    width: 10vw;
+    height: 100vh;
     z-index: 15;
   }
-  .icons{
-    margin-top: 15px;
+  .title{
+    margin-top: 3vh;
+    margin-bottom: 5vh;
+    padding-bottom: 2vh;
+    border-bottom: #999999 0.05rem solid;
+  }
+  .center{
+    width:100%;
+    height: auto;
+    display:inline-block;
+    margin-top: 12vh
+  }
+  .iconsSelect{
+    padding: 0.5vw;
+    width: 100%;
+    float: left;
+    clear: both;
+    filter:brightness(100%);
+  }
+  .iconsDeSelect
+  {
+    padding: 0.5vw;
+    width: 100%;
+    float: left;
+    filter:brightness(70%);
+  }
+  .iconsSelect:hover{
+    background-color: #526f82;
+  }
+  .iconsDeSelect:hover{
+    background-color: #526f82;
+  }
+  .iconFont{
+    color: white;
+    font-family: 黑体;
+    font-size: 1.6vw;
+    float: right
+  }
+  .menu{
+    float: left;
+    width: 2vw; height: 2vw;
+  }
+  .bottom{
+    margin-top: 18vh;
   }
 
 </style>

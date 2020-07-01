@@ -1,7 +1,5 @@
 <template>
   <div id="body">
-    <top></top>
-    <left></left>
     <div class="return">
       <img src="../assets/return2.png" style="width: 30px; height: 30px;">
     </div>
@@ -112,7 +110,6 @@ export default {
   }
   .return{
     margin-left: -65%;
-    margin-top: -5vh;
   }
 
   #header{

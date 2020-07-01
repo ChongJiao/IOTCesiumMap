@@ -1,22 +1,27 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Main from '../components/Main'
-import imageProcessDetail from '../components/imageProcessDetail'
+import UserXmpp from '../components/UserXmpp'
+import imageProcessDetail from '../components/TaskDetail'
+import UrlNotFound from '../components/UrlNotFound'
 
 Vue.use(Router)
 
 export default new Router({
   routes: [
     {
-      path: '/',
-      name: 'Main',
-      // name: 'imageProcessDetail',
-      component: Main
+      path: '/UserXmpp',
+      name: 'UserXmpp',
+      component: UserXmpp
     },
     {
-      path: '/imageProcessDetail',
-      name: 'imageProcessDetail',
+      path: '/TaskDetail',
+      name: 'TaskDetail',
       component: imageProcessDetail
+    },
+    {
+      path: '*',
+      name: 'UrlNotFound',
+      component: UrlNotFound
     }
   ]
 })

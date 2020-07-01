@@ -1,33 +1,37 @@
 <template>
     <div class="body">
-      <div class="login" v-show="!connectFlag">
-        <div class = "login-body">
-          <el-form size="small" ref="userValidateForm">
-            <el-tag>用户登陆</el-tag>
-            <el-form-item
-              prop="userJID"
-              label="JID号">
-              <el-input placeholder="请输入用户名JID"
-                        v-model="userJid"
-                        clearable></el-input>
-            </el-form-item>
-
-            <el-form-item
-              prop="userJID"
-              label="密码">
-              <el-input placeholder="请输入用户密码"
-                        v-model="userPassword"
-                        type="password"
-                        clearable></el-input>
-            </el-form-item>
-
-            <el-form-item>
-              <el-button type="primary" @click="connecting()">登陆</el-button>
-              <el-button @click="resetForm('userValidateForm')">重置</el-button>
-            </el-form-item>
-          </el-form>
-        </div>
+      <div class="cesium">
+        <CesiumMap :tileUrl="tileUrl" :showTileMap = "tileShow">
+        </CesiumMap>
       </div>
+<!--      <div class="login" v-show="!connectFlag">-->
+<!--        <div class = "login-body">-->
+<!--          <el-form size="small" ref="userValidateForm">-->
+<!--            <el-tag>用户登陆</el-tag>-->
+<!--            <el-form-item-->
+<!--              prop="userJID"-->
+<!--              label="JID号">-->
+<!--              <el-input placeholder="请输入用户名JID"-->
+<!--                        v-model="userJid"-->
+<!--                        clearable></el-input>-->
+<!--            </el-form-item>-->
+
+<!--            <el-form-item-->
+<!--              prop="userJID"-->
+<!--              label="密码">-->
+<!--              <el-input placeholder="请输入用户密码"-->
+<!--                        v-model="userPassword"-->
+<!--                        type="password"-->
+<!--                        clearable></el-input>-->
+<!--            </el-form-item>-->
+
+<!--            <el-form-item>-->
+<!--              <el-button type="primary" @click="connecting()">登陆</el-button>-->
+<!--              <el-button @click="resetForm('userValidateForm')">重置</el-button>-->
+<!--            </el-form-item>-->
+<!--          </el-form>-->
+<!--        </div>-->
+<!--      </div>-->
 <!--      <div style="position:fixed; left:1rem; top:1rem; z-index: 9;">-->
 <!--        <el-row>-->
 <!--          <el-button style="margin-right: 1rem" type="success">用户名称：{{userJid}}</el-button>-->
@@ -69,7 +73,7 @@
 <!--      <div style="position:fixed; left:1rem; top:10rem; z-index: 8;">-->
 <!--        <el-button style="margin-right: 1rem" type="success" @click="TestTile()">测试</el-button>-->
 <!--      </div>-->
-      <el-container class="Task" v-show="taskSendFlag">
+      <el-container class="task" v-show="taskSendFlag">
         <el-row id="flow" style="width: 100%; margin: auto; padding-left: 1rem; padding-right: 1rem">
           <el-steps :active="taskActiveCode" simple>
             <el-step title="发起请求" icon="el-icon-edit" ></el-step>
@@ -80,7 +84,6 @@
           </el-steps>
         </el-row>
       </el-container>
-      <div style="width: 100%"><CesiumMap :tileUrl="tileUrl" :showTileMap = "tileShow"></CesiumMap></div>
       <Window :show="WindowPopUpShow" :title="WindowPopUpTitle" :data="taskData" @closed="closeTasksWindow">
       </Window>
     </div>
@@ -90,6 +93,7 @@
 import Strophe from 'strophe.js'
 import CesiumMap from './CesiumMap'
 import Window from './UserTaskWindow'
+import TestMap from './Test'
 String.format = function (src) {
   if (arguments.length === 0) return null
 
@@ -100,7 +104,7 @@ String.format = function (src) {
   })
 }
 export default {
-  components: {CesiumMap, Window},
+  components: {TestMap, CesiumMap, Window},
   name: 'UserXmpp',
 
   mounted () {
@@ -301,7 +305,8 @@ export default {
       tileShow: true,
       WindowPopUpTitle: '已完成任务列表',
       WindowPopUpShow: false,
-      WindowContent: ''
+      WindowContent: '',
+      drawFlag: false
     }
   }
 }
@@ -310,6 +315,14 @@ export default {
 <style scoped>
   .body{
     width: 100%;
+  }
+  .cesium{
+    position: absolute;
+    top:0;
+    left:0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 12;
   }
   .login{
     position: fixed;
@@ -329,7 +342,7 @@ export default {
     background-color: #21abe5;
     box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04); border-radius: 1rem
   }
-  .Task{
+  .task{
     position: fixed;
     z-index: 11;
     top: 0;

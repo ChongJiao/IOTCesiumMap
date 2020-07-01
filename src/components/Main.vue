@@ -1,11 +1,15 @@
 <template>
-    <div style="width: 100%"><UserXmpp></UserXmpp></div>
+  <div>
+    <left></left>
+    <router-view></router-view>
+  </div>
 </template>
 
 <script>
-import UserXmpp from './UserXmpp'
+import left from './left'
+import top from './top'
 export default {
-  components: {UserXmpp},
+  components: {left, top},
   name: 'Main'
 }
 </script>
