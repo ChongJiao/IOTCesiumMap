@@ -95,9 +95,10 @@ export default {
       this.viewer = viewer
       viewer.scene.globe.depthTestAgainstTerrain = true
 
-      this.Polygons = []
-      this.activeShapePoints = []
+      this.PolygonsPoints = []
       this.cursorPoint = null
+      this.currentLine = null
+      this.currentLinePoints = []
 
       this.eventInit()
     },
@@ -107,9 +108,8 @@ export default {
     eventInit () {
       let eventHandler = new this.Cesium.ScreenSpaceEventHandler(this.viewer.canvas)
       this.viewer.cesiumWidget.screenSpaceEventHandler.removeInputAction(this.Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK)
-      this.viewer.scene.screenSpaceCameraController.enableTilt = false
+      // this.viewer.scene.screenSpaceCameraController.enableTilt = false
       // left click function
-      console.log('left click')
       let cm = this
       let ellipsoid = this.viewer.scene.globe.ellipsoid
       eventHandler.setInputAction(function (event) {
@@ -117,19 +117,22 @@ export default {
           console.log('This browser does not support polylines on terrain.')
         } else {
           if (cm.drawFlag) {
-            console.log('left click')
             let earthPosition = cm.viewer.camera.pickEllipsoid(event.position, ellipsoid)
-            console.log('pick position is ')
-            console.log(earthPosition)
-            let pos = cm.createPoint(earthPosition)
-            cm.Polygons.push(pos)
+            cm.addPoint(earthPosition)
             if (cm.cursorPoint !== null) {
+              cm.PolygonsPoints.pop()
               cm.cursorPoint = null
             }
-            // let dynamicPositions = new cm.Cesium.CallbackProperty(function () {
-            //   return cm.activeShapePoints
-            // }, false)
-            // cm.activeShape = cm.drawShape(dynamicPositions)
+            cm.PolygonsPoints.push(earthPosition)
+
+            if (cm.currentLinePoints.length === 0) {
+              cm.currentLinePoints.push(earthPosition)
+              cm.currentLine = cm.addLineEntity()
+            } else {
+              cm.currentLinePoints = []
+              cm.currentLinePoints.push(earthPosition)
+              cm.currentLine = cm.addLineEntity()
+            }
           }
         }
       }, cm.Cesium.ScreenSpaceEventType.LEFT_CLICK)
@@ -138,13 +141,30 @@ export default {
       eventHandler.setInputAction(function (event) {
         if (cm.drawFlag) {
           let newPosition = cm.viewer.camera.pickEllipsoid(event.endPosition)
-          if (cm.cursorPoint === null) {
-            cm.cursorPoint = cm.createPoint(newPosition)
-          } else {
-            if (cm.Cesium.defined(newPosition)) {
+          if (cm.Cesium.defined(newPosition)) {
+            if (cm.cursorPoint === null) {
+              cm.cursorPoint = cm.addPoint(newPosition)
+              cm.currentLinePoints.push(newPosition)
+              cm.PolygonsPoints.push(newPosition)
+            } else {
+              cm.PolygonsPoints.pop()
+              cm.PolygonsPoints.push(newPosition)
+              cm.currentLinePoints.pop()
+              cm.currentLinePoints.push(newPosition)
+              console.log('-----------------------')
+              console.log(cm.PolygonsPoints.length)
+              console.log(cm.currentLinePoints.length)
+              // console.log(cm.cursorPoint)
+              // cm.polygonShape.polygon.hierarchy.setValue(cm.PolygonsPoints)
+              console.log()
               cm.cursorPoint.position.setValue(newPosition)
-              cm.Polygons.pop()
-              cm.Polygons.push(newPosition)
+              if (cm.currentLine !== null) {
+                // console.log(cm.currentLine.polyline.positions)
+                cm.currentLine.polyline.positions.setValue(cm.currentLinePoints)
+              }
+              console.log('!!!!!!!!!!!!!!!!!!!!!!!')
+              // cm.currentLine.position.setValue(cm.currentLinePoints)
+              // cm.polygonShape.position.setValue(cm.PolygonsPoints)
             }
           }
         }
@@ -170,6 +190,8 @@ export default {
         this.drawFlag = true
         let pol = document.getElementById('polygon')
         pol.className = 'toolSelect'
+        // 新增shape 实体
+        // this.polygonShape = this.addPolygonEntity()
       } else {
         span.innerText = '绘制'
         i.className = 'el-icon-thumb'
@@ -181,36 +203,34 @@ export default {
     regionSearch () {
       // 查找区域
     },
-    drawShape (positions, completed = false) {
-      console.log(positions)
-      console.log('draw')
+    addPolygonEntity () {
+      console.log('add polygon')
       let shape = this.viewer.entities.add({
         polygon: {
-          hierarchy: positions,
+          hierarchy: [],
           material: new this.Cesium.ColorMaterialProperty(this.Cesium.Color.YELLOW.withAlpha(0.4))
         }
       })
-      // if (completed) {
-      //   shape.fromDrawingTool = true
-      // }
-      // return shape
       return shape
     },
-    clear () {
+    addLineEntity () {
+      console.log('add line')
+      let cm = this
+      let line = this.viewer.entities.add({
+        polyline: {
+          positions: [],
+          clampToGround: true,
+          width: 3,
+          material: new cm.Cesium.PolylineOutlineMaterialProperty({
+            color: cm.Cesium.Color.ORANGE,
+            outlineWidth: 1,
+            outlineColor: cm.Cesium.Color.BLACK
+          })
+        }
+      })
+      return line
     },
-    completeShape () {
-      // this.activeShapePoints.pop()
-      this.drawShape(this.Polygons, true)
-      // this.viewer.entities.remove(this.cursorPoint)
-      // this.viewer.entities.remove(this.activeShape)
-
-      this.cursorPoint = null
-      // this.activeShape = null
-      // this.activeShapePoints = []
-    },
-    createPoint (position) {
-      console.log(position)
-
+    addPoint (position) {
       // position = this.Cesium.Ellipsoid.WGS84.cartesianToCartographic(position)
       // let lon = this.Cesium.Math.toDegrees(position.longitude)
       // let lat = this.Cesium.Math.toDegrees(position.latitude)
@@ -225,6 +245,8 @@ export default {
       })
 
       return point
+    },
+    clear () {
     },
     getPolylines () {
       let entities = this.viewer.entities._entities._array
@@ -242,9 +264,12 @@ export default {
 </script>
 <style scoped>
   .viewer {
+    position: absolute;
+    top:0;
+    left:0;
     width: 100vw;
     height: 100vh;
-    /*margin-top: -8vh;*/
+    z-index: 12;
   }
   .toolBox {
     position: absolute;

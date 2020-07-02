@@ -1,9 +1,10 @@
 <template>
     <div class="body">
-      <div class="cesium">
-        <CesiumMap :tileUrl="tileUrl" :showTileMap = "tileShow">
-        </CesiumMap>
-      </div>
+      <left @openType="openSubWindowType"></left>
+      <CesiumMap v-if="showCesiumFlag" :tileUrl="tileUrl" :showTileMap = "tileShow">
+      </CesiumMap>
+      <TaskDetail v-if="showTaskFlag"></TaskDetail>
+
 <!--      <div class="login" v-show="!connectFlag">-->
 <!--        <div class = "login-body">-->
 <!--          <el-form size="small" ref="userValidateForm">-->
@@ -93,7 +94,8 @@
 import Strophe from 'strophe.js'
 import CesiumMap from './CesiumMap'
 import Window from './UserTaskWindow'
-import TestMap from './Test'
+import TaskDetail from './TaskDetail'
+import left from './left'
 String.format = function (src) {
   if (arguments.length === 0) return null
 
@@ -104,7 +106,7 @@ String.format = function (src) {
   })
 }
 export default {
-  components: {TestMap, CesiumMap, Window},
+  components: {left, CesiumMap, Window, TaskDetail},
   name: 'UserXmpp',
 
   mounted () {
@@ -282,6 +284,28 @@ export default {
     },
     closeTasksWindow: function () {
       this.WindowPopUpShow = false
+    },
+
+    openSubWindowType (type) {
+      console.log('log type is')
+      console.log(type)
+      switch (type) {
+        case 1:
+          this.showCesiumFlag = true
+          this.showTaskFlag = false
+          this.showUserFlag = false
+          break
+        case 2:
+          this.showCesiumFlag = false
+          this.showTaskFlag = true
+          this.showUserFlag = false
+          break
+        case 3:
+          this.showCesiumFlag = false
+          this.showTaskFlag = false
+          this.showUserFlag = true
+          break
+      }
     }
   },
   data () {
@@ -306,7 +330,9 @@ export default {
       WindowPopUpTitle: '已完成任务列表',
       WindowPopUpShow: false,
       WindowContent: '',
-      drawFlag: false
+      showCesiumFlag: true,
+      showTaskFlag: false,
+      showUserFlag: false
     }
   }
 }
@@ -315,14 +341,6 @@ export default {
 <style scoped>
   .body{
     width: 100%;
-  }
-  .cesium{
-    position: absolute;
-    top:0;
-    left:0;
-    width: 100vw;
-    height: 100vh;
-    z-index: 12;
   }
   .login{
     position: fixed;

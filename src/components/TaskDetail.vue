@@ -81,7 +81,7 @@
 import top from './top.vue'
 import left from './left.vue'
 export default {
-  name: 'imageProcessDetail',
+  name: 'TaskDetail',
   components: {top, left},
   data () {
     return {

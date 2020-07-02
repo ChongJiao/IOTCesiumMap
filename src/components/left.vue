@@ -33,21 +33,15 @@ export default {
   methods: {
     jumpToMap () {
       this.setMenuClass('earth', 'user', 'console')
-      if (this.$route.path !== '/UserXmpp') {
-        this.$router.push({path: '/UserXmpp'})
-      }
+      this.$emit('openType', 1)
     },
     jumpToDetail () {
       this.setMenuClass('console', 'user', 'earth')
-      if (this.$route.path !== '/TaskDetail') {
-        this.$router.push({path: '/TaskDetail'})
-      }
+      this.$emit('openType', 2)
     },
     jumpToUser () {
       this.setMenuClass('user', 'console', 'earth')
-      if (this.$route.path !== '/UserCenter') {
-        this.$router.push({path: '/UserCenter'})
-      }
+      this.$emit('openType', 3)
     },
     setMenuClass (name1, name2, name3) {
       let imgDiv = document.getElementById(name1)
