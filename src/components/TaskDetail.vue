@@ -80,6 +80,8 @@
 <script>
 import top from './top.vue'
 import left from './left.vue'
+import myStropheConn from '../api/Connection'
+import Strophe from 'strophe.js'
 export default {
   name: 'TaskDetail',
   components: {top, left},
@@ -91,9 +93,39 @@ export default {
       information: false
     }
   },
+  mounted () {
+    setTimeout(function () {
+      if (!myStropheConn.myStropheConn.connFlag) {
+        console.log('not login')
+        myStropheConn.myStropheConn.connecting()
+      }
+    }, 2000)
+    console.log('task mounted')
+    this.messageHandler = myStropheConn.myStropheConn.conn.addHandler(this.testMessage, null, 'message', null, null, null)
+  },
+  destroyed () {
+    console.log('Task destroyed')
+    myStropheConn.myStropheConn.conn.deleteHandler(this.messageHandler)
+  },
   methods: {
+    testMessage (msg) {
+      console.log('Task Message')
+      let fromJid = msg.getAttribute('from')
+      let toJid = msg.getAttribute('to')
+      let type = msg.getAttribute('type')
+      let elems = msg.getElementsByTagName('body')
+      if (type === 'chat' && elems.length > 0) {
+        let msgContent = Strophe.Strophe.getText(elems[0])
+        msgContent = msgContent.replace(/&apos;/g, '"')
+        msgContent = msgContent.replace(/&quot;/g, '"')
+        console.log(fromJid + ' send message to ' + toJid + ' and the message content is ' + msgContent)
+      }
+      return true
+    },
     showInformation: function () {
       this.information = true
+    },
+    onMessage () {
     }
   }
 }

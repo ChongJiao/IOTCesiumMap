@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import UserXmpp from '../components/UserXmpp'
+import CesiumMap from '../components/CesiumMap'
+import TaskDetail from '../components/TaskDetail'
 import UrlNotFound from '../components/UrlNotFound'
 
 Vue.use(Router)
@@ -9,13 +10,18 @@ export default new Router({
   routes: [
     {
       path: '/',
-      name: 'UserXmpp',
-      component: UserXmpp
+      name: 'CesiumMap',
+      component: CesiumMap
     },
     {
-      path: '/main',
-      name: 'UserXmpp',
-      component: UserXmpp
+      path: '/CesiumMap',
+      name: 'CesiumMap',
+      component: CesiumMap
+    },
+    {
+      path: '/TaskDetail',
+      name: 'TaskDetail',
+      component: TaskDetail
     },
     {
       path: '*',

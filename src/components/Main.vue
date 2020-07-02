@@ -1,9 +1,7 @@
 <template>
     <div class="body">
-      <left @openType="openSubWindowType"></left>
-      <CesiumMap v-if="showCesiumFlag" :tileUrl="tileUrl" :showTileMap = "tileShow">
-      </CesiumMap>
-      <TaskDetail v-if="showTaskFlag"></TaskDetail>
+      <left></left>
+      <router-view></router-view>
 
 <!--      <div class="login" v-show="!connectFlag">-->
 <!--        <div class = "login-body">-->
@@ -107,20 +105,25 @@ String.format = function (src) {
 }
 export default {
   components: {left, CesiumMap, Window, TaskDetail},
-  name: 'UserXmpp',
+  name: 'Main',
 
   mounted () {
-    console.log('自动登陆')
-    this.connecting()
+    // while (!myStropheConn.connFlag) {
+    //
+    // }
+    // console.log(myStropheConn.myStropheConn.conn.handlers)
+    // if (myStropheConn.myStropheConn.conn.handlers.length > 0) {
+    //   console.log(myStropheConn.myStropheConn.conn.handlers)
+    //   myStropheConn.myStropheConn.conn.deleteHandler(myStropheConn.myStropheConn.conn.handlers[0])
+    // }
+    // console.log(myStropheConn.myStropheConn.conn.handlers)
+    // myStropheConn.myStropheConn.conn.addHandler(this.testMessage, null, 'message', null, null, null)
   },
   methods: {
     connecting () {
       if (this.userJid === '' || this.userPassword === '') {
         return false
       } else {
-        console.log(this.userJid)
-        console.log(this.userPassword)
-        console.log(this.BOSH_SERVER)
         this.conn = new Strophe.Strophe.Connection(this.BOSH_SERVER)
         this.conn.connect(this.userJid, this.userPassword, this.onConnected)
       }
@@ -139,10 +142,10 @@ export default {
         this.connectFlag = true
 
         // 当接收到<message>节
-        this.conn.addHandler(this.onMessage, null, 'message', null, null, null)
+        // this.conn.addHandler(this.onMessage, null, 'message', null, null, null)
 
         // 首先要发送一个<presence>给服务器（initial presence）
-        this.conn.send(Strophe.$pres().tree())
+        // this.conn.send(Strophe.$pres().tree())
 
         // 获取所有地理信息数据
         this.ObtainDataUrlSource()

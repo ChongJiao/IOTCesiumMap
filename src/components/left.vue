@@ -33,15 +33,24 @@ export default {
   methods: {
     jumpToMap () {
       this.setMenuClass('earth', 'user', 'console')
-      this.$emit('openType', 1)
+      if (this.$route.path !== '/CesiumMap') {
+        this.$router.push({path: '/CesiumMap'})
+      }
+      // this.$emit('openType', 1)
     },
     jumpToDetail () {
       this.setMenuClass('console', 'user', 'earth')
-      this.$emit('openType', 2)
+      if (this.$route.path !== '/TaskDetail') {
+        this.$router.push({path: '/TaskDetail'})
+      }
+      // this.$emit('openType', 2)
     },
     jumpToUser () {
       this.setMenuClass('user', 'console', 'earth')
-      this.$emit('openType', 3)
+      if (this.$route.path !== '/UserCenter') {
+        this.$router.push({path: '/UserCenter'})
+      }
+      // this.$emit('openType', 3)
     },
     setMenuClass (name1, name2, name3) {
       let imgDiv = document.getElementById(name1)

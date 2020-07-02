@@ -1,5 +1,6 @@
 // The Vue build version to load with the `import` command
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
+
 import Vue from 'vue'
 import App from './App'
 import router from './router'
@@ -24,7 +25,7 @@ Vue.use(VueCesium, {
   // 指定Cesium.Ion.defaultAccessToken，使用Cesium ion的数据源需要到https://cesium.com/ion/申请一个账户，获取Access Token。不指定的话可能导致 Cesium 在线影像加载不了
   // accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJhNDBhMWRhNy04M2E3LTQ0ZWQtYTVkMS0yNDYyOTA3ZDNjMDgiLCJpZCI6MjIyODIsInNjb3BlcyI6WyJhc2wiLCJhc3IiLCJhc3ciLCJnYyJdLCJpYXQiOjE1ODE2NzA4NDh9.Ah9tzm1Do4yiB2zSEiHr23iDU2WWgEYSp7k3RZYH2V4'
 })
-
+// Vue.use(myStropheConn)
 Vue.use(ElementUI)
 Vue.use(BootstrapVue)
 Vue.use(VueRouter)

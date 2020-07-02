@@ -43,6 +43,8 @@
 import top from './top'
 import left from './left'
 
+import myStropheConn from '../api/Connection'
+import Strophe from 'strophe.js'
 export default {
   name: 'CesiumMap',
   components: {top, left},
@@ -71,6 +73,20 @@ export default {
       type: Boolean,
       default: false
     }
+  },
+  mounted () {
+    console.log('Cesium mounted')
+    setTimeout(function () {
+      if (!myStropheConn.myStropheConn.connFlag) {
+        console.log('not login')
+        myStropheConn.myStropheConn.connecting()
+      }
+    }, 2000)
+    this.messageHandler = myStropheConn.myStropheConn.conn.addHandler(this.testMessage, null, 'message', null, null, null)
+  },
+  destroyed () {
+    console.log('Cesium destroyed')
+    myStropheConn.myStropheConn.conn.deleteHandler(this.messageHandler)
   },
   data () {
     return {
@@ -104,6 +120,20 @@ export default {
     },
     imageryReady (imageryProvider) {
       this.viewer.camera.flyTo({ destination: imageryProvider.rectangle })
+    },
+    testMessage (msg) {
+      console.log('Cesium Message')
+      let fromJid = msg.getAttribute('from')
+      let toJid = msg.getAttribute('to')
+      let type = msg.getAttribute('type')
+      let elems = msg.getElementsByTagName('body')
+      if (type === 'chat' && elems.length > 0) {
+        let msgContent = Strophe.Strophe.getText(elems[0])
+        msgContent = msgContent.replace(/&apos;/g, '"')
+        msgContent = msgContent.replace(/&quot;/g, '"')
+        console.log(fromJid + ' send message to ' + toJid + ' and the message content is ' + msgContent)
+      }
+      return true
     },
     eventInit () {
       let eventHandler = new this.Cesium.ScreenSpaceEventHandler(this.viewer.canvas)
