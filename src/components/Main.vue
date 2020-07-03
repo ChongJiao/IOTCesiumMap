@@ -108,55 +108,8 @@ export default {
   name: 'Main',
 
   mounted () {
-    // while (!myStropheConn.connFlag) {
-    //
-    // }
-    // console.log(myStropheConn.myStropheConn.conn.handlers)
-    // if (myStropheConn.myStropheConn.conn.handlers.length > 0) {
-    //   console.log(myStropheConn.myStropheConn.conn.handlers)
-    //   myStropheConn.myStropheConn.conn.deleteHandler(myStropheConn.myStropheConn.conn.handlers[0])
-    // }
-    // console.log(myStropheConn.myStropheConn.conn.handlers)
-    // myStropheConn.myStropheConn.conn.addHandler(this.testMessage, null, 'message', null, null, null)
   },
   methods: {
-    connecting () {
-      if (this.userJid === '' || this.userPassword === '') {
-        return false
-      } else {
-        this.conn = new Strophe.Strophe.Connection(this.BOSH_SERVER)
-        this.conn.connect(this.userJid, this.userPassword, this.onConnected)
-      }
-    },
-    onConnected (status) {
-      console.log('onConnection Function')
-      console.log(status)
-      if (status === Strophe.Strophe.Status.CONNFAIL) {
-        this.connectCode = '连接失败'
-        this.connectFlag = false
-      } else if (status === Strophe.Strophe.Status.AUTHFAIL) {
-        this.connectCode = '登陆失败'
-        this.connectFlag = false
-      } else if (status === Strophe.Strophe.Status.CONNECTED) {
-        this.connectCode = '已登陆'
-        this.connectFlag = true
-
-        // 当接收到<message>节
-        // this.conn.addHandler(this.onMessage, null, 'message', null, null, null)
-
-        // 首先要发送一个<presence>给服务器（initial presence）
-        // this.conn.send(Strophe.$pres().tree())
-
-        // 获取所有地理信息数据
-        this.ObtainDataUrlSource()
-        // 发送成功即获取当前用户的所有已处理任务
-        this.ObtainAllTaskContent()
-      } else {
-        this.connectCode = '自动登陆失败'
-        this.connectFlag = false
-      }
-      console.log(this.connectCode)
-    },
     onMessage (msg) {
       // 解析出<message>的from、type属性，以及body子元素
       let fromJid = msg.getAttribute('from')
@@ -222,14 +175,7 @@ export default {
       }
       return true
     },
-    ObtainDataUrlSource () {
-      let msgContent = '{\'type\': \'satellite\'}'
-      this.SendMessage(this.serverJid, msgContent)
-    },
-    ObtainAllTaskContent () {
-      let msgContent = '{\'type\': \'queryTask\'}'
-      this.SendMessage(this.serverJid, msgContent)
-    },
+
     ObtainTaskStatus () {
       if (this.taskSendFlag) {
         console.log('obtain task id')
@@ -287,28 +233,6 @@ export default {
     },
     closeTasksWindow: function () {
       this.WindowPopUpShow = false
-    },
-
-    openSubWindowType (type) {
-      console.log('log type is')
-      console.log(type)
-      switch (type) {
-        case 1:
-          this.showCesiumFlag = true
-          this.showTaskFlag = false
-          this.showUserFlag = false
-          break
-        case 2:
-          this.showCesiumFlag = false
-          this.showTaskFlag = true
-          this.showUserFlag = false
-          break
-        case 3:
-          this.showCesiumFlag = false
-          this.showTaskFlag = false
-          this.showUserFlag = true
-          break
-      }
     }
   },
   data () {

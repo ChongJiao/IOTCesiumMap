@@ -33,21 +33,32 @@
       <div id = "polygon" class= "toolDeSelect">
         <img class = "toolIcon" src="../assets/tool_Polygon.png">
       </div>
-      <el-button id="draw" size="small" icon="el-icon-thumb" style="padding: 0.5vw; margin-left: 0.5vw" v-on:click="regionDraw()">绘制</el-button>
-      <el-button type="primary" size="small" icon="el-icon-search" style="padding: 0.5vw; margin-left: 0.5vw" v-on:click="regionSearch">搜索</el-button>
+        <el-button id="draw" icon="el-icon-thumb" v-on:click="regionDraw()" style="margin-top: 2%; margin-left:0.2vw">绘制</el-button>
+        <el-button type="primary" icon="el-icon-delete" v-on:click="clear">清除</el-button>
+        <el-button type="danger" icon="el-icon-search" v-on:click="regionSearch">搜索</el-button>
+    </div>
+    <div class="rightList">
+<!--      <RightItem image-url="test.png" name="高分一号" position="位置在武汉汉阳地区">-->
+<!--      </RightItem>-->
+<!--      <RightItem image-url="test.png" name="高分二号" position="武汉">-->
+<!--      </RightItem>-->
+      <div v-for="(data, index) in dataSource" :key="index">
+        <RightItem :image-url="data.url" :name="data.name" :position="data.pos">
+        </RightItem>
+      </div>
     </div>
   </div>
   </div>
 </template>
 <script>
-import top from './top'
 import left from './left'
 
 import myStropheConn from '../api/Connection'
 import Strophe from 'strophe.js'
+import RightItem from './RightItem'
 export default {
   name: 'CesiumMap',
-  components: {top, left},
+  components: {RightItem, left},
   props: {
     tileUrl: {
       type: String,
@@ -76,13 +87,13 @@ export default {
   },
   mounted () {
     console.log('Cesium mounted')
-    setTimeout(function () {
-      if (!myStropheConn.myStropheConn.connFlag) {
-        console.log('not login')
-        myStropheConn.myStropheConn.connecting()
-      }
-    }, 2000)
-    this.messageHandler = myStropheConn.myStropheConn.conn.addHandler(this.testMessage, null, 'message', null, null, null)
+    // setTimeout(function () {
+    //   if (!myStropheConn.myStropheConn.connFlag) {
+    //     console.log('not login')
+    //     myStropheConn.myStropheConn.connecting()
+    //   }
+    // }, 2000)
+    // this.messageHandler = myStropheConn.myStropheConn.conn.addHandler(this.onMessage, null, 'message', null, null, null)
   },
   destroyed () {
     console.log('Cesium destroyed')
@@ -95,14 +106,18 @@ export default {
       contrast: 1,
       imageryProvider: {},
       bmKey: 'AgcbDCAOb9zMfquaT4Z-MdHX4AsHUNvs7xgdHefEA5myMHxZk87NTNgdLbG90IE-',
-      Cesium: null
+      Cesium: null,
+      dataSource: []
     }
   },
   methods: {
     ready (cesiumInstance) {
       const { Cesium, viewer } = cesiumInstance
 
+      viewer.scene.requestRenderMode = true
+      viewer.scene.maximumRenderTimeChange = Infinity
       viewer.cesiumWidget.creditContainer.style.display = 'none'
+      viewer.scene.globe.depthTestAgainstTerrain = true
       this.imageryProvider = new Cesium.MapboxImageryProvider({
         mapId: 'mapbox.streets'
       })
@@ -110,8 +125,8 @@ export default {
       // this.tooltip = new Cesium.createTooltip(viewer.cesiumWidget.container)
       this.viewer = viewer
       viewer.scene.globe.depthTestAgainstTerrain = true
-
       this.PolygonsPoints = []
+      this.LineList = []
       this.cursorPoint = null
       this.currentLine = null
       this.currentLinePoints = []
@@ -121,27 +136,35 @@ export default {
     imageryReady (imageryProvider) {
       this.viewer.camera.flyTo({ destination: imageryProvider.rectangle })
     },
-    testMessage (msg) {
+    onMessage (msg) {
       console.log('Cesium Message')
-      let fromJid = msg.getAttribute('from')
-      let toJid = msg.getAttribute('to')
+      // let fromJid = msg.getAttribute('from')
+      // let toJid = msg.getAttribute('to')
       let type = msg.getAttribute('type')
       let elems = msg.getElementsByTagName('body')
       if (type === 'chat' && elems.length > 0) {
         let msgContent = Strophe.Strophe.getText(elems[0])
         msgContent = msgContent.replace(/&apos;/g, '"')
         msgContent = msgContent.replace(/&quot;/g, '"')
-        console.log(fromJid + ' send message to ' + toJid + ' and the message content is ' + msgContent)
+        if (myStropheConn.myStropheConn.isJsonStr(msgContent)) {
+          let replyJson = JSON.parse(msgContent)
+          switch (replyJson['type']) {
+            case 'region':
+              // TODO show region
+              console.log(replyJson['data'])
+              break
+            default:
+              break
+          }
+        }
       }
       return true
     },
     eventInit () {
-      let eventHandler = new this.Cesium.ScreenSpaceEventHandler(this.viewer.canvas)
-      this.viewer.cesiumWidget.screenSpaceEventHandler.removeInputAction(this.Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK)
-      // this.viewer.scene.screenSpaceCameraController.enableTilt = false
-      // left click function
       let cm = this
       let ellipsoid = this.viewer.scene.globe.ellipsoid
+      let eventHandler = new this.Cesium.ScreenSpaceEventHandler(this.viewer.canvas)
+      this.viewer.cesiumWidget.screenSpaceEventHandler.removeInputAction(this.Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK)
       eventHandler.setInputAction(function (event) {
         if (!cm.Cesium.Entity.supportsPolylinesOnTerrain(cm.viewer.scene)) {
           console.log('This browser does not support polylines on terrain.')
@@ -149,63 +172,44 @@ export default {
           if (cm.drawFlag) {
             let earthPosition = cm.viewer.camera.pickEllipsoid(event.position, ellipsoid)
             cm.addPoint(earthPosition)
-            if (cm.cursorPoint !== null) {
-              cm.PolygonsPoints.pop()
-              cm.cursorPoint = null
+            cm.cursorPoint = cm.addPoint(earthPosition)
+            console.log('click')
+            if (cm.PolygonsPoints.length === 0) {
+              cm.LineList.push(cm.addLineEntity())
+              cm.LineList.push(cm.addLineEntity())
+            } else {
+              cm.LineList[0].polyline.positions.setValue([cm.PolygonsPoints[0], earthPosition])
+              cm.LineList.push(cm.addLineEntity())
             }
             cm.PolygonsPoints.push(earthPosition)
-
-            if (cm.currentLinePoints.length === 0) {
-              cm.currentLinePoints.push(earthPosition)
-              cm.currentLine = cm.addLineEntity()
-            } else {
-              cm.currentLinePoints = []
-              cm.currentLinePoints.push(earthPosition)
-              cm.currentLine = cm.addLineEntity()
-            }
           }
         }
       }, cm.Cesium.ScreenSpaceEventType.LEFT_CLICK)
-
-      // move event
-      eventHandler.setInputAction(function (event) {
+      this.viewer.canvas.addEventListener('mousemove', function (event) {
         if (cm.drawFlag) {
-          let newPosition = cm.viewer.camera.pickEllipsoid(event.endPosition)
-          if (cm.Cesium.defined(newPosition)) {
-            if (cm.cursorPoint === null) {
-              cm.cursorPoint = cm.addPoint(newPosition)
-              cm.currentLinePoints.push(newPosition)
-              cm.PolygonsPoints.push(newPosition)
-            } else {
-              cm.PolygonsPoints.pop()
-              cm.PolygonsPoints.push(newPosition)
-              cm.currentLinePoints.pop()
-              cm.currentLinePoints.push(newPosition)
+          let position = new cm.Cesium.Cartesian2(event.x, event.y)
+          let pickedObject = cm.viewer.scene.pick(position)
+          if (!cm.Cesium.defined(pickedObject)) {
+            // let newPosition = cm.viewer.camera.pickEllipsoid(position)
+            let newPosition = cm.viewer.scene.pickPosition(new cm.Cesium.Cartesian2(event.x, event.y))
+            if (cm.PolygonsPoints.length > 0) {
               console.log('-----------------------')
+              let p1 = cm.PolygonsPoints[cm.PolygonsPoints.length - 1]
               console.log(cm.PolygonsPoints.length)
-              console.log(cm.currentLinePoints.length)
-              // console.log(cm.cursorPoint)
-              // cm.polygonShape.polygon.hierarchy.setValue(cm.PolygonsPoints)
-              console.log()
-              cm.cursorPoint.position.setValue(newPosition)
-              if (cm.currentLine !== null) {
-                // console.log(cm.currentLine.polyline.positions)
-                cm.currentLine.polyline.positions.setValue(cm.currentLinePoints)
+              cm.LineList[0].polyline.positions.setValue([cm.PolygonsPoints[0], newPosition])
+              cm.LineList[cm.LineList.length - 1].polyline.positions.setValue([p1, newPosition])
+              if (cm.cursorPoint !== null) {
+                cm.cursorPoint.position.setValue(newPosition)
               }
+              cm.viewer.scene.requestRender()
               console.log('!!!!!!!!!!!!!!!!!!!!!!!')
-              // cm.currentLine.position.setValue(cm.currentLinePoints)
-              // cm.polygonShape.position.setValue(cm.PolygonsPoints)
             }
           }
         }
-      }, cm.Cesium.ScreenSpaceEventType.MOUSE_MOVE)
-
-      // right event
-      eventHandler.setInputAction(function (event) {
-        if (cm.drawFlag) {
-          cm.completeShape()
-        }
-      }, cm.Cesium.ScreenSpaceEventType.RIGHT_CLICK)
+      })
+      this.viewer.canvas.addEventListener('contextmenu', function (event) {
+        cm.drawFlag = false
+      })
     },
     regionDraw () {
       // 绘制
@@ -244,20 +248,16 @@ export default {
       return shape
     },
     addLineEntity () {
-      console.log('add line')
       let cm = this
       let line = this.viewer.entities.add({
         polyline: {
           positions: [],
           clampToGround: true,
           width: 3,
-          material: new cm.Cesium.PolylineOutlineMaterialProperty({
-            color: cm.Cesium.Color.ORANGE,
-            outlineWidth: 1,
-            outlineColor: cm.Cesium.Color.BLACK
-          })
+          material: cm.Cesium.Color.ORANGE
         }
       })
+      this.viewer.scene.requestRender()
       return line
     },
     addPoint (position) {
@@ -268,15 +268,15 @@ export default {
       let point = this.viewer.entities.add({
         position: position,
         point: {
-          color: cm.Cesium.Color.YELLOW,
-          pixelSize: 5,
-          heightReference: cm.Cesium.HeightReference.RELATIVE_TO_GROUND
+          pixelSize: 10,
+          color: cm.Cesium.Color.YELLOW
         }
       })
 
       return point
     },
     clear () {
+      this.viewer.entities.removeAll()
     },
     getPolylines () {
       let entities = this.viewer.entities._entities._array
@@ -303,7 +303,6 @@ export default {
   }
   .toolBox {
     position: absolute;
-    padding: 0.5vw;
     border-radius: 0.5vh;
     top: 1vh;
     right: 5vw;
@@ -326,5 +325,16 @@ export default {
   .toolIcon {
     width: 3vw;
     height: 3vw;
+  }
+  .rightList{
+    max-width: 20vw;
+    position: absolute;
+    /*padding: 0.5vw;*/
+    border-radius: 0.5vh;
+    top: 10vh;
+    right: 3vw;
+    z-index: 15;
+    background-color: #dfebee;
+    display: list-item;
   }
 </style>
