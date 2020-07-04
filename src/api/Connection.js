@@ -20,7 +20,7 @@ class StropheConn {
         return true
       }
     } catch (e) {
-      console.log(e)
+      return false
     }
     return false
   }
@@ -37,17 +37,17 @@ class StropheConn {
     dict['type'] = 'queryRegion'
     dict['pos'] = pos
     let msgContent = JSON.stringify(dict)
-    this.SendMessage(this.controlJID, msgContent)
+    this.SendMessage(msgContent)
   }
   // 获取所有的卫星影像地址
   ObtainDataUrlSource () {
     let msgContent = '{\'type\': \'satellite\'}'
-    this.SendMessage(this.controlJID, msgContent)
+    this.SendMessage(msgContent)
   }
   // 获取这个用户的所有任务内容
   ObtainAllTaskContent () {
     let msgContent = '{\'type\': \'queryTask\'}'
-    this.SendMessage(this.controlJID, msgContent)
+    this.SendMessage(msgContent)
   }
   // TODO 查询当前任务的状态，这个功能需不需要呢？
   ObtainTaskStatus (taskID) {
@@ -56,7 +56,7 @@ class StropheConn {
       let msgContent = '{\'type\': \'queryStatus\', \'taskId\': {0}}'
       msgContent = String.format(msgContent, taskID)
       console.log(msgContent)
-      this.SendMessage(this.controlJID, msgContent)
+      this.SendMessage(msgContent)
     }
   }
   onMessage (msg) {
@@ -70,7 +70,8 @@ class StropheConn {
       let msgContent = Strophe.Strophe.getText(elems[0])
       msgContent = msgContent.replace(/&apos;/g, '"')
       msgContent = msgContent.replace(/&quot;/g, '"')
-      if (this.isJsonStr(msgContent)) {
+      console.log(msgContent)
+      if (myStropheConn.isJsonStr(msgContent)) {
         // TODO 具体状态消息处理, 消息实体储存在该类中，以供其他组件调用
       }
       // console.log(fromJid + ' send message to ' + toJid + ' and the message content is ' + msgContent)
@@ -78,13 +79,14 @@ class StropheConn {
     return true
   }
   // 消息传输统一放这里好了
-  SendMessage (toJid, message) {
+  SendMessage (message) {
     if (this.connFlag) {
       let msg = Strophe.$msg({
-        to: toJid,
-        from: this.controlJID,
+        to: this.controlJID,
+        from: this.userJID,
         type: 'chat'
       }).c('body', message)
+      console.log('send is ' + msg)
       this.conn.send(msg.tree())
     }
   }
@@ -102,7 +104,6 @@ function onConnected (status) {
     myStropheConn.connectCode = '已登陆'
     myStropheConn.connFlag = true
     console.log('已登陆')
-    console.log(this)
     this.addHandler(myStropheConn.onMessage, null, 'message', null, null, null)
     // 首先要发送一个<presence>给服务器（initial presence）
     this.send(Strophe.$pres().tree())

@@ -6,7 +6,7 @@
       <div class="position">{{position}}</div>
     </div>
     <div class="button">
-      <el-button type="primary" style="padding: 0.5vw; margin-left: 0.5vw" icon="el-icon-s-operation">处理</el-button>
+      <el-button type="primary" style="padding: 0.5vw; margin-left: 0.5vw;margin-top: 2vh;" icon="el-icon-s-operation">处理</el-button>
     </div>
   </div>
 </template>
@@ -39,6 +39,7 @@ export default {
     /*display: table-cell;*/
   }
   .image{
+    margin-top: 0.5vh;
     width: 5vw;
     float: left;
     display: table-cell;

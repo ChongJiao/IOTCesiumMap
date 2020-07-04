@@ -1,7 +1,7 @@
 <template>
 <div>
   <div class="viewer">
-    <vc-viewer @ready="ready">
+    <vc-viewer ref="viewer" @ready="ready">
       <vc-layer-imagery :alpha="alpha" :imageryProvider="imageryProvider" :brightness="brightness" :contrast="contrast">
       </vc-layer-imagery>
 <!--      <vc-layer-imagery :alpha="alpha" :brightness="brightness" :contrast="contrast" v-if="showTileMap">-->
@@ -28,12 +28,19 @@
 <!--          @readyPromise="imageryReady"-->
 <!--        ></vc-provider-imagery-tile-mapservice>-->
 <!--      </vc-layer-imagery>-->
+      <vc-handler-draw-polygon
+        :clampToGround="true"
+        ref="handlerPolygon"
+        @activeEvt="activeEvt"
+        @movingEvt="movingEvt"
+        @drawEvt="drawEvt"
+      ></vc-handler-draw-polygon>
     </vc-viewer>
     <div class="toolBox" >
       <div id = "polygon" class= "toolDeSelect">
         <img class = "toolIcon" src="../assets/tool_Polygon.png">
       </div>
-        <el-button id="draw" icon="el-icon-thumb" v-on:click="regionDraw()" style="margin-top: 2%; margin-left:0.2vw">绘制</el-button>
+        <el-button id="draw" icon="el-icon-thumb" v-on:click="toggle('handlerPolygon')" style="margin-top: 2%; margin-left:0.2vw">绘制</el-button>
         <el-button type="primary" icon="el-icon-delete" v-on:click="clear">清除</el-button>
         <el-button type="danger" icon="el-icon-search" v-on:click="regionSearch">搜索</el-button>
     </div>
@@ -56,6 +63,8 @@ import left from './left'
 import myStropheConn from '../api/Connection'
 import Strophe from 'strophe.js'
 import RightItem from './RightItem'
+// import cesiumDrawViewer from 'cesium-draw'
+
 export default {
   name: 'CesiumMap',
   components: {RightItem, left},
@@ -87,13 +96,13 @@ export default {
   },
   mounted () {
     console.log('Cesium mounted')
-    // setTimeout(function () {
-    //   if (!myStropheConn.myStropheConn.connFlag) {
-    //     console.log('not login')
-    //     myStropheConn.myStropheConn.connecting()
-    //   }
-    // }, 2000)
-    // this.messageHandler = myStropheConn.myStropheConn.conn.addHandler(this.onMessage, null, 'message', null, null, null)
+    setTimeout(function () {
+      if (!myStropheConn.myStropheConn.connFlag) {
+        console.log('not login')
+        myStropheConn.myStropheConn.connecting()
+      }
+    }, 2000)
+    this.messageHandler = myStropheConn.myStropheConn.conn.addHandler(this.onMessage, null, 'message', null, null, null)
   },
   destroyed () {
     console.log('Cesium destroyed')
@@ -107,6 +116,7 @@ export default {
       imageryProvider: {},
       bmKey: 'AgcbDCAOb9zMfquaT4Z-MdHX4AsHUNvs7xgdHefEA5myMHxZk87NTNgdLbG90IE-',
       Cesium: null,
+      viewer: null,
       dataSource: []
     }
   },
@@ -124,18 +134,56 @@ export default {
       this.Cesium = Cesium
       // this.tooltip = new Cesium.createTooltip(viewer.cesiumWidget.container)
       this.viewer = viewer
-      viewer.scene.globe.depthTestAgainstTerrain = true
-      this.PolygonsPoints = []
-      this.LineList = []
-      this.cursorPoint = null
-      this.currentLine = null
-      this.currentLinePoints = []
 
-      this.eventInit()
+      let replyData = '{\n' +
+        '    "data":"[{\\"pos\\":\\"[30.6552,113.672,30.5877,114.045,30.2668,113.966,30.3343,113.594]\\",\\"id\\":1,\\"satellite\\":\\"GF1\\",\\"position\\":\\"武汉\\",\\"url\\":\\"http://localhost:8000/GFData/srcData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806\\"},{\\"pos\\":\\"[31.0873,114.363,31.0424,114.599,30.8455,114.548,30.8903,114.313]\\",\\"id\\":2,\\"satellite\\":\\"GF2\\",\\"position\\":\\"武汉\\",\\"url\\":\\"http://localhost:8000/GFData/srcData/GF2_PMS2_E114.5_N31.0_20190331_L1A0003916014\\"}]",\n' +
+        '    "type":"region"\n' +
+        '}'
+      let replyJson = JSON.parse(replyData)
+      let data = JSON.parse(replyJson['data'])
+      this.addRegionResults(data)
     },
-    imageryReady (imageryProvider) {
-      this.viewer.camera.flyTo({ destination: imageryProvider.rectangle })
+    toggle (type) {
+      this.$refs[type].drawing = !this.$refs[type].drawing
+
+      let div = document.getElementById('draw')
+      let i = div.getElementsByTagName('i')[0]
+      let span = div.getElementsByTagName('span')[0]
+
+      let name = span.innerText
+      if (name === '绘制') {
+        span.innerText = '停止'
+        i.className = 'el-icon-circle-close'
+        let pol = document.getElementById('polygon')
+        pol.className = 'toolSelect'
+        // 新增shape 实体
+        // this.polygonShape = this.addPolygonEntity()
+      } else {
+        span.innerText = '绘制'
+        i.className = 'el-icon-thumb'
+        let pol = document.getElementById('polygon')
+        pol.className = 'toolDeSelect'
+      }
     },
+    clear () {
+      console.log('clear')
+      this.$refs.handlerPolygon.clear()
+      this.viewer.entities.removeAll()
+      this.viewer.scene.requestRender()
+    },
+    activeEvt (_) {
+      this[_.type] = _.isActive
+    },
+    movingEvt (windowPosition) {
+      // this.tooltip.showAt(windowPosition, '<p>左键绘制, 右键结束绘制.</p>')
+    },
+    drawEvt (result) {
+      // result.finished && this.tooltip.setVisible(false)
+      // console.log(result)
+    },
+    // imageryReady (imageryProvider) {
+    //   this.viewer.camera.flyTo({ destination: imageryProvider.rectangle })
+    // },
     onMessage (msg) {
       console.log('Cesium Message')
       // let fromJid = msg.getAttribute('from')
@@ -151,7 +199,9 @@ export default {
           switch (replyJson['type']) {
             case 'region':
               // TODO show region
-              console.log(replyJson['data'])
+              console.log(JSON.parse(replyJson['data']))
+              let data = JSON.parse(replyJson['data'])
+              this.addRegionResults(data)
               break
             default:
               break
@@ -160,134 +210,49 @@ export default {
       }
       return true
     },
-    eventInit () {
-      let cm = this
-      let ellipsoid = this.viewer.scene.globe.ellipsoid
-      let eventHandler = new this.Cesium.ScreenSpaceEventHandler(this.viewer.canvas)
-      this.viewer.cesiumWidget.screenSpaceEventHandler.removeInputAction(this.Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK)
-      eventHandler.setInputAction(function (event) {
-        if (!cm.Cesium.Entity.supportsPolylinesOnTerrain(cm.viewer.scene)) {
-          console.log('This browser does not support polylines on terrain.')
-        } else {
-          if (cm.drawFlag) {
-            let earthPosition = cm.viewer.camera.pickEllipsoid(event.position, ellipsoid)
-            cm.addPoint(earthPosition)
-            cm.cursorPoint = cm.addPoint(earthPosition)
-            console.log('click')
-            if (cm.PolygonsPoints.length === 0) {
-              cm.LineList.push(cm.addLineEntity())
-              cm.LineList.push(cm.addLineEntity())
-            } else {
-              cm.LineList[0].polyline.positions.setValue([cm.PolygonsPoints[0], earthPosition])
-              cm.LineList.push(cm.addLineEntity())
-            }
-            cm.PolygonsPoints.push(earthPosition)
-          }
-        }
-      }, cm.Cesium.ScreenSpaceEventType.LEFT_CLICK)
-      this.viewer.canvas.addEventListener('mousemove', function (event) {
-        if (cm.drawFlag) {
-          let position = new cm.Cesium.Cartesian2(event.x, event.y)
-          let pickedObject = cm.viewer.scene.pick(position)
-          if (!cm.Cesium.defined(pickedObject)) {
-            // let newPosition = cm.viewer.camera.pickEllipsoid(position)
-            let newPosition = cm.viewer.scene.pickPosition(new cm.Cesium.Cartesian2(event.x, event.y))
-            if (cm.PolygonsPoints.length > 0) {
-              console.log('-----------------------')
-              let p1 = cm.PolygonsPoints[cm.PolygonsPoints.length - 1]
-              console.log(cm.PolygonsPoints.length)
-              cm.LineList[0].polyline.positions.setValue([cm.PolygonsPoints[0], newPosition])
-              cm.LineList[cm.LineList.length - 1].polyline.positions.setValue([p1, newPosition])
-              if (cm.cursorPoint !== null) {
-                cm.cursorPoint.position.setValue(newPosition)
-              }
-              cm.viewer.scene.requestRender()
-              console.log('!!!!!!!!!!!!!!!!!!!!!!!')
-            }
-          }
-        }
-      })
-      this.viewer.canvas.addEventListener('contextmenu', function (event) {
-        cm.drawFlag = false
-      })
-    },
-    regionDraw () {
-      // 绘制
-      let div = document.getElementById('draw')
-      let i = div.getElementsByTagName('i')[0]
-      let span = div.getElementsByTagName('span')[0]
-
-      let name = span.innerText
-      if (name === '绘制') {
-        span.innerText = '取消'
-        i.className = 'el-icon-circle-close'
-        this.drawFlag = true
-        let pol = document.getElementById('polygon')
-        pol.className = 'toolSelect'
-        // 新增shape 实体
-        // this.polygonShape = this.addPolygonEntity()
-      } else {
-        span.innerText = '绘制'
-        i.className = 'el-icon-thumb'
-        this.drawFlag = false
-        let pol = document.getElementById('polygon')
-        pol.className = 'toolDeSelect'
-      }
-    },
     regionSearch () {
       // 查找区域
-    },
-    addPolygonEntity () {
-      console.log('add polygon')
-      let shape = this.viewer.entities.add({
-        polygon: {
-          hierarchy: [],
-          material: new this.Cesium.ColorMaterialProperty(this.Cesium.Color.YELLOW.withAlpha(0.4))
-        }
-      })
-      return shape
-    },
-    addLineEntity () {
-      let cm = this
-      let line = this.viewer.entities.add({
-        polyline: {
-          positions: [],
-          clampToGround: true,
-          width: 3,
-          material: cm.Cesium.Color.ORANGE
-        }
-      })
-      this.viewer.scene.requestRender()
-      return line
-    },
-    addPoint (position) {
-      // position = this.Cesium.Ellipsoid.WGS84.cartesianToCartographic(position)
-      // let lon = this.Cesium.Math.toDegrees(position.longitude)
-      // let lat = this.Cesium.Math.toDegrees(position.latitude)
-      let cm = this
-      let point = this.viewer.entities.add({
-        position: position,
-        point: {
-          pixelSize: 10,
-          color: cm.Cesium.Color.YELLOW
-        }
-      })
-
-      return point
-    },
-    clear () {
-      this.viewer.entities.removeAll()
-    },
-    getPolylines () {
-      let entities = this.viewer.entities._entities._array
-      let pool = []
-
-      for (let i = 0; i < entities.length; i++) {
-        if (entities[i].fromDrawingTool) {
-          pool.push(entities[i])
-        }
+      let positions = this.$refs.handlerPolygon.polylines[0].positions
+      let latlngPoses = []
+      for (let index in positions) {
+        let pos = this.Cesium.Ellipsoid.WGS84.cartesianToCartographic(positions[index])
+        let lng = this.Cesium.Math.toDegrees(pos.longitude)
+        let lat = this.Cesium.Math.toDegrees(pos.latitude)
+        latlngPoses.push(lat)
+        latlngPoses.push(lng)
       }
-      return pool
+      // queryRegion
+      let msgContent = '{\'type\': \'queryRegion\', \'pos\': \'{0}\'}'
+      msgContent = String.format(msgContent, '[' + latlngPoses.toString() + ']')
+      myStropheConn.myStropheConn.SendMessage(msgContent)
+    },
+    addRegionResults: function (dataJson) {
+      for (let index in dataJson) {
+        let data = dataJson[index]
+        let pos = data['pos']
+        pos = pos.substr(1, pos.length - 1)
+
+        let tmp = {}
+        tmp['url'] = data['url']
+        tmp['name'] = data['satellite']
+        tmp['pos'] = data['position']
+        this.dataSource.push(tmp)
+        let positionCartesians = []
+        pos = pos.split(',')
+        for (let i = 0; i < pos.length; i += 2) {
+          let lat = parseFloat(pos[i])
+          let lng = parseFloat(pos[i + 1])
+          let pt = this.Cesium.Cartesian3.fromDegrees(lng, lat, 0)
+          positionCartesians.push(pt)
+        }
+        console.log(positionCartesians)
+        this.viewer.entities.add({
+          polygon: {
+            hierarchy: positionCartesians,
+            material: new this.Cesium.ColorMaterialProperty(this.Cesium.Color.YELLOW.withAlpha(0.4))
+          }
+        })
+      }
     }
   }
 }
@@ -329,7 +294,7 @@ export default {
   .rightList{
     max-width: 20vw;
     position: absolute;
-    /*padding: 0.5vw;*/
+    padding: 0.5vw;
     border-radius: 0.5vh;
     top: 10vh;
     right: 3vw;
