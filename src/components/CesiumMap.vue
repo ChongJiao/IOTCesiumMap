@@ -227,6 +227,7 @@ export default {
       myStropheConn.myStropheConn.SendMessage(msgContent)
     },
     addRegionResults: function (dataJson) {
+      // let addShape = null
       for (let index in dataJson) {
         let data = dataJson[index]
         let pos = data['pos']
@@ -253,6 +254,9 @@ export default {
           }
         })
       }
+      // if (addShape != null) {
+      //   this.viewer.camera.flyTo({addShape})
+      // }
     }
   }
 }

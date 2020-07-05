@@ -1,10 +1,10 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import CesiumMap from '../components/CesiumMap'
-import TaskDetail from '../components/TaskDetail'
+// import TaskDetail from '../components/TaskDetail'
 import UrlNotFound from '../components/UrlNotFound'
 import NodesChart from '../components/NodesChart'
-
+import ProcessShow from '../components/TaskFlow'
 Vue.use(Router)
 
 export default new Router({
@@ -20,9 +20,9 @@ export default new Router({
       component: CesiumMap
     },
     {
-      path: '/TaskDetail',
-      name: 'TaskDetail',
-      component: TaskDetail
+      path: '/ProcessShow',
+      name: 'ProcessShow',
+      component: ProcessShow
     },
     {
       path: '/Charts',
