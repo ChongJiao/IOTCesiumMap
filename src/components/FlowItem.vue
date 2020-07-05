@@ -7,9 +7,9 @@
 </template>
 
 <script>
-    export default {
-        name: "FlowItem"
-    }
+export default {
+  name: 'FlowItem'
+}
 </script>
 
 <style scoped>
