@@ -1,22 +1,38 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Main from '../components/Main'
-import imageProcessDetail from '../components/imageProcessDetail'
-
+import CesiumMap from '../components/CesiumMap'
+// import TaskDetail from '../components/TaskDetail'
+import UrlNotFound from '../components/UrlNotFound'
+import NodesChart from '../components/NodesChart'
+import ProcessShow from '../components/TaskFlow'
 Vue.use(Router)
 
 export default new Router({
   routes: [
     {
       path: '/',
-      name: 'Main',
-      // name: 'imageProcessDetail',
-      component: Main
+      name: 'CesiumMap',
+      component: CesiumMap
     },
     {
-      path: '/imageProcessDetail',
-      name: 'imageProcessDetail',
-      component: imageProcessDetail
+      path: '/CesiumMap',
+      name: 'CesiumMap',
+      component: CesiumMap
+    },
+    {
+      path: '/ProcessShow',
+      name: 'ProcessShow',
+      component: ProcessShow
+    },
+    {
+      path: '/Charts',
+      name: 'Charts',
+      component: NodesChart
+    },
+    {
+      path: '*',
+      name: 'UrlNotFound',
+      component: UrlNotFound
     }
   ]
 })
