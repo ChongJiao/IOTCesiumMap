@@ -1,100 +1,129 @@
 <template>
-  <div id="body">
-    <div class="return">
-      <img src="../assets/return2.png" style="width: 30px; height: 30px;">
-    </div>
-    <div class="main">
+  <div class="Tbody">
+    <div class="TaskWindow">
       <!-- 数据的名称-->
-      <div id="header">
-        <el-tag style="width: 200px;text-align: center; background-color: dodgerblue; color: aliceblue; border-radius: 20px">
-          {{dataName}}
+<!--      <div class="return">-->
+      <div class="head">
+        <img src="../assets/return2.png" class="head-image">
+        <!--      </div>-->
+        <el-tag class="head-tag">
+            {{dataName}}
         </el-tag>
       </div>
-
       <!-- 处理流程-->
       <div class="process-group">
-        <div class="step1">
-          <img src="../assets/preProcess.png" style="width: 50px; height: 50px; display: block; padding: 10px">
-          <span style="margin-top: -50px; margin-left: 40px; display: block;" :class="showTaskDetail[0] ? 'after-process': 'pre-process'">数据预处理</span><br>
-          <el-link type="primary" style="margin-top: -40px; margin-left: 30px; font-size: small" v-on:click="showInformation" v-show="showTaskDetail[0]">详情</el-link>
+        <div class="step" id="step1">
+          <img src="../assets/preProcess.png" class="processIcon">
+          <span :class="showTaskDetail[0] ? 'after-process': 'pre-process'">数据预处理</span>
+          <el-link type="primary" class="tag-link" v-on:click="showInformation" v-show="showTaskDetail[0]">{{processStatus[0]}}</el-link>
         </div>
-        <img src="../assets/xiaojiantou.png" style="width: 40px;">
-        <div class="step1">
-          <img src="../assets/sharpening.png" style="width: 50px; height: 50px; display: block; padding: 10px">
-          <span style="margin-top: -50px; margin-left: 40px; display: block;" :class="showTaskDetail[1] ? 'after-process': 'pre-process'">图像融合</span><br>
-          <el-link type="primary" style="margin-top: -40px; margin-left: 30px; font-size: small" v-show="showTaskDetail[1]">详情</el-link>
+        <img src="../assets/xiaojiantou.png" style="width: 3vw;">
+        <div class="step-doing" id="step2">
+          <img src="../assets/sharpening.png" class="processIcon">
+          <span :class="showTaskDetail[1] ? 'after-process': 'pre-process'">图像融合</span>
+          <el-link type="primary" class="tag-link" v-on:click="showDoingInfomation"  v-show="showTaskDetail[1]">{{processStatus[1]}}</el-link>
         </div>
-        <img src="../assets/xiaojiantou.png" style="width: 40px;">
-        <div class="step1">
-          <img src="../assets/imgProcess.png" style="width: 50px; height: 50px; display: block; padding: 10px">
-          <span style="margin-top: -50px; margin-left: 40px; display: block;" :class="showTaskDetail[2] ? 'after-process': 'pre-process'">图像处理</span><br>
-          <el-link type="primary" style="margin-top: -40px; margin-left: 30px; font-size: small" v-show="showTaskDetail[2]">详情</el-link>
+        <img src="../assets/xiaojiantou.png" style="width: 3vw;">
+        <div class="step" id="step3">
+          <img src="../assets/imgProcess.png" class="processIcon">
+          <span :class="showTaskDetail[2] ? 'after-process': 'pre-process'">图像处理</span>
+          <el-link type="primary" class="tag-link" v-show="showTaskDetail[2]">{{processStatus[2]}}</el-link>
         </div>
-        <img src="../assets/xiaojiantou.png" style="width: 40px;">
-        <div class="step1">
-          <img src="../assets/imgEnhence.png" style="width: 50px; height: 50px; display: block; padding: 10px">
-          <span style="margin-top: -50px; margin-left: 40px; display: block;" :class="showTaskDetail[3] ? 'after-process': 'pre-process'">图像增强</span><br>
-          <el-link type="primary" style="margin-top: -40px; margin-left: 30px; font-size: small" v-show="showTaskDetail[3]">详情</el-link>
+        <img src="../assets/xiaojiantou.png" style="width: 3vw;">
+        <div class="step" id="step4">
+          <img src="../assets/imgEnhence.png" class="processIcon">
+          <span :class="showTaskDetail[3] ? 'after-process': 'pre-process'">图像增强</span>
+          <el-link type="primary" class="tag-link" v-show="showTaskDetail[3]">{{processStatus[3]}}</el-link>
         </div>
-        <img src="../assets/xiaojiantou.png" style="width: 40px;">
-        <div class="step1">
-          <img src="../assets/object.png" style="width: 50px; height: 50px; display: block; padding: 10px">
-          <span style="margin-top: -50px; margin-left: 40px; display: block;" :class="showTaskDetail[4] ? 'after-process': 'pre-process'">目标识别</span><br>
-          <el-link type="primary" style="margin-top: -40px; margin-left: 30px; font-size: small" v-show="showTaskDetail[4]">详情</el-link>
-        </div>
-      </div>
-      <el-divider v-show="information"></el-divider>
-
-      <!--      说明-->
-      <div class="container" style="width: 50%;margin-left: 0" v-show="information">
-        <div class="row align-items-center">
-          <div class="col-2" style="padding: 0;">
-            <el-button type="primary" plain style="padding: 0.5vh;border: none; margin-left: 1vh">说明：</el-button>
-          </div>
-          <div class="col-10">
-            <b-card-text class="text-left" style="color:#F56C6C">{{dataProcessNote}}</b-card-text>
-          </div>
-        </div>
-        <div class="row align-items-center" style="margin-top: 1vh;margin-bottom: 1vh">
-          <div class="col-2 " style="padding: 0;">
-            <el-button type="primary" plain style="padding: 0.5vh;border: none; margin-left: 1vh">进度：</el-button>
-          </div>
-          <div class="col-10">
-            <el-progress :text-inside="true" :stroke-width="26" :percentage="100"></el-progress>
-          </div>
+        <img src="../assets/xiaojiantou.png" style="width: 3vw;">
+        <div class="step" id="step5">
+          <img src="../assets/object.png" class="processIcon">
+          <span :class="showTaskDetail[4] ? 'after-process': 'pre-process'">目标识别</span>
+          <el-link type="primary" class="tag-link" v-show="showTaskDetail[4]">{{processStatus[4]}}</el-link>
         </div>
       </div>
-      <el-divider v-show="information"></el-divider>
-
-      <!--显示图片 -->
-      <div class="showImage" v-show="information">
-<!--        可以找到图片地址，但是显示不出来，因为太大？？？-->
-<!--        <img src="http://localhost:8000/GFData/srcData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806-MSS2-0.tiff" style="width: 250px; height: 250px">-->
-        <img src="../assets/GF1_preProcess.png" style="width: 250px; height: 250px">
-        <img src="../assets/jiantou.png" style="width: 50px; height: 50px">
-        <img src="../assets/GF1_result.png" style="width: 250px; height: 250px">
-<!--        <el-progress type="circle" :percentage="25"></el-progress>-->
+      <el-divider></el-divider>
+      <div v-show="overInfo">
+        <div class="container" style="width: 50%;margin-left: 0">
+          <div class="row align-items-center">
+            <div class="col-2" style="padding: 0;">
+              <el-button type="primary" plain style="padding: 0.5vh;border: none; margin-left: 1vh">说明：</el-button>
+            </div>
+            <div class="col-10">
+              <b-card-text class="text-left" style="color:#F56C6C">{{dataProcessNote}}</b-card-text>
+            </div>
+          </div>
+          <div class="row align-items-center" style="margin-top: 1vh;margin-bottom: 1vh">
+            <div class="col-2 " style="padding: 0;">
+              <el-button type="primary" plain style="padding: 0.5vh;border: none; margin-left: 1vh">进度：</el-button>
+            </div>
+            <div class="col-10">
+              <el-progress :text-inside="true" :stroke-width="26" :percentage="100"></el-progress>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div v-if="doingInfo">
+        <div class="container" style="width: 50%;margin-left: 0">
+          <div class="row align-items-center">
+            <div class="col-2" style="padding: 0;">
+              <el-button type="primary" plain style="padding: 0.5vh;border: none; margin-left: 1vh">说明：</el-button>
+            </div>
+            <div class="col-10">
+              <b-card-text class="text-left" style="color:#F56C6C">对图像进行矫正和融合</b-card-text>
+            </div>
+          </div>
+          <div class="row align-items-center" style="margin-top: 1vh;margin-bottom: 1vh">
+            <div class="col-2 " style="padding: 0;">
+              <el-button type="primary" plain style="padding: 0.5vh;border: none; margin-left: 1vh">进度：</el-button>
+            </div>
+            <div class="col-10">
+              <el-progress :text-inside="true" :stroke-width="26" :percentage="25"></el-progress>
+            </div>
+          </div>
+        </div>
+      </div>
+      <el-divider></el-divider>
+      <div v-show="overInfo">
+        <!--显示图片 -->
+        <div class="showImage">
+  <!--        可以找到图片地址，但是显示不出来，因为太大？？？-->
+  <!--        <img src="http://localhost:8000/GFData/srcData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806-MSS2-0.tiff" style="width: 250px; height: 250px">-->
+          <img src="../assets/GF1_preProcess.png" style="width: 25vw; height: 25vw">
+          <img src="../assets/jiantou.png" style="width: 5vw; height: 5vw">
+          <img src="../assets/GF1_result.png" style="width: 25vw; height: 25vw">
+        </div>
+      </div>
+      <div v-show="doingInfo">
+        <div class="showImage">
+          <!--        可以找到图片地址，但是显示不出来，因为太大？？？-->
+          <!--        <img src="http://localhost:8000/GFData/srcData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806-MSS2-0.tiff" style="width: 250px; height: 250px">-->
+          <img src="../assets/GF1_preProcess.png" style="width: 25vw; height: 25vw">
+          <img src="../assets/jiantou.png" style="width: 5vw; height: 5vw">
+          <el-progress type="circle" :percentage="25"></el-progress>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import top from './top.vue'
 import left from './left.vue'
 import myStropheConn from '../api/Connection'
 import Strophe from 'strophe.js'
 export default {
   name: 'TaskDetail',
-  components: {top, left},
+  components: {left},
   data () {
     return {
       dataName: '高分1号',
       dataProcessNote: '对原始图像进行预处理等',
       // dataProcessNote: "正在进行几何矫正，请稍后。。。",
-      information: false,
+      overInfo: false,
+      doingInfo: false,
       taskSteps: 0,
-      showTaskDetail: [true, false, false, false, false],
+      showTaskDetail: [true, true, false, false, false],
+      processStatus: ['处理完', '正在处理', '未处理', '未处理', '未处理'],
       resultUrlList: []
     }
   },
@@ -138,7 +167,7 @@ export default {
         let msgContent = Strophe.Strophe.getText(elems[0])
         msgContent = msgContent.replace(/&apos;/g, '"')
         msgContent = msgContent.replace(/&quot;/g, '"')
-        if (this.isJsonStr(msgContent)) {
+        if (myStropheConn.myStropheConn.isJsonStr(msgContent)) {
           let replyJson = JSON.parse(msgContent)
           console.log(replyJson)
           switch (replyJson['type']) {
@@ -158,41 +187,50 @@ export default {
       }
     },
     showInformation: function () {
-      if (this.information) {
-        this.information = false
-      } else {
-        this.information = true
-      }
+      this.overInfo = !this.overInfo
     },
-    isJsonStr (str) {
-      try {
-        if (typeof JSON.parse(str) === 'object') {
-          return true
-        }
-      } catch (e) {
-        console.log(e)
-      }
-      return false
+    showDoingInfomation: function () {
+      this.doingInfo = !this.doingInfo
     }
   }
 }
 </script>
 
 <style scoped>
-  .main{
-    width: 80vw;
-    height: 88vh;
-    margin-left: 15%;
-    margin-top: 1vh;
+  .Tbody{
+    margin-left: 10vw;
+    width: 90vw;
+  }
+  .TaskWindow{
+    width: 85vw;
+    height: 92vh;
     border: solid;
-    border-radius: 10px;
+    border-radius: 1vw;
+    margin: 4vh auto;
   }
   .return{
-    margin-left: -65%;
+    /*margin-left: 10vw;*/
   }
 
-  #header{
-    height: 2vh;
+  .head{
+    margin-top: 1vh;
+    height: 4vh;
+  }
+  .head-image{
+    margin-left: 1vw;
+    float: left;
+    width: 4vh;
+    height: 4vh;
+  }
+  .head-tag{
+    width: 10vw;
+    text-align: center;
+    font-size:1.5vw;
+    color: #2f2f2f;
+    background-color: dodgerblue;
+    /*color: aliceblue;*/
+    font-family: 华光黑体_CNKI;
+    border-radius: 20px
   }
 
   .process-group{
@@ -202,18 +240,48 @@ export default {
     display: flex;
     justify-content: space-around;
   }
-  .step1{
+  .step{
     height: 10vh;
-    width: 150px;
+    width: 12vw;
     border-radius: 5px;
     border: solid;
     box-shadow: 8px 8px 5px #888888;
     display: inline-block;
   }
+  .step-doing
+  {
+    height: 10vh;
+    width: 12vw;
+    border-radius: 5px;
+    border: red solid;
+    box-shadow: 8px 8px 5px #888888;
+    display: inline-block;
+  }
+  .processIcon{
+    width: 4vw;
+    height: 4vw;
+    display: block;
+    float: left;
+    padding: 0.4vw
+  }
   .pre-process{
+    /*margin-top: -50px;*/
+    margin-top: 2vh;
+    margin-left: 3vw;
+    display: block;
     color: crimson;
   }
   .after-process{
+    text-align: center;
+    margin-top: 2vh;
+    margin-left: 3vw;
+    display: block;
     color: cornflowerblue;
+  }
+  .tag-link{
+    /*margin-left: 1vw;*/
+    /*font-size: small*/
+    font-size: 1.3vw;
+    font-family: 华光隶书_CNKI;
   }
 </style>

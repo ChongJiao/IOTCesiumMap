@@ -42,13 +42,12 @@
       </div>
         <el-button id="draw" icon="el-icon-thumb" v-on:click="toggle('handlerPolygon')" style="margin-top: 2%; margin-left:0.2vw">绘制</el-button>
         <el-button type="primary" icon="el-icon-delete" v-on:click="clear">清除</el-button>
-        <el-button type="danger" icon="el-icon-search" v-on:click="regionSearch">搜索</el-button>
+        <el-button type="danger" icon="el-icon-search" v-on:click="regionSearch" style="margin-right: 0.5vw">搜索</el-button>
     </div>
     <div class="rightList">
-<!--      <RightItem image-url="test.png" name="高分一号" position="位置在武汉汉阳地区">-->
-<!--      </RightItem>-->
-<!--      <RightItem image-url="test.png" name="高分二号" position="武汉">-->
-<!--      </RightItem>-->
+      <el-tag class="head-tag">
+        查询列表
+      </el-tag>
       <div v-for="(data, index) in dataSource" :key="index">
         <RightItem :image-url="data.url" :name="data.name" :position="data.pos">
         </RightItem>
@@ -136,7 +135,12 @@ export default {
       this.viewer = viewer
 
       let replyData = '{\n' +
-        '    "data":"[{\\"pos\\":\\"[30.6552,113.672,30.5877,114.045,30.2668,113.966,30.3343,113.594]\\",\\"id\\":1,\\"satellite\\":\\"GF1\\",\\"position\\":\\"武汉\\",\\"url\\":\\"http://localhost:8000/GFData/srcData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806\\"},{\\"pos\\":\\"[31.0873,114.363,31.0424,114.599,30.8455,114.548,30.8903,114.313]\\",\\"id\\":2,\\"satellite\\":\\"GF2\\",\\"position\\":\\"武汉\\",\\"url\\":\\"http://localhost:8000/GFData/srcData/GF2_PMS2_E114.5_N31.0_20190331_L1A0003916014\\"}]",\n' +
+        '    "data":"[' +
+        '{\\"pos\\":\\"[30.6552,113.672,30.5877,114.045,30.2668,113.966,30.3343,113.594]\\",\\"id\\":1,\\"satellite\\":\\"GF1\\",\\"position\\":\\"武汉\\",\\"url\\":\\"http://localhost:8000/GFData/srcData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806\\"},' +
+        '{\\"pos\\":\\"[31.0873,114.363,31.0424,114.599,30.8455,114.548,30.8903,114.313]\\",\\"id\\":2,\\"satellite\\":\\"GF2\\",\\"position\\":\\"武汉\\",\\"url\\":\\"http://localhost:8000/GFData/srcData/GF2_PMS2_E114.5_N31.0_20190331_L1A0003916014\\"},' +
+        '{\\"pos\\":\\"[30.5655,112.5932,30.6110,117.9872,25.1890,117.2408,25.1615,112.1658]\\",\\"id\\":3,\\"satellite\\":\\"GF4\\",\\"position\\":\\"南昌、长沙\\",\\"url\\":\\"http://localhost:8000/GFData/srcData/GF4_PMS_E114.8_N27.0_20200427_L1A0000296438\\"},' +
+        '{\\"pos\\":\\"[30.5289,112.5504,30.5817,117.9426,25.1614,117.2021,25.1274,112.1290]\\",\\"id\\":4,\\"satellite\\":\\"GF4\\",\\"position\\":\\"南昌、长沙\\",\\"url\\":\\"http://localhost:8000/GFData/srcData/GF4_PMS_E114.8_N27.0_20200513_L1A0000299090\\"}' +
+        ']",\n' +
         '    "type":"region"\n' +
         '}'
       let replyJson = JSON.parse(replyData)
@@ -274,7 +278,7 @@ export default {
     position: absolute;
     border-radius: 0.5vh;
     top: 1vh;
-    right: 5vw;
+    right: 3vw;
     display: inline-block;
     background-color: #2f2f2f;
     z-index: 15;
@@ -305,5 +309,6 @@ export default {
     z-index: 15;
     background-color: #dfebee;
     display: list-item;
+    list-style: none;
   }
 </style>

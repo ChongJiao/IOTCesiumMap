@@ -1,8 +1,11 @@
 <template>
     <div class="body">
-      <left></left>
-      <router-view></router-view>
-
+      <div>
+        <left></left>
+      </div>
+      <div>
+        <router-view></router-view>
+      </div>
 <!--      <div class="login" v-show="!connectFlag">-->
 <!--        <div class = "login-body">-->
 <!--          <el-form size="small" ref="userValidateForm">-->
@@ -267,6 +270,7 @@ export default {
 
 <style scoped>
   .body{
+    position: absolute;
     width: 100%;
   }
   .login{

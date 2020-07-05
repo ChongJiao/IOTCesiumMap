@@ -1,8 +1,8 @@
 <template>
-  <div id="left">
-<!--    <div class="title">-->
-<!--      <img src="../assets/title.png" style="width: 8vw">-->
-<!--    </div>-->
+  <div class="left">
+    <div class="title">
+      <img src="../assets/title.png" style="width: 8vw">
+    </div>
     <div class="center">
       <div id="earth"  class="iconsSelect" v-on:click="jumpToMap">
         <img src="../assets/earth_white.png" class="menu">
@@ -42,7 +42,7 @@ export default {
       }
     },
     jumpToUser () {
-      this.setMenuClass('user', 'task', 'earth')
+      this.setMenuClass('user', 'task', 'earth', 'node')
       if (this.$route.path !== '/UserCenter') {
         this.$router.push({path: '/UserCenter'})
       }
@@ -55,8 +55,8 @@ export default {
     },
     jumpToTask () {
       this.setMenuClass('task', 'user', 'earth', 'node')
-      if (this.$route.path !== '/TaskDetail') {
-        this.$router.push({path: '/TaskDetail'})
+      if (this.$route.path !== '/ProcessShow') {
+        this.$router.push({path: '/ProcessShow'})
       }
     },
     setMenuClass (name1, name2, name3, name4) {
@@ -77,7 +77,7 @@ export default {
 </script>
 
 <style scoped>
-  #left{
+  .left{
     position: absolute;
     background: #2f2f2f;
     width: 10vw;
