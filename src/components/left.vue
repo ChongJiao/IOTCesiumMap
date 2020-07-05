@@ -1,8 +1,8 @@
 <template>
   <div id="left">
-    <div class="title">
-      <img src="../assets/title.png" style="width: 8vw">
-    </div>
+<!--    <div class="title">-->
+<!--      <img src="../assets/title.png" style="width: 8vw">-->
+<!--    </div>-->
     <div class="center">
       <div id="earth"  class="iconsSelect" v-on:click="jumpToMap">
         <img src="../assets/earth_white.png" class="menu">

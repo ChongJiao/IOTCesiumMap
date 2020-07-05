@@ -2,8 +2,8 @@ import Strophe from 'strophe.js'
 class StropheConn {
   connFlag = false
   conn = null
-  userJID = 'jc@desktop-98tu7o0'
-  userPassword = 'jiaochong123'
+  userJID = 'wz@127.0.0.1'
+  userPassword = '123456'
   BOSH_SERVER = 'http://127.0.0.1:7070/http-bind/'
   controlJID = 'admin@desktop-98tu7o0'
   setUserJid (user) {
