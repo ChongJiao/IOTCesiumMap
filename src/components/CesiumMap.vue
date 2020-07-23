@@ -200,6 +200,7 @@ export default {
         msgContent = msgContent.replace(/&quot;/g, '"')
         if (myStropheConn.myStropheConn.isJsonStr(msgContent)) {
           let replyJson = JSON.parse(msgContent)
+          console.log(replyJson)
           switch (replyJson['type']) {
             case 'region':
               // TODO show region

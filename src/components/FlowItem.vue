@@ -5,7 +5,9 @@
           <div class="head-tag">
             {{dataName}}
           </div>
-          <el-link type="primary" class="tag-link">正在处理,点击查看详情</el-link>
+<!--          <el-link type="primary" class="tag-link">正在处理,点击查看详情</el-link>-->
+<!--        从总列表跳转到详细界面，测试以下-->
+        <el-link type="primary" class="tag-link" v-on:click="jumpToDetail()">正在处理,点击查看详情</el-link>
       </div>
       <div class="process-group">
         <div class="step-down">
@@ -43,6 +45,11 @@ export default {
   data () {
     return {
       dataName: '高分一号'
+    }
+  },
+  methods: {
+    jumpToDetail () {
+      this.$router.push({path: '/TaskDetail', query: {id: 1}})
     }
   }
 }

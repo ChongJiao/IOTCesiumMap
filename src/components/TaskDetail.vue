@@ -4,7 +4,7 @@
       <!-- 数据的名称-->
 <!--      <div class="return">-->
       <div class="head">
-        <img src="../assets/return2.png" class="head-image">
+        <img src="../assets/return2.png" class="head-image" v-on:click="jumpToAllData()">
         <!--      </div>-->
         <el-tag class="head-tag">
             {{dataName}}
@@ -12,119 +12,71 @@
       </div>
       <!-- 处理流程-->
       <div class="process-group">
-        <div class="step" id="step1">
+        <div :class="processStatus[0] === '正在处理' ? 'step-doing' : 'step'" id="step1">
           <img src="../assets/preProcess.png" class="processIcon">
           <span :class="showTaskDetail[0] ? 'after-process': 'pre-process'">数据预处理</span>
-          <el-link type="primary" class="tag-link" v-on:click="showInformation" v-show="showTaskDetail[0]">{{processStatus[0]}}</el-link>
+          <el-link type="primary" class="tag-link" v-on:click="showInformation(0)" v-show="showTaskDetail[0]">{{processStatus[0]}}</el-link>
         </div>
         <img src="../assets/xiaojiantou.png" style="width: 3vw;">
-        <div class="step-doing" id="step2">
+        <div :class="processStatus[1] === '正在处理' ? 'step-doing' : 'step'" id="step2">
           <img src="../assets/sharpening.png" class="processIcon">
           <span :class="showTaskDetail[1] ? 'after-process': 'pre-process'">图像融合</span>
-          <el-link type="primary" class="tag-link" v-on:click="showDoingInfomation"  v-show="showTaskDetail[1]">{{processStatus[1]}}</el-link>
+          <el-link type="primary" class="tag-link" v-on:click="showInformation(1)"  v-show="showTaskDetail[1]">{{processStatus[1]}}</el-link>
         </div>
         <img src="../assets/xiaojiantou.png" style="width: 3vw;">
-        <div class="step" id="step3">
+        <div :class="processStatus[2] === '正在处理' ? 'step-doing' : 'step'" id="step3">
           <img src="../assets/imgProcess.png" class="processIcon">
           <span :class="showTaskDetail[2] ? 'after-process': 'pre-process'">图像处理</span>
-          <el-link type="primary" class="tag-link" v-show="showTaskDetail[2]">{{processStatus[2]}}</el-link>
+          <el-link type="primary" class="tag-link" v-on:click="showInformation(2)" v-show="showTaskDetail[2]">{{processStatus[2]}}</el-link>
         </div>
         <img src="../assets/xiaojiantou.png" style="width: 3vw;">
-        <div class="step" id="step4">
+        <div :class="processStatus[3] === '正在处理' ? 'step-doing' : 'step'" id="step4">
           <img src="../assets/imgEnhence.png" class="processIcon">
           <span :class="showTaskDetail[3] ? 'after-process': 'pre-process'">图像增强</span>
-          <el-link type="primary" class="tag-link" v-show="showTaskDetail[3]">{{processStatus[3]}}</el-link>
+          <el-link type="primary" class="tag-link" v-on:click="showInformation(3)" v-show="showTaskDetail[3]">{{processStatus[3]}}</el-link>
         </div>
         <img src="../assets/xiaojiantou.png" style="width: 3vw;">
-        <div class="step" id="step5">
+        <div :class="processStatus[4] === '正在处理' ? 'step-doing' : 'step'" id="step5">
           <img src="../assets/object.png" class="processIcon">
           <span :class="showTaskDetail[4] ? 'after-process': 'pre-process'">目标识别</span>
-          <el-link type="primary" class="tag-link" v-show="showTaskDetail[4]">{{processStatus[4]}}</el-link>
+          <el-link type="primary" class="tag-link" v-on:click="showInformation(4)" v-show="showTaskDetail[4]">{{processStatus[4]}}</el-link>
         </div>
       </div>
       <el-divider></el-divider>
-      <div v-show="overInfo">
-        <div class="container" style="width: 50%;margin-left: 0">
-          <div class="row align-items-center">
-            <div class="col-2" style="padding: 0;">
-              <el-button type="primary" plain style="padding: 0.5vh;border: none; margin-left: 1vh">说明：</el-button>
-            </div>
-            <div class="col-10">
-              <b-card-text class="text-left" style="color:#F56C6C">{{dataProcessNote}}</b-card-text>
-            </div>
-          </div>
-          <div class="row align-items-center" style="margin-top: 1vh;margin-bottom: 1vh">
-            <div class="col-2 " style="padding: 0;">
-              <el-button type="primary" plain style="padding: 0.5vh;border: none; margin-left: 1vh">进度：</el-button>
-            </div>
-            <div class="col-10">
-              <el-progress :text-inside="true" :stroke-width="26" :percentage="100"></el-progress>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div v-if="doingInfo">
-        <div class="container" style="width: 50%;margin-left: 0">
-          <div class="row align-items-center">
-            <div class="col-2" style="padding: 0;">
-              <el-button type="primary" plain style="padding: 0.5vh;border: none; margin-left: 1vh">说明：</el-button>
-            </div>
-            <div class="col-10">
-              <b-card-text class="text-left" style="color:#F56C6C">对图像进行矫正和融合</b-card-text>
-            </div>
-          </div>
-          <div class="row align-items-center" style="margin-top: 1vh;margin-bottom: 1vh">
-            <div class="col-2 " style="padding: 0;">
-              <el-button type="primary" plain style="padding: 0.5vh;border: none; margin-left: 1vh">进度：</el-button>
-            </div>
-            <div class="col-10">
-              <el-progress :text-inside="true" :stroke-width="26" :percentage="25"></el-progress>
-            </div>
-          </div>
-        </div>
-      </div>
-      <el-divider></el-divider>
-      <div v-show="overInfo">
-        <!--显示图片 -->
-        <div class="showImage">
-  <!--        可以找到图片地址，但是显示不出来，因为太大？？？-->
-  <!--        <img src="http://localhost:8000/GFData/srcData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806-MSS2-0.tiff" style="width: 250px; height: 250px">-->
-          <img src="../assets/GF1_preProcess.png" style="width: 25vw; height: 25vw">
-          <img src="../assets/jiantou.png" style="width: 5vw; height: 5vw">
-          <img src="../assets/GF1_result.png" style="width: 25vw; height: 25vw">
-        </div>
-      </div>
-      <div v-show="doingInfo">
-        <div class="showImage">
-          <!--        可以找到图片地址，但是显示不出来，因为太大？？？-->
-          <!--        <img src="http://localhost:8000/GFData/srcData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806-MSS2-0.tiff" style="width: 250px; height: 250px">-->
-          <img src="../assets/GF1_preProcess.png" style="width: 25vw; height: 25vw">
-          <img src="../assets/jiantou.png" style="width: 5vw; height: 5vw">
-          <el-progress type="circle" :percentage="25"></el-progress>
-        </div>
-      </div>
+      <Stage1 :stageShowOne="stageOne" :allData="allInitData"></Stage1>
+      <Stage2 :stageShowTwo="stageTwo" :allData="allInitData"></Stage2>
+      <Stage3 :stageShowThree="stageThree" :allData="allInitData"></Stage3>
+      <Stage4 :stageShowFour="stageFour" :allData="allInitData"></Stage4>
+      <Stage5 :stageShowFive="stageFive" :allData="allInitData"></Stage5>
     </div>
   </div>
 </template>
 
 <script>
 import left from './left.vue'
+import Stage1 from './Stage1'
+import Stage2 from './Stage2'
+import Stage3 from './Stage3'
+import Stage4 from './Stage4'
+import Stage5 from './Stage5'
 import myStropheConn from '../api/Connection'
 import Strophe from 'strophe.js'
 export default {
   name: 'TaskDetail',
-  components: {left},
+  components: {left, Stage1, Stage2, Stage3, Stage4, Stage5},
   data () {
     return {
-      dataName: '高分1号',
-      dataProcessNote: '对原始图像进行预处理等',
-      // dataProcessNote: "正在进行几何矫正，请稍后。。。",
-      overInfo: false,
-      doingInfo: false,
-      taskSteps: 0,
-      showTaskDetail: [true, true, false, false, false],
-      processStatus: ['处理完', '正在处理', '未处理', '未处理', '未处理'],
-      resultUrlList: []
+      dataName: '',
+      showTaskDetail: [false, false, false, false, false],
+      processStatus: ['未处理', '未处理', '未处理', '未处理', '未处理'],
+      taskId: 0,
+      stageOne: false,
+      stageTwo: false,
+      stageThree: false,
+      stageFour: false,
+      stageFive: false,
+      // 存放初始的所有阶段信息
+      allInitData: []
     }
   },
   mounted () {
@@ -135,6 +87,12 @@ export default {
       }
     }, 2000)
     console.log('task mounted')
+    // 想从上一个界面获取任务id,可以通过路由的形式获取
+    this.taskId = this.$route.query.id
+    console.log(this.taskId)
+    // 初始化，发送请求
+    this.initTask()
+    // 接收消息
     this.messageHandler = myStropheConn.myStropheConn.conn.addHandler(this.onMessage, null, 'message', null, null, null)
   },
   destroyed () {
@@ -156,10 +114,15 @@ export default {
       }
       return true
     },
+    initTask () {
+      let msgContent = '{\'type\': \'singleQueryTask\', \'taskId\': {0}, \'userJID\': \'{1}\'}'
+      msgContent = String.format(msgContent, this.taskId, myStropheConn.myStropheConn.userJID)
+      myStropheConn.myStropheConn.SendMessage(msgContent)
+    },
     onMessage (msg) {
       // 解析出<message>的from、type属性，以及body子元素
-      let fromJid = msg.getAttribute('from')
-      let toJid = msg.getAttribute('to')
+      // let fromJid = msg.getAttribute('from')
+      // let toJid = msg.getAttribute('to')
       let type = msg.getAttribute('type')
       let elems = msg.getElementsByTagName('body')
 
@@ -171,26 +134,92 @@ export default {
           let replyJson = JSON.parse(msgContent)
           console.log(replyJson)
           switch (replyJson['type']) {
-            case 'status':
-              // 可以查询到当前数据已经处理到第几步（0为预处理，1为融合等）了,上面界面进行相应处理
-              let taskSteps = replyJson['status']
-              console.log(taskSteps)
-              for (let key in taskSteps) {
-                // 已处理完以及正在处理的可以展示出详情链接
-                this.showTaskDetail[taskSteps[key]] = true
+            case 'singleTaskList':
+              this.dataName = replyJson['name']
+              let data = replyJson['data']
+              let len = data.length
+              console.log(len)
+              if (len < 1) {
+                return false
+              }
+              for (let i = 0; i < len; i++) {
+                this.allInitData.push(data[i])
+                if (data[i]['progress'] === 100) {
+                  this.showTaskDetail[i] = true
+                  this.processStatus[i] = '处理完'
+                } else {
+                  this.showTaskDetail[i] = true
+                  this.processStatus[i] = '正在处理'
+                }
               }
               break
+            // 阶段过程接收
+            case 'statusProcess':
+              if (this.taskId === replyJson['taskId']) {
+                let stageId = replyJson['stageId']
+                // 如果是该阶段刚开始，初始时没有
+                if (stageId > this.allInitData.length) {
+                  let temp = {}
+                  temp['stageId'] = replyJson['stageId'] - 1
+                  temp['progress'] = replyJson['progress']
+                  temp['url'] = replyJson['url']
+                  this.allInitData.push(temp)
+                } else {
+                  let progress = replyJson['progress']
+                  // 文档中阶段从1开始，而页面中为了方便从阶段编号从0开始
+                  if (stageId - 1 >= 0) {
+                    this.allInitData[stageId - 1]['progress'] = progress
+                  }
+                }
+              }
+              break
+            // 阶段结束接收
+            case 'statusFinished':
+              if (this.taskId === replyJson['taskId']) {
+                let stageId = replyJson['stageId']
+                this.processStatus[stageId - 1] = '处理完'
+                // 该阶段处理完，默认处理下一个阶段
+                if (stageId <= 4) {
+                  this.showTaskDetail[stageId] = true
+                  this.processStatus[stageId] = '正在处理'
+                }
+                this.$forceUpdate()
+                if (stageId - 1 >= 0) {
+                  this.allInitData[stageId - 1]['progress'] = 100
+                }
+                this.allInitData[stageId - 1]['url'] = replyJson['url']
+              }
+              break
+            default:
+              break
           }
-        } else {
-          console.log(fromJid + ' send message to ' + toJid + ' and the message content is ' + msgContent)
         }
       }
+      return true
     },
-    showInformation: function () {
-      this.overInfo = !this.overInfo
+    showInformation (index) {
+      switch (index) {
+        case 0:
+          this.stageOne = !this.stageOne
+          break
+        case 1:
+          this.stageTwo = !this.stageTwo
+          break
+        case 2:
+          this.stageThree = !this.stageThree
+          break
+        case 3:
+          this.stageFour = !this.stageFour
+          break
+        case 4:
+          this.stageFive = !this.stageFive
+          break
+        default:
+          break
+      }
     },
-    showDoingInfomation: function () {
-      this.doingInfo = !this.doingInfo
+    jumpToAllData () {
+      this.$router.push({path: '/ProcessShow'})
     }
   }
 }
@@ -223,9 +252,9 @@ export default {
     height: 4vh;
   }
   .head-tag{
-    width: 10vw;
+    width: 15vw;
     text-align: center;
-    font-size:1.5vw;
+    font-size:2.5vw;
     color: #2f2f2f;
     background-color: dodgerblue;
     /*color: aliceblue;*/
