@@ -4,37 +4,37 @@
     <vc-viewer ref="viewer" @ready="ready">
       <vc-layer-imagery :alpha="alpha" :imageryProvider="imageryProvider" :brightness="brightness" :contrast="contrast">
       </vc-layer-imagery>
-<!--      <vc-layer-imagery :alpha="alpha" :brightness="brightness" :contrast="contrast" v-if="showTileMap">-->
-<!--        <vc-provider-imagery-tile-mapservice-->
-<!--          :url="tileUrl1"-->
-<!--          @readyPromise="imageryReady"-->
-<!--        ></vc-provider-imagery-tile-mapservice>-->
-<!--      </vc-layer-imagery>-->
-<!--      <vc-layer-imagery :alpha="alpha" :brightness="brightness" :contrast="contrast" v-if="showTileMap">-->
-<!--        <vc-provider-imagery-tile-mapservice-->
-<!--          :url="tileUrl2"-->
-<!--          @readyPromise="imageryReady"-->
-<!--        ></vc-provider-imagery-tile-mapservice>-->
-<!--      </vc-layer-imagery>-->
-<!--      <vc-layer-imagery :alpha="alpha" :brightness="brightness" :contrast="contrast" v-if="showTileMap">-->
-<!--        <vc-provider-imagery-tile-mapservice-->
-<!--          :url="tileUrl3"-->
-<!--          @readyPromise="imageryReady"-->
-<!--        ></vc-provider-imagery-tile-mapservice>-->
-<!--      </vc-layer-imagery>-->
-<!--      <vc-layer-imagery :alpha="alpha" :brightness="brightness" :contrast="contrast" v-if="showTileMap">-->
-<!--        <vc-provider-imagery-tile-mapservice-->
-<!--          :url="tileUrl4"-->
-<!--          @readyPromise="imageryReady"-->
-<!--        ></vc-provider-imagery-tile-mapservice>-->
-<!--      </vc-layer-imagery>-->
-      <vc-handler-draw-polygon
-        :clampToGround="true"
-        ref="handlerPolygon"
-        @activeEvt="activeEvt"
-        @movingEvt="movingEvt"
-        @drawEvt="drawEvt"
-      ></vc-handler-draw-polygon>
+      <vc-layer-imagery :alpha="alpha" :brightness="brightness" :contrast="contrast" v-if="showTileMap">
+        <vc-provider-imagery-tile-mapservice
+          :url="tileUrl1"
+          @readyPromise="imageryReady"
+        ></vc-provider-imagery-tile-mapservice>
+      </vc-layer-imagery>
+      <vc-layer-imagery :alpha="alpha" :brightness="brightness" :contrast="contrast" v-if="showTileMap">
+        <vc-provider-imagery-tile-mapservice
+          :url="tileUrl2"
+          @readyPromise="imageryReady"
+        ></vc-provider-imagery-tile-mapservice>
+      </vc-layer-imagery>
+      <vc-layer-imagery :alpha="alpha" :brightness="brightness" :contrast="contrast" v-if="showTileMap">
+        <vc-provider-imagery-tile-mapservice
+          :url="tileUrl3"
+          @readyPromise="imageryReady"
+        ></vc-provider-imagery-tile-mapservice>
+      </vc-layer-imagery>
+      <vc-layer-imagery :alpha="alpha" :brightness="brightness" :contrast="contrast" v-if="showTileMap">
+        <vc-provider-imagery-tile-mapservice
+          :url="tileUrl4"
+          @readyPromise="imageryReady"
+        ></vc-provider-imagery-tile-mapservice>
+      </vc-layer-imagery>
+<!--      <vc-handler-draw-polygon-->
+<!--        :clampToGround="true"-->
+<!--        ref="handlerPolygon"-->
+<!--        @activeEvt="activeEvt"-->
+<!--        @movingEvt="movingEvt"-->
+<!--        @drawEvt="drawEvt"-->
+<!--      ></vc-handler-draw-polygon>-->
     </vc-viewer>
     <div class="toolBox" >
       <div id = "polygon" class= "toolDeSelect">
@@ -90,7 +90,7 @@ export default {
     },
     showTileMap: {
       type: Boolean,
-      default: false
+      default: true
     }
   },
   mounted () {
@@ -124,7 +124,7 @@ export default {
       const { Cesium, viewer } = cesiumInstance
 
       viewer.scene.requestRenderMode = true
-      viewer.scene.maximumRenderTimeChange = Infinity
+      // viewer.scene.maximumRenderTimeChange = Infinity
       viewer.cesiumWidget.creditContainer.style.display = 'none'
       viewer.scene.globe.depthTestAgainstTerrain = true
       this.imageryProvider = new Cesium.MapboxImageryProvider({
@@ -134,18 +134,18 @@ export default {
       // this.tooltip = new Cesium.createTooltip(viewer.cesiumWidget.container)
       this.viewer = viewer
 
-      let replyData = '{\n' +
-        '    "data":"[' +
-        '{\\"pos\\":\\"[30.6552,113.672,30.5877,114.045,30.2668,113.966,30.3343,113.594]\\",\\"id\\":1,\\"satellite\\":\\"GF1\\",\\"position\\":\\"武汉\\",\\"url\\":\\"http://localhost:8000/GFData/srcData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806\\"},' +
-        '{\\"pos\\":\\"[31.0873,114.363,31.0424,114.599,30.8455,114.548,30.8903,114.313]\\",\\"id\\":2,\\"satellite\\":\\"GF2\\",\\"position\\":\\"武汉\\",\\"url\\":\\"http://localhost:8000/GFData/srcData/GF2_PMS2_E114.5_N31.0_20190331_L1A0003916014\\"},' +
-        '{\\"pos\\":\\"[30.5655,112.5932,30.6110,117.9872,25.1890,117.2408,25.1615,112.1658]\\",\\"id\\":3,\\"satellite\\":\\"GF4\\",\\"position\\":\\"南昌、长沙\\",\\"url\\":\\"http://localhost:8000/GFData/srcData/GF4_PMS_E114.8_N27.0_20200427_L1A0000296438\\"},' +
-        '{\\"pos\\":\\"[30.5289,112.5504,30.5817,117.9426,25.1614,117.2021,25.1274,112.1290]\\",\\"id\\":4,\\"satellite\\":\\"GF4\\",\\"position\\":\\"南昌、长沙\\",\\"url\\":\\"http://localhost:8000/GFData/srcData/GF4_PMS_E114.8_N27.0_20200513_L1A0000299090\\"}' +
-        ']",\n' +
-        '    "type":"region"\n' +
-        '}'
-      let replyJson = JSON.parse(replyData)
-      let data = JSON.parse(replyJson['data'])
-      this.addRegionResults(data)
+      // let replyData = '{\n' +
+      //   '    "data":"[' +
+      //   '{\\"pos\\":\\"[30.6552,113.672,30.5877,114.045,30.2668,113.966,30.3343,113.594]\\",\\"id\\":1,\\"satellite\\":\\"GF1\\",\\"position\\":\\"武汉\\",\\"url\\":\\"http://localhost:8000/GFData/srcData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806\\"},' +
+      //   '{\\"pos\\":\\"[31.0873,114.363,31.0424,114.599,30.8455,114.548,30.8903,114.313]\\",\\"id\\":2,\\"satellite\\":\\"GF2\\",\\"position\\":\\"武汉\\",\\"url\\":\\"http://localhost:8000/GFData/srcData/GF2_PMS2_E114.5_N31.0_20190331_L1A0003916014\\"},' +
+      //   '{\\"pos\\":\\"[30.5655,112.5932,30.6110,117.9872,25.1890,117.2408,25.1615,112.1658]\\",\\"id\\":3,\\"satellite\\":\\"GF4\\",\\"position\\":\\"南昌、长沙\\",\\"url\\":\\"http://localhost:8000/GFData/srcData/GF4_PMS_E114.8_N27.0_20200427_L1A0000296438\\"},' +
+      //   '{\\"pos\\":\\"[30.5289,112.5504,30.5817,117.9426,25.1614,117.2021,25.1274,112.1290]\\",\\"id\\":4,\\"satellite\\":\\"GF4\\",\\"position\\":\\"南昌、长沙\\",\\"url\\":\\"http://localhost:8000/GFData/srcData/GF4_PMS_E114.8_N27.0_20200513_L1A0000299090\\"}' +
+      //   ']",\n' +
+      //   '    "type":"region"\n' +
+      //   '}'
+      // let replyJson = JSON.parse(replyData)
+      // let data = JSON.parse(replyJson['data'])
+      // this.addRegionResults(data)
     },
     toggle (type) {
       this.$refs[type].drawing = !this.$refs[type].drawing
@@ -185,9 +185,9 @@ export default {
       // result.finished && this.tooltip.setVisible(false)
       // console.log(result)
     },
-    // imageryReady (imageryProvider) {
-    //   this.viewer.camera.flyTo({ destination: imageryProvider.rectangle })
-    // },
+    imageryReady (imageryProvider) {
+      this.viewer.camera.flyTo({ destination: imageryProvider.rectangle })
+    },
     onMessage (msg) {
       console.log('Cesium Message')
       // let fromJid = msg.getAttribute('from')
@@ -200,6 +200,7 @@ export default {
         msgContent = msgContent.replace(/&quot;/g, '"')
         if (myStropheConn.myStropheConn.isJsonStr(msgContent)) {
           let replyJson = JSON.parse(msgContent)
+          console.log(replyJson)
           switch (replyJson['type']) {
             case 'region':
               // TODO show region
