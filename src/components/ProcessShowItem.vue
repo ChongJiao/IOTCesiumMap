@@ -6,16 +6,19 @@
 <!--      <img v-bind src="../assets/return2.png" style="width: 30px; height: 30px;">-->
 <!--    </div>-->
     <div class="main">
-      <div class="gaofenDiv">{{task_id}}</div>
+      <div class="gaofenDiv">{{progressShowItem.name}}</div>
+      <div class="col-10">
+            <el-progress:text-inside="true":stroke-width="26" :percentage="this.progress"></el-progress>
+       </div>
       <div class="outerDiv">
         <div class="div1">
-          <div class="imgDiv"><img :src="url0" class="imgStyle"></div>
+          <div class="imgDiv"><img :src="progressShowItem.tasksStatus[0].url" class="imgStyle"></div>
           <span class="nameSpan">数据预处理</span>
         </div>
         <img src="../assets/fengefu.png" style="width: 10px;">
         <div class="div1">
           <div class="imgDiv">
-            <div style="transform:rotate(30deg)"><img :src="url1" class="imgStyle">
+            <div style="transform:rotate(30deg)"><img :src="progressShowItem.tasksStatus[1].url" class="imgStyle">
             </div>
           </div>
           <span class="nameSpan" >几何矫正与融合</span>
@@ -23,13 +26,13 @@
         <img src="../assets/fengefu.png" style="width: 10px;">
         <div class="div1">
           <div class="imgDiv">
-            <div style="transform:rotate(30deg)"><img :src="url2" class="imgStyle"></div></div>
+            <div style="transform:rotate(30deg)"><img :src="progressShowItem.tasksStatus[2].url" class="imgStyle"></div></div>
           <span class="nameSpan">图像增强去云去雾</span>
         </div>
         <img src="../assets/fengefu.png" style="width: 10px;">
         <div class="div1">
           <div class="imgDiv">
-            <div style="transform:rotate(30deg)"><img :src="url3" class="imgStyle"></div></div>
+            <div style="transform:rotate(30deg)"><img :src="progressShowItem.tasksStatus[3].url" class="imgStyle"></div></div>
           <span class="nameSpan">图像目标识别</span>
         </div>
         <div style="width: 15%">
@@ -45,8 +48,9 @@
 //import left from './left.vue'
 export default {
   name: 'ProcessShowItem',
-  props:{
-    task_id:{
+  props:
+    [progressShowItem],
+    /*task_id:{
       type:String,
       default:''
     },
@@ -65,15 +69,36 @@ export default {
     url3:{
       type:String,
       default:''
-    }
-  },
-  mounted()
+    },
+    processProgress0:
+    {
+    type:String,
+      default:''
+    },
+    processProgress1:
+    {
+    type:String,
+      default:''
+    },
+    processProgress2:
+    {
+    type:String,
+      default:''
+    },
+    processProgress3:
+    {
+    type:String,
+      default:''
+    }*/
+  mounted ()
   {
-    console.log(this.url0)
+    let len=progressShowItem.tasksStatus.length
+    this.progress=progressShowItem.taskStatus[len-1].processProgress
   },
  // components: {top, left},
   data () {
     return {
+      progress: 0,
       button_finished:require("../assets/yiwancheng.png")
       // dataName: '高分1号',
       // dataProcessNote: '对原始图像进行预处理等',

@@ -2,7 +2,9 @@
   <div class="Tbody">
   <div class="title">任务列表</div>
   <div v-for="(data, index) in taskSource" :key="index">
-        <ProcessShowItem :task_id="data.task_id" :url0="data.url0" :url1="data.url1":url2="data.url2" :url3="data.url3">
+  <ProcessShowItem :processShowItem="data">
+        //<ProcessShowItem :task_id="data.task_id" :task_name="data.task_name" :processProgress0="data.processProgress0" :processProgress1="data.processProgress1" :
+        //processProgress2="data.processProgress2" :processProgress3="data.processProgress3" :url0="data.url0" :url1="data.url1":url2="data.url2" :url3="data.url3">
         </ProcessShowItem>
      </div>
   <!--  <div class="title">任务列表</div>
@@ -27,6 +29,7 @@ export default {
       }
     }, 2000)
     this.messageHandler = myStropheConn.myStropheConn.conn.addHandler(this.onMessage, null, 'message', null, null, null)
+    this.initQuery()
   },
   destroyed () {
     console.log('Cesium destroyed')
@@ -39,6 +42,12 @@ export default {
     }
   },
   methods: {
+
+   initQuery () {
+      let msgContent='{\'type\':\'queryTask\',\'userJID\':\'{0}\'}'
+      msgContent=String.format(msgContent,myStropheConn.myStropheConn.userJID)
+      myStropheConn.myStropheConn.SendMessage(msgContent)
+    },
    onMessage (msg) {
       console.log('all tasks process got')
       let type=msg.getAttribute('type')
@@ -51,26 +60,81 @@ export default {
         if (myStropheConn.myStropheConn.isJsonStr(msgContent)) {
           let replyJson = JSON.parse(msgContent)
           switch (replyJson['type']) {
-           case 'TaskList':
-              console.log(JSON.parse(replyJson['tasks']))
-              let tasks=JSON.parse(replyJson['tasks'])
+           case 'taskList':
+              console.log(JSON.parse(replyJson['data']))
+              let tasks=JSON.parse(replyJson['data'])
               tasks_len=tasks.length
               for (let index in tasks) {
                   let task_data = tasks[index]
-                  let data=task_data['data']
                   let tmp = {}
                   tmp['id'] = task_data['id']
-                  for (let index_step in data)
+                  tmp['name']=task_data['name']
+                  tmp['position']=task_data['position']
+                  let taskStatus=task_data['taskStatus']
+                  tmp['tasksStatus']=[]
+                  for (let index_step in taskStatus)
                   {
-                     tmp['taskStatus'+index_step]=data[index_step]['taskStatus']
-                     tmp['url'+index_step]=data[index_step]['url']
+                    let singleTaskStatus={}
+
+                    // let processId=taskStatus[index_step]['processId']
+                    // processId-=1
+                     //singleTaskStatus[processId.toString()]=processId.toString()//不同的阶段
+                     singleTaskStatus['processProgress']=taskStatus[index_step]['processProgress']
+                     singleTaskStatus['url']=taskStatus[index_step]['url']
+                     //if(singleTaskStatus['processProgress'+processId.toString()]=="100")
+                    // {
+
+
+                    // }
+                    tmp['tasksStatus'].push(singleTaskStatus)
                   }
 
+                  //tmp['taskStatus']=taskStatus
                   this.taskSource.push(tmp)
               }
+                break
+           case 'stageProcess':
+                let taskId=replyJson['taskId']
+                let stageId=replyJson['stageId']
+                if(stageId>taskSource.length)
+                {
+                    let temp=this.taskSource[taskId-1]['tasksStatus']
+                     singleTaskStatus={}
+                     //singleTaskStatus['processId'+processId.toString()]=processId.toString()//不同的阶段
+                     singleTaskStatus['processProgress']=replyJson['process']
+                     singleTaskStatus['url']=replyJson['url']
+                     temp.push(singleTaskStatus)
+                }
+                else
+                {
+                  taskSource[taskId-1]['tasksStatus'][stageId-1]['processProgress']=replyJson['process']
+                  taskSource[taskId-1]['tasksStatus'][stageId-1]['url']=replyJson['url']
+                }
+                break
+           case 'stageFinished':
+                let taskFinishedId=replyJson['taskId']
+                let stageFinishedId=replyJson['stageId']
+                if(stageId>taskSource.length)
+                {
+                    temp=this.taskSource[taskId-1]['tasksStatus']
+                     singleTaskStatus={}
+                     singleTaskStatus['processProgress']='100'
+                     singleTaskStatus['url']=replyJson['url']
+                     temp.push(singleTaskStatus)
+                      temp.push(singleTaskStatus)
 
-              break
+                }
+                else
+                {
+                 taskSource[taskId-1]['tasksStatus'][stageId-1]['processProgress']=replyJson['100']
+                 taskSource[taskId-1]['tasksStatus'][stageId-1]['url']=replyJson['url']
+
+                }
+                break
+            default:
+                break
           }
+
       }
       }
       return true
