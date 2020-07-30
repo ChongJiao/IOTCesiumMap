@@ -7,7 +7,7 @@
             <el-button type="primary" plain style="padding: 0.5vh;border: none; margin-left: 1vh">说明：</el-button>
           </div>
           <div class="col-10">
-            <b-card-text class="text-left" style="color:#F56C6C">对图像进行进一步的处理</b-card-text>
+            <b-card-text class="text-left" style="color:#F56C6C">对图像进行增强处理</b-card-text>
           </div>
         </div>
         <div class="row align-items-center" style="margin-top: 1vh;margin-bottom: 1vh">

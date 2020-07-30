@@ -53,7 +53,7 @@
 </template>
 
 <script>
-import left from './left.vue'
+import left from './Left.vue'
 import Stage1 from './Stage1'
 import Stage2 from './Stage2'
 import Stage3 from './Stage3'
@@ -80,20 +80,21 @@ export default {
     }
   },
   mounted () {
+    let base = this
     setTimeout(function () {
       if (!myStropheConn.myStropheConn.connFlag) {
         console.log('not login')
         myStropheConn.myStropheConn.connecting()
+        // 初始化，发送请求
+        base.initTask()
+        // 接收消息
+        base.messageHandler = myStropheConn.myStropheConn.conn.addHandler(base.onMessage, null, 'message', null, null, null)
       }
     }, 2000)
-    console.log('task mounted')
+    console.log('taskDetail mounted')
     // 想从上一个界面获取任务id,可以通过路由的形式获取
     this.taskId = this.$route.query.id
     console.log(this.taskId)
-    // 初始化，发送请求
-    this.initTask()
-    // 接收消息
-    this.messageHandler = myStropheConn.myStropheConn.conn.addHandler(this.onMessage, null, 'message', null, null, null)
   },
   destroyed () {
     console.log('Task destroyed')
@@ -154,7 +155,7 @@ export default {
               }
               break
             // 阶段过程接收
-            case 'statusProcess':
+            case 'stageProcess':
               if (this.taskId === replyJson['taskId']) {
                 let stageId = replyJson['stageId']
                 // 如果是该阶段刚开始，初始时没有
@@ -174,7 +175,7 @@ export default {
               }
               break
             // 阶段结束接收
-            case 'statusFinished':
+            case 'stageFinished':
               if (this.taskId === replyJson['taskId']) {
                 let stageId = replyJson['stageId']
                 this.processStatus[stageId - 1] = '处理完'

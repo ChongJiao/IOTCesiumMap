@@ -8,13 +8,13 @@
         <img src="../assets/earth_white.png" class="menu">
         <span class="iconFont">地 图</span>
       </div>
-      <div id="user" class="iconsDeSelect" v-on:click="jumpToUser">
-        <img src="../assets/user_white.png" class="menu">
-        <span class="iconFont">用 户</span>
-      </div>
       <div id="task" class="iconsDeSelect" v-on:click="jumpToTask">
         <img src="../assets/task_white.png" class="menu">
         <span class="iconFont">任务台</span>
+      </div>
+      <div id="data" class="iconsDeSelect" v-on:click="jumpToData">
+        <img src="../assets/dataCenter_white.png" class="menu">
+        <span class="iconFont">数据源</span>
       </div>
       <div id="node" class="iconsDeSelect" v-on:click="jumpToNode">
         <img src="../assets/console_white.png" class="menu">
@@ -30,33 +30,41 @@
 <script>
 export default {
   name: 'left',
+  mounted () {
+    let path = this.$route.path
+    console.log(path)
+    if (path === '/CesiumMap') this.setMenuClass('earth', 'data', 'task', 'node')
+    if (path === '/ProcessShow') this.setMenuClass('task', 'data', 'earth', 'node')
+    if (path === '/DataCenter') this.setMenuClass('data', 'task', 'earth', 'node')
+    if (path === '/Charts') this.setMenuClass('node', 'data', 'earth', 'task')
+  },
   data () {
     return {
     }
   },
   methods: {
     jumpToMap () {
-      this.setMenuClass('earth', 'user', 'task', 'node')
+      this.setMenuClass('earth', 'data', 'task', 'node')
       if (this.$route.path !== '/CesiumMap') {
         this.$router.push({path: '/CesiumMap'})
       }
     },
-    jumpToUser () {
-      this.setMenuClass('user', 'task', 'earth', 'node')
-      if (this.$route.path !== '/UserCenter') {
-        this.$router.push({path: '/UserCenter'})
+    jumpToTask () {
+      this.setMenuClass('task', 'data', 'earth', 'node')
+      if (this.$route.path !== '/ProcessShow') {
+        this.$router.push({path: '/ProcessShow'})
+      }
+    },
+    jumpToData () {
+      this.setMenuClass('data', 'task', 'earth', 'node')
+      if (this.$route.path !== '/DataCenter') {
+        this.$router.push({path: '/DataCenter'})
       }
     },
     jumpToNode () {
-      this.setMenuClass('node', 'user', 'earth', 'task')
+      this.setMenuClass('node', 'data', 'earth', 'task')
       if (this.$route.path !== '/Charts') {
         this.$router.push({path: '/Charts'})
-      }
-    },
-    jumpToTask () {
-      this.setMenuClass('task', 'user', 'earth', 'node')
-      if (this.$route.path !== '/ProcessShow') {
-        this.$router.push({path: '/ProcessShow'})
       }
     },
     setMenuClass (name1, name2, name3, name4) {
