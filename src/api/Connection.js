@@ -15,6 +15,7 @@ class StropheConn {
   tileData = 'tileData'
   tileDeData = 'tileDeData'
   taskFlowList = ['computercenter@desktop-98tu7o0', 'imgenhance@desktop-98tu7o0', 'imgcesium@desktop-98tu7o0', 'imgdetector@desktop-98tu7o0']
+  serverDirPath = ['srcData', 'imgSrcData', 'imgEnData', 'tileData', 'tileDeData']
   taskLength = 0
   setUserJid (user) {
     this.userJID = user

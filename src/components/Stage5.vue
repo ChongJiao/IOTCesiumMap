@@ -1,6 +1,5 @@
 <template>
   <div class="detail">
-    <div v-if="stageShow">
       <div class="container" style="width: 50%;margin-left: 0">
         <div class="row align-items-center">
           <div class="col-2" style="padding: 0;">
@@ -22,30 +21,46 @@
       <el-divider></el-divider>
       <!--显示图片 -->
       <div class="showImage">
-        <img id = "start" :src="this.startCompleteUrl" style="width: 25vw; height: 25vw">
-        <img src="../assets/jiantou.png" style="width: 5vw; height: 5vw">
-        <img v-if="complete" id="end" :src="this.finishedCompleteUrl" style="width: 25vw; height: 25vw">
-        <el-progress v-if="!complete" type="circle" :percentage="this.progress"></el-progress>
+        <div v-if="!complete" >
+          <vue-loading type="spiningDubbles" color="#d9544e" :size="{ width: '20vw', height: '20vw' }">
+          </vue-loading>
+          <p style="font-size: 2vw">目标识别正在进行，请稍后......</p>
+        </div>
+        <div v-if="complete" >
+          <p style="font-size: 1.5vw">已完成识别，请在地图中查看结果</p>
+          <el-button @click="jumpToRes" type="primary">点击查看</el-button>
+        </div>
       </div>
-    </div>
   </div>
 </template>
 
 <script>
+import myStropheConn from '../api/Connection'
+
 export default {
   name: 'Stage5',
-  props: ['allData', 'stageShowFive'],
+  props: ['allData'],
   mounted () {
+    this.baseUrl = myStropheConn.myStropheConn.httpServer + myStropheConn.myStropheConn.serverDirPath[4]
+  },
+  methods: {
+    jumpToRes () {
+      this.$router.push({
+        name: 'CesiumMap',
+        params: {
+          type: 1,
+          url: this.resUrl
+        }
+      })
+    }
   },
   data () {
     return {
       stageShow: this.stageShowFive,
       stageData: this.allData,
       progress: 0,
-      baseUrl: 'http://127.0.0.1:8000/GFData',
-      startCompleteUrl: '',
-      finishedCompleteUrl: '',
-      complete: false
+      resUrl: '',
+      complete: true
     }
   },
   watch: {
@@ -66,8 +81,7 @@ export default {
           this.startCompleteUrl = this.baseUrl + '/' + url + '.png'
           if (this.stageData[4]['progress'] === 100) {
             this.complete = true
-            // 去掉-g，相当于去掉最后两个字符
-            this.finishedCompleteUrl = this.baseUrl + '/' + url.substring(0, url.length - 2) + '.png'
+            this.resUrl = url
           } else {
             this.complete = false
           }

@@ -11,6 +11,7 @@ import BootstrapVue from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 import VueRouter from 'vue-router'
+import VueLoading from 'vue-loading-template'
 Vue.use(VueCesium, {
   // cesiumPath 是指引用的Cesium.js路径，如
   // 项目本地的Cesium Build包，vue项目需要将Cesium Build包放static目录：
@@ -28,6 +29,7 @@ Vue.use(VueCesium, {
 Vue.use(ElementUI)
 Vue.use(BootstrapVue)
 Vue.use(VueRouter)
+Vue.use(VueLoading /** options **/)
 Vue.config.productionTip = false
 
 /* eslint-disable no-new */
