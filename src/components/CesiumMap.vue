@@ -112,7 +112,7 @@ export default {
     }
   },
   methods: {
-    ready (cesiumInstance) {
+    ready (cesiumInstance) {  //Main界面中的四张图片
       const { Cesium, viewer } = cesiumInstance
 
       viewer.scene.requestRenderMode = true
