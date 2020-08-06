@@ -116,7 +116,7 @@ function onConnected (status) {
   }
 }
 console.log('run one')
-myStropheConn.connecting()
+// myStropheConn.connecting()
 
 export default {
   myStropheConn
