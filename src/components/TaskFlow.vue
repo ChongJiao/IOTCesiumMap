@@ -2,7 +2,7 @@
   <div class="Tbody">
   <div class="title">任务列表</div>
   <div v-for="(data, index) in taskSource" :key="index">
-  <ProcessShowItem :processShowItem="data">
+  <ProcessShowItem :processShowItem="data" :task_state="data.tasksStatus">
 
         <!--<ProcessShowItem :task_id="data.task_id" :task_name="data.task_name" :processProgress0="data.processProgress0" :processProgress1="data.processProgress1" :
         //processProgress2="data.processProgress2" :processProgress3="data.processProgress3" :url0="data.url0" :url1="data.url1":url2="data.url2" :url3="data.url3">-->
@@ -41,24 +41,36 @@ export default {
                 {
                   'processId': '2',
                   'processProgress': '100',
-                  'url': '../assets/GF1_preProcess'
+                  'url': 'http://192.168.100.125:8000/GFData/srcData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806.jpg'
                 },
                 {
                   'processId': '3',
                   'processProgress': '100',
-                  'url': '../assets/GF1_preProcess'
+                  'url': 'http://192.168.100.125:8000/GFData/srcData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806.jpg'
                 },
                 {
                   'processId': '4',
                   'processProgress': '100',
-                  'url': '../assets/GF1_preProcess'
+                  'url': 'http://192.168.100.125:8000/GFData/srcData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806.jpg'
                 }
               ]
           }
         ]
     }
+    let replyJsonProcessed = {
+      "type": "stageProcess",
+      "taskId": 1,
+      "stageId": 5,
+      "process": "88"
+    }
+    let replyJsonFinished = {
+      "type": "stageFinished",
+      "taskId": 1,
+      "stageId": 5,
+      "url": "http://192.168.100.125:8000/GFData/srcData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806.jpg"
+    }
     // console.log(replyJson)
-
+    replyJson=replyJson
     switch (replyJson['type']) {
       case 'taskList':
      //   console.log(replyJson['data'])
@@ -102,40 +114,53 @@ export default {
         }
        // console.log(this.taskSource)
         break
+      default:
+        break
+    }
+    replyJson=replyJsonProcessed
+    console.log(replyJson)
+    switch (replyJson['type']) {
       case 'stageProcess':
-        let taskId = replyJson['taskId']
-        let stageId = replyJson['stageId']
-        if (stageId > this.taskSource.length) {
+        console.log(replyJson)
+        let taskId = replyJsonProcessed['taskId']
+        let stageId = replyJsonProcessed['stageId']
+        console.log(this.taskSource[taskId - 1]['tasksStatus'].length)
+        console.log(stageId)
+        if (stageId > this.taskSource[taskId - 1]['tasksStatus'].length) {
+          console.log(taskId)
           let temp = this.taskSource[taskId - 1]['tasksStatus']
           let singleTaskStatus = {}
           // singleTaskStatus['processId'+processId.toString()]=processId.toString()//不同的阶段
           singleTaskStatus['processProgress'] = replyJson['process']
-          singleTaskStatus['url'] = replyJson['url']
+          //  singleTaskStatus['url'] = replyJson['url']
           temp.push(singleTaskStatus)
           this.taskSource[taskId - 1]['tasksStatus'] = temp
         } else {
           this.taskSource[taskId - 1]['tasksStatus'][stageId - 1]['processProgress'] = replyJson['process']
-          this.taskSource[taskId - 1]['tasksStatus'][stageId - 1]['url'] = replyJson['url']
-        }
-        break
-      case 'stageFinished':
-        let taskFinishedId = replyJson['taskId']
-        let stageFinishedId = replyJson['stageId']
-        if (stageFinishedId > this.taskSource.length) {
-          let temp = this.taskSource[taskFinishedId - 1]['tasksStatus']
-          let singleTaskStatus = {}
-          singleTaskStatus['processProgress'] = '100'
-          singleTaskStatus['url'] = replyJson['url']
-          temp.push(singleTaskStatus)
-          this.taskSource[taskFinishedId - 1]['tasksStatus'] = temp
-        } else {
-          this.taskSource[taskFinishedId - 1]['tasksStatus'][stageFinishedId - 1]['processProgress'] = replyJson['100']
-          this.taskSource[taskFinishedId - 1]['tasksStatus'][stageFinishedId - 1]['url'] = replyJson['url']
+          // this.taskSource[taskId - 1]['tasksStatus'][stageId - 1]['url'] = replyJson['url']
         }
         break
       default:
         break
     }
+    // replyJson=replyJsonFinished
+    // switch (replyJson['type']) {
+    //   case 'stageFinished':
+    //     let taskFinishedId = replyJson['taskId']
+    //     let stageFinishedId = replyJson['stageId']
+    //     if (stageFinishedId > this.taskSource[taskFinishedId - 1].length) {
+    //       let temp = this.taskSource[taskFinishedId - 1]['tasksStatus']
+    //       let singleTaskStatus = {}
+    //       singleTaskStatus['processProgress'] = '100'
+    //       singleTaskStatus['url'] = replyJson['url']
+    //       temp.push(singleTaskStatus)
+    //       this.taskSource[taskFinishedId - 1]['tasksStatus'] = temp
+    //     } else {
+    //       this.taskSource[taskFinishedId - 1]['tasksStatus'][stageFinishedId - 1]['processProgress'] = '100'
+    //       this.taskSource[taskFinishedId - 1]['tasksStatus'][stageFinishedId - 1]['url'] = replyJson['url']
+    //     }
+    //     break
+    // }
     // setTimeout(function () {
     //   if (!myStropheConn.myStropheConn.connFlag) {
     //     console.log('not login')
@@ -152,6 +177,7 @@ export default {
   data () {
     return {
       tasks_len: 0,
+
       taskSource: []// [{'task_id': '1', 'url0': require('../assets/GF1_preProcess.png'), 'url1': require('../assets/GF1_preProcess.png'), 'url2': require('../assets/GF1_result.png'), 'url3': require('../assets/GF1_result.png')}]
     }
   },
@@ -171,37 +197,7 @@ export default {
         msgContent = msgContent.replace(/&apos;/g, '"')
         msgContent = msgContent.replace(/&quot;/g, '"')
         if (myStropheConn.myStropheConn.isJsonStr(msgContent)) {
-          // let replyJson = JSON.parse(msgContent)
-          let replyJson = [{
-            'type': 'taskList',
-            'data':
-              [
-                {
-                  'id': '1(代表任务的id)',
-                  'name': 'GF1（代表处理的数据名称）',
-                  'position': '武汉(代表影像位置)',
-                  'taskStatus(备注：每个任务默认都是5个阶段,这里处理了几个阶段就返回几个，但是前端的显示中默认显示5个)':
-                    [
-                      {
-                        'processId': '1（处理的阶段id）',
-                        'processProgress': '100(100表示处理结束，0-100表示正在处理，)',
-                        'url': '图像url地址（例如：imgSrcData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806-MSS2-0-g,默认传回的是原始的图片地址，如果progress是100的话，新的图片地址需要去掉-g)'
-                      },
-                      {
-                        'processId': '2（处理的阶段id）',
-                        'processProgress': '100(100表示处理结束，0-100表示正在处理，)',
-                        'url': '图像url地址（例如：imgSrcData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806-MSS2-0-g,默认传回的是原始的图片地址，如果progress是100的话，新的图片地址需要去掉-g)'
-                      },
-                      {
-                        '其他阶段信息,和上面一致，如果该阶段还没开始处理，则默认不传任何信息': ''
-                      }
-                    ]
-                },
-                {
-                  '第二个任务内容，和上面的内容一致': ''
-                }
-              ]
-          }]
+          let replyJson = JSON.parse(msgContent)
           switch (replyJson['type']) {
             case 'taskList':
               console.log(JSON.parse(replyJson['data']))
@@ -238,25 +234,29 @@ export default {
               }
               break
             case 'stageProcess':
-              let taskId = replyJson['taskId']
-              let stageId = replyJson['stageId']
-              if (stageId > this.taskSource.length) {
+              console.log(replyJson)
+              let taskId = replyJsonProcessed['taskId']
+              let stageId = replyJsonProcessed['stageId']
+              console.log(this.taskSource[taskId - 1]['tasksStatus'].length)
+              console.log(stageId)
+              if (stageId > this.taskSource[taskId - 1]['tasksStatus'].length) {
+                console.log(taskId)
                 let temp = this.taskSource[taskId - 1]['tasksStatus']
                 let singleTaskStatus = {}
                 // singleTaskStatus['processId'+processId.toString()]=processId.toString()//不同的阶段
                 singleTaskStatus['processProgress'] = replyJson['process']
-                singleTaskStatus['url'] = replyJson['url']
+                //  singleTaskStatus['url'] = replyJson['url']
                 temp.push(singleTaskStatus)
                 this.taskSource[taskId - 1]['tasksStatus'] = temp
               } else {
                 this.taskSource[taskId - 1]['tasksStatus'][stageId - 1]['processProgress'] = replyJson['process']
-                this.taskSource[taskId - 1]['tasksStatus'][stageId - 1]['url'] = replyJson['url']
+                // this.taskSource[taskId - 1]['tasksStatus'][stageId - 1]['url'] = replyJson['url']
               }
               break
             case 'stageFinished':
               let taskFinishedId = replyJson['taskId']
               let stageFinishedId = replyJson['stageId']
-              if (stageFinishedId > this.taskSource.length) {
+              if (stageFinishedId > this.taskSource[taskFinishedId - 1].length) {
                 let temp = this.taskSource[taskFinishedId - 1]['tasksStatus']
                 let singleTaskStatus = {}
                 singleTaskStatus['processProgress'] = '100'
@@ -264,7 +264,8 @@ export default {
                 temp.push(singleTaskStatus)
                 this.taskSource[taskFinishedId - 1]['tasksStatus'] = temp
               } else {
-                this.taskSource[taskFinishedId - 1]['tasksStatus'][stageFinishedId - 1]['processProgress'] = replyJson['100']
+                console.log("888")
+                this.taskSource[taskFinishedId - 1]['tasksStatus'][stageFinishedId - 1]['processProgress'] = '100'
                 this.taskSource[taskFinishedId - 1]['tasksStatus'][stageFinishedId - 1]['url'] = replyJson['url']
               }
               break

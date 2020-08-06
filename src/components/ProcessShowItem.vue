@@ -7,18 +7,18 @@
 <!--    </div>-->
     <div class="main">
       <div class="gaofenDiv">{{processShowItem.name}}</div>
-      <div class="col-10">
+      <div class="col-3" tyle="margin-top: 19vh;margin-bottom: 10vh">
             <el-progress :text-inside="true" :stroke-width="18" :percentage="this.progress"></el-progress>
        </div>
       <div class="outerDiv">
         <div class="div1">
-          <div class="imgDiv"><img :src="processShowItem.tasksStatus[0].url" class="imgStyle"></div>
+          <div class="imgDiv"><img :src="url[0]" class="imgStyle"></div>
           <span class="nameSpan">数据预处理</span>
         </div>
         <img src="../assets/fengefu.png" style="width: 10px;">
         <div class="div1">
           <div class="imgDiv">
-            <div style="transform:rotate(30deg)"><img :src="processShowItem.tasksStatus[1].url" class="imgStyle">
+            <div style="transform:rotate(30deg)"><img :src="url[1]" class="imgStyle">
             </div>
           </div>
           <span class="nameSpan" >几何矫正与融合</span>
@@ -26,17 +26,25 @@
         <img src="../assets/fengefu.png" style="width: 10px;">
         <div class="div1">
           <div class="imgDiv">
-            <div style="transform:rotate(30deg)"><img :src="processShowItem.tasksStatus[2].url" class="imgStyle"></div></div>
+            <div style="transform:rotate(30deg)"><img :src="url[2]" class="imgStyle"></div></div>
           <span class="nameSpan">图像增强去云去雾</span>
         </div>
         <img src="../assets/fengefu.png" style="width: 10px;">
         <div class="div1">
           <div class="imgDiv">
-            <div style="transform:rotate(30deg)"><img :src="processShowItem.tasksStatus[3].url" class="imgStyle"></div></div>
+            <div style="transform:rotate(30deg)"><img :src="url[3]" class="imgStyle"></div></div>
+          <span class="nameSpan">图像目标识别</span>
+        </div>
+        <div class="div1">
+          <div class="imgDiv">
+            <div style="transform:rotate(30deg)"><img :src="url[4]" class="imgStyle"></div></div>
           <span class="nameSpan">图像目标识别</span>
         </div>
         <div style="width: 15%">
-          <img :src="button_finished" style="margin-top:20px;width: 70px;height: 35px">
+          <img v-if="complete" src="../assets/yiwancheng.png" sstyle="margin-top:20px;width: 70px;height: 35px">
+        </div>
+        <div style="width: 15%">
+          <img v-if="!complete"  src="../assets/jinxingzhong.png" style="margin-top:40vm;width: 8vm;height: 4vm">
         </div>
       </div>
     </div>
@@ -49,7 +57,7 @@
 export default {
   name: 'ProcessShowItem',
   props:
-    ['processShowItem'],
+    ['processShowItem','task_state'],
   /* task_id:{
       type:String,
       default:''
@@ -92,26 +100,59 @@ export default {
     } */
   mounted () {
     let len = this.processShowItem.tasksStatus.length
-  //  console.log(len+"edghfjsdgfdj")
-    console.log(this.processShowItem.tasksStatus[len-1].url)
-  // console.log(this.processShowItem.tasksStatus[len-1].processProgress)
+    for (let index in this.processShowItem.tasksStatus) {
+      this.url[index] = this.processShowItem.tasksStatus[index].url
+    }
+    //  console.log(len+"edghfjsdgfdj")
+    console.log(this.processShowItem.tasksStatus[len - 1].url)
+    // console.log(this.processShowItem.tasksStatus[len-1].processProgress)
 
-    this.progress = parseInt(this.processShowItem.tasksStatus[len-1].processProgress)
-    //console.log('5786586')
-   // console.log(this.progress)
+    this.progress = parseInt(this.processShowItem.tasksStatus[len - 1].processProgress)
+    // console.log('5786586')
+    // console.log(this.progress)
   },
   // components: {top, left},
   data () {
     return {
       progress: 0,
-      url
-      button_finished: require('../assets/yiwancheng.png')
+      one_task_state:this.task_state,
+      url: ['', '', '', '', ''],
+      button_finished: require('../assets/yiwancheng.png'),
+      complete: false
       // dataName: '高分1号',
       // dataProcessNote: '对原始图像进行预处理等',
       // // dataProcessNote: "正在进行几何矫正，请稍后。。。",
       // information: false
     }
   },
+  watch:{
+  task_state:{
+  handler(nv,ov)
+  {
+    let len_single_task=this.task_state.length
+    console.log("666")
+   console.log("666")
+    for(let i=0;i<len_single_task;i++)
+    {
+      this.url[i]=this.task_state[i].url
+      // this.startCompleteUrl = this.baseUrl + '/' + url + '.png'
+      // if (this.stageData[4]['progress'] === 100) {
+      //   this.complete = true
+      //   // 去掉-g，相当于去掉最后两个字符
+      //   this.finishedCompleteUrl = this.baseUrl + '/' + url.substring(0, url.length - 2) + '.png'
+      // } else {
+      //   this.complete = false
+      // }
+    }
+    console.log("666")
+    this.progress=parseInt(this.task_state[len_single_task-1].progress)
+    console.log(this.progress)
+    if(len_single_task>=5&&this.progress===100)this.complete=true
+  },
+  deep:true
+  }
+  },
+
   methods: {
 
   }
