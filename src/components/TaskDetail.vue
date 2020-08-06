@@ -67,8 +67,8 @@ export default {
   data () {
     return {
       dataName: '',
-      showTaskDetail: [false, true, false, false, false],
-      processStatus: ['处理中', '处理中', '未处理', '未处理', '处理中'],
+      showTaskDetail: [true, true, false, false, false],
+      processStatus: ['未理中', '未处理', '未处理', '未处理', '未处理'],
       showStageDetail: [false, false, false, false, false],
       taskId: 0,
       url: 'GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806',
@@ -121,9 +121,12 @@ export default {
     // 想从上一个界面获取任务id,可以通过路由的形式获取
 
     let params = this.$route.params
-    this.taskId = params.id
-    this.url = params.url
-    console.log(this.taskId)
+    if (Object.keys(params).length === 0) {
+      this.url = 'GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806'
+    } else {
+      this.taskId = params.id
+      this.url = params.url
+    }
 
     // 测试监听
     // setInterval(function () {
@@ -239,7 +242,15 @@ export default {
       return true
     },
     showInformation (index) {
-      console.log('set' + index + 'to be' + this.showStageDetail[index])
+      for (let i in this.showStageDetail) {
+        if (this.showStageDetail[i]) {
+          if (index === parseInt(i)) {
+            break
+          } else {
+            return
+          }
+        }
+      }
       this.$set(this.showStageDetail, index, !this.showStageDetail[index])
     },
     jumpToAllData () {
