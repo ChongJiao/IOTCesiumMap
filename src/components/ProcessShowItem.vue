@@ -104,6 +104,7 @@ export default {
   data () {
     return {
       progress: 0,
+      url
       button_finished: require('../assets/yiwancheng.png')
       // dataName: '高分1号',
       // dataProcessNote: '对原始图像进行预处理等',
