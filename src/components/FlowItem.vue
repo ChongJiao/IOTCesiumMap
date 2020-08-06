@@ -17,17 +17,17 @@
         <img src="../assets/xiaojiantou.png" style="width: 3vw;">
         <div class="step-doing">
           <img src="../assets/GF1_preProcess.png" class="processIcon">
-          <span class="pre-process">图像融合</span>
-        </div>
-        <img src="../assets/xiaojiantou.png" style="width: 3vw;">
-        <div class="step-wait">
-          <img src="../assets/GF1_preProcess.png" class="processIcon">
-          <span class="pre-process">图像处理</span>
+          <span class="pre-process">融合及矫正</span>
         </div>
         <img src="../assets/xiaojiantou.png" style="width: 3vw;">
         <div class="step-wait">
           <img src="../assets/GF1_preProcess.png" class="processIcon">
           <span class="pre-process">图像增强</span>
+        </div>
+        <img src="../assets/xiaojiantou.png" style="width: 3vw;">
+        <div class="step-wait">
+          <img src="../assets/GF1_preProcess.png" class="processIcon">
+          <span class="pre-process">图像切分</span>
         </div>
         <img src="../assets/xiaojiantou.png" style="width: 3vw;">
         <div class="step-wait">

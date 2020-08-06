@@ -86,17 +86,16 @@
           </el-steps>
         </el-row>
       </el-container>
-      <Window :show="WindowPopUpShow" :title="WindowPopUpTitle" :data="taskData" @closed="closeTasksWindow">
-      </Window>
+<!--      <Window :show="WindowPopUpShow" :title="WindowPopUpTitle" :data="taskData" @closed="closeTasksWindow">-->
+<!--      </Window>-->
     </div>
 </template>
 
 <script>
-import Strophe from 'strophe.js'
 import CesiumMap from './CesiumMap'
 import Window from './UserTaskWindow'
 import TaskDetail from './TaskDetail'
-import left from './left'
+import left from './Left'
 String.format = function (src) {
   if (arguments.length === 0) return null
 
@@ -113,119 +112,10 @@ export default {
   mounted () {
   },
   methods: {
-    onMessage (msg) {
-      // 解析出<message>的from、type属性，以及body子元素
-      let fromJid = msg.getAttribute('from')
-      let toJid = msg.getAttribute('to')
-      let type = msg.getAttribute('type')
-      let elems = msg.getElementsByTagName('body')
 
-      if (type === 'chat' && elems.length > 0) {
-        let msgContent = Strophe.Strophe.getText(elems[0])
-        msgContent = msgContent.replace(/&apos;/g, '"')
-        msgContent = msgContent.replace(/&quot;/g, '"')
-        if (this.isJsonStr(msgContent)) {
-          let replyJson = JSON.parse(msgContent)
-          console.log(replyJson)
-          switch (replyJson['type']) {
-            case 'satellite':
-              console.log(replyJson)
-              this.SatelliteData = JSON.parse(replyJson['data'])
-              console.log('SatelliteData is ')
-              console.log(this.SatelliteData)
-              break
-            case 'finished':
-              let resultsUrlList = JSON.parse(replyJson['content'])
-              for (let key in resultsUrlList) {
-                console.log(resultsUrlList[key])
-              }
-              if (resultsUrlList.length <= 2) {
-                console.log('error finished')
-              } else {
-                this.tileUrl = resultsUrlList[resultsUrlList.length - 1]
-                this.tileShow = true
-                console.log('Can show tile and Url and it is ' + this.tileUrl)
-              }
-              this.taskSendFlag = false
-              this.taskActiveCode = 1
-              break
-            case 'status' :
-              this.taskActiveCode = replyJson['status'] + 1
-              this.taskSendFlag = true
-              console.log('activate code')
-              console.log(this.taskActiveCode)
-              break
-            case 'taskId':
-              this.processTaskId = replyJson['taskId']
-              console.log('task Id is')
-              console.log(this.processTaskId)
-              break
-            case 'taskList':
-              let contents = replyJson['tasks']
-              let jsonContent = JSON.parse(contents)
-              if (this.taskData.length > 0) { this.taskData = [] }
-              this.taskData = jsonContent
-              if (this.taskData[this.taskData.length - 1].length <= 3) {
-                this.processTaskId = this.taskData[this.taskData.length - 1]['id']
-                this.taskSendFlag = true
-                setInterval(this.ObtainTaskStatus, 5000)
-              }
-              console.log(this.taskData)
-          }
-        } else {
-          console.log(fromJid + ' send message to ' + toJid + ' and the message content is ' + msgContent)
-        }
-      }
-      return true
-    },
-
-    ObtainTaskStatus () {
-      if (this.taskSendFlag) {
-        console.log('obtain task id')
-        let msgContent = '{\'type\': \'queryStatus\', \'taskId\': {0}}'
-        msgContent = String.format(msgContent, this.processTaskId)
-        console.log(msgContent)
-        this.SendMessage(this.serverJid, msgContent)
-      }
-    },
     TestTile () {
       this.tileUrl = 'http://localhost:8000/GFData/tileData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806'
       this.tileShow = true
-    },
-    MakeTask (index) {
-      let taskFlowStr = '['
-      for (let v in this.taskFlowList) {
-        taskFlowStr += '"' + this.taskFlowList[v] + '"' + ','
-      }
-      taskFlowStr = taskFlowStr.substr(0, taskFlowStr.length - 1) + ']'
-      console.log(taskFlowStr)
-      console.log(this.SatelliteData[index])
-      let msgContent = '{"type": "newTask", "url":"{0}", "content": {1}}'
-      msgContent = String.format(msgContent, this.SatelliteData[index].url, taskFlowStr)
-      console.log('send message is' + msgContent)
-      this.SendMessage(this.serverJid, msgContent)
-      this.taskSendFlag = true
-      setInterval(this.ObtainTaskStatus, 5000)
-    },
-    SendMessage (toJid, message) {
-      if (this.connectFlag) {
-        let msg = Strophe.$msg({
-          to: toJid,
-          from: this.userJid,
-          type: 'chat'
-        }).c('body', message)
-        this.conn.send(msg.tree())
-      }
-    },
-    isJsonStr (str) {
-      try {
-        if (typeof JSON.parse(str) === 'object') {
-          return true
-        }
-      } catch (e) {
-        return false
-      }
-      return false
     },
     resetForm (formName) {
       console.log('reset')

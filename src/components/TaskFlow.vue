@@ -136,7 +136,9 @@ export default {
           temp.push(singleTaskStatus)
           this.taskSource[taskId - 1]['tasksStatus'] = temp
         } else {
-          this.taskSource[taskId - 1]['tasksStatus'][stageId - 1]['processProgress'] = replyJson['process']
+         // this.taskSource[taskId - 1]['tasksStatus'][stageId - 1]['processProgress'] = replyJson['process']
+          this.$set(this.showStageDetail, index, !this.showStageDetail[index])
+          this.$set(this.taskSource[taskId - 1]['tasksStatus'][stageId - 1]['processProgress'],index,!)
           // this.taskSource[taskId - 1]['tasksStatus'][stageId - 1]['url'] = replyJson['url']
         }
         break

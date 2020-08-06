@@ -2,7 +2,13 @@
 <div>
   <div class="viewer">
     <vc-viewer ref="viewer" @ready="ready">
-      <vc-layer-imagery :alpha="alpha" :imageryProvider="imageryProvider" :brightness="brightness" :contrast="contrast">
+<!--      <vc-layer-imagery :alpha="alpha" :imageryProvider="imageryProvider" :brightness="brightness" :contrast="contrast">-->
+<!--      </vc-layer-imagery>-->
+      <vc-layer-imagery :alpha="alpha" :brightness="brightness" :contrast="contrast" v-if="showTileMap">
+        <vc-provider-imagery-tile-mapservice
+          :url="tileUrl0"
+          @readyPromise="imageryReady"
+        ></vc-provider-imagery-tile-mapservice>
       </vc-layer-imagery>
       <vc-layer-imagery :alpha="alpha" :brightness="brightness" :contrast="contrast" v-if="showTileMap">
         <vc-provider-imagery-tile-mapservice
@@ -19,12 +25,6 @@
       <vc-layer-imagery :alpha="alpha" :brightness="brightness" :contrast="contrast" v-if="showTileMap">
         <vc-provider-imagery-tile-mapservice
           :url="tileUrl3"
-          @readyPromise="imageryReady"
-        ></vc-provider-imagery-tile-mapservice>
-      </vc-layer-imagery>
-      <vc-layer-imagery :alpha="alpha" :brightness="brightness" :contrast="contrast" v-if="showTileMap">
-        <vc-provider-imagery-tile-mapservice
-          :url="tileUrl4"
           @readyPromise="imageryReady"
         ></vc-provider-imagery-tile-mapservice>
       </vc-layer-imagery>
@@ -57,51 +57,41 @@
   </div>
 </template>
 <script>
-import left from './left'
 
 import myStropheConn from '../api/Connection'
 import Strophe from 'strophe.js'
 import RightItem from './RightItem'
-// import cesiumDrawViewer from 'cesium-draw'
 
 export default {
   name: 'CesiumMap',
-  components: {RightItem, left},
-  props: {
-    tileUrl: {
-      type: String,
-      default: 'http://localhost:8000/GFData/tileData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806'
-    },
-    tileUrl1: {
-      type: String,
-      default: 'http://localhost:8000/GFData/tileData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806-pansharpen-0'
-    },
-    tileUrl2: {
-      type: String,
-      default: 'http://localhost:8000/GFData/tileData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806-pansharpen-1'
-    },
-    tileUrl3: {
-      type: String,
-      default: 'http://localhost:8000/GFData/tileData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806-pansharpen-2'
-    },
-    tileUrl4: {
-      type: String,
-      default: 'http://localhost:8000/GFData/tileData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806-pansharpen-3'
-    },
-    showTileMap: {
-      type: Boolean,
-      default: true
-    }
-  },
+  components: {RightItem},
+
   mounted () {
     console.log('Cesium mounted')
+    let base = this
     setTimeout(function () {
       if (!myStropheConn.myStropheConn.connFlag) {
         console.log('not login')
         myStropheConn.myStropheConn.connecting()
+      } else {
+        base.messageHandler = myStropheConn.myStropheConn.conn.addHandler(base.onMessage, null, 'message', null, null, null)
       }
     }, 2000)
-    this.messageHandler = myStropheConn.myStropheConn.conn.addHandler(this.onMessage, null, 'message', null, null, null)
+
+    // 获取路由参数
+    console.log('路由参数为')
+    let type = this.$route.params.type
+    if (type === 'result') {
+      // 在地图中显示结果
+      let url = this.$route.params.url
+      let tileData = myStropheConn.myStropheConn.serverDirPath[3]
+      this.tileUrl0 = myStropheConn.myStropheConn.httpServer + tileData + '/' + url + '-pansharpen-' + '0'
+      this.tileUrl1 = myStropheConn.myStropheConn.httpServer + tileData + '/' + url + '-pansharpen-' + '1'
+      this.tileUrl2 = myStropheConn.myStropheConn.httpServer + tileData + '/' + url + '-pansharpen-' + '2'
+      this.tileUrl3 = myStropheConn.myStropheConn.httpServer + tileData + '/' + url + '-pansharpen-' + '3'
+      console.log('展示瓦片地图为' + this.tileUrl0 + ' ' + this.tileUrl1 + ' ' + this.tileUrl2 + ' ' + this.tileUrl3)
+      this.showTileMap = true
+    }
   },
   destroyed () {
     console.log('Cesium destroyed')
@@ -116,12 +106,16 @@ export default {
       bmKey: 'AgcbDCAOb9zMfquaT4Z-MdHX4AsHUNvs7xgdHefEA5myMHxZk87NTNgdLbG90IE-',
       Cesium: null,
       viewer: null,
-      dataSource: []
+      dataSource: [],
+      tileUrl0: 'http://localhost:8000/GFData/tileData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806-pansharpen-0',
+      tileUrl1: 'http://localhost:8000/GFData/tileData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806-pansharpen-0',
+      tileUrl2: 'http://localhost:8000/GFData/tileData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806-pansharpen-0',
+      tileUrl3: 'http://localhost:8000/GFData/tileData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806-pansharpen-0',
+      showTileMap: false
     }
   },
   methods: {
-    ready (cesiumInstance) { // Main界面中的四张图片
-      const { Cesium, viewer } = cesiumInstance
+    ready (cesiumInstance) {        const { Cesium, viewer } = cesiumInstance
 
       viewer.scene.requestRenderMode = true
       // viewer.scene.maximumRenderTimeChange = Infinity

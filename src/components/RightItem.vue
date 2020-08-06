@@ -6,12 +6,13 @@
       <div class="position">{{position}}</div>
     </div>
     <div class="button">
-      <el-button type="primary" style="padding: 0.5vw; margin-left: 0.5vw;margin-top: 2vh;" icon="el-icon-s-operation">处理</el-button>
+      <el-button type="primary" style="padding: 0.5vw; margin-left: 0.5vw;margin-top: 2vh;" icon="el-icon-s-operation" @click="newTask">处理</el-button>
     </div>
   </div>
 </template>
 
 <script>
+import myStropheConn from '../api/Connection'
 export default {
   name: 'RightItem',
   props: {
@@ -26,6 +27,15 @@ export default {
     position: {
       type: String,
       default: '武汉'
+    }
+  },
+  methods: {
+    newTask () {
+      if (myStropheConn.myStropheConn.taskLength === 0) {
+        myStropheConn.myStropheConn.MakeTask(this.imageUrl)
+      } else {
+        alert('请等待处理完当前任务')
+      }
     }
   }
 }

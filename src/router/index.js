@@ -5,6 +5,7 @@ import TaskDetail from '../components/TaskDetail'
 import UrlNotFound from '../components/UrlNotFound'
 import NodesChart from '../components/NodesChart'
 import ProcessShow from '../components/TaskFlow'
+import DataCenter from '../components/DataCenter'
 Vue.use(Router)
 
 export default new Router({
@@ -23,6 +24,11 @@ export default new Router({
       path: '/ProcessShow',
       name: 'ProcessShow',
       component: ProcessShow
+    },
+    {
+      path: '/DataCenter',
+      name: 'DataCenter',
+      component: DataCenter
     },
     {
       path: '/TaskDetail',

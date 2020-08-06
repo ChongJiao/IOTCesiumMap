@@ -2,10 +2,16 @@ import Strophe from 'strophe.js'
 class StropheConn {
   connFlag = false
   conn = null
-  userJID = 'wz@127.0.0.1'
-  userPassword = '123456'
+  // userJID = 'wz@127.0.0.1'
+  // userPassword = '123456'
+  userJID = 'jc@desktop-98tu7o0'
+  userPassword = 'jiaochong123'
   BOSH_SERVER = 'http://127.0.0.1:7070/http-bind/'
-  controlJID = 'admin@127.0.0.1'
+  controlJID = 'admin@desktop-98tu7o0'
+  httpServer ='http://localhost:8000/GFData/'
+  taskFlowList = ['computercenter@desktop-98tu7o0', 'imgenhance@desktop-98tu7o0', 'imgcesium@desktop-98tu7o0', 'imgdetector@desktop-98tu7o0']
+  serverDirPath = ['srcData', 'imgSrcData', 'imgEnData', 'tileData', 'tileDeData']
+  taskLength = 0
   setUserJid (user) {
     this.userJID = user
   }
@@ -59,20 +65,37 @@ class StropheConn {
       this.SendMessage(msgContent)
     }
   }
+  // 构建任务
+  MakeTask (url) {
+    let taskFlowStr = '['
+    for (let v in this.taskFlowList) {
+      taskFlowStr += '"' + this.taskFlowList[v] + '"' + ','
+    }
+    taskFlowStr = taskFlowStr.substr(0, taskFlowStr.length - 1) + ']'
+    let msgContent = '{"type": "newTask", "url":"{0}", "content": {1}}'
+    msgContent = String.format(msgContent, url, taskFlowStr)
+    console.log('send message is' + msgContent)
+    this.SendMessage(this.controlJID, msgContent)
+    this.taskLength += 1
+  }
+
   onMessage (msg) {
     // TODO 全局的消息回调函数，但仅处理部分消息接口: 包括任务状态监听，各节点状态监听等
-    // console.log('global message')
-    // let fromJid = msg.getAttribute('from')
-    // let toJid = msg.getAttribute('to')
     let type = msg.getAttribute('type')
     let elems = msg.getElementsByTagName('body')
     if (type === 'chat' && elems.length > 0) {
       let msgContent = Strophe.Strophe.getText(elems[0])
       msgContent = msgContent.replace(/&apos;/g, '"')
       msgContent = msgContent.replace(/&quot;/g, '"')
-      console.log(msgContent)
+      // console.log(msgContent)
       if (myStropheConn.isJsonStr(msgContent)) {
         // TODO 具体状态消息处理, 消息实体储存在该类中，以供其他组件调用
+        if (msgContent['type']) {
+          switch (msgContent['type']) {
+            case 'taskFinished':
+              this.taskLength -= 1
+          }
+        }
       }
       // console.log(fromJid + ' send message to ' + toJid + ' and the message content is ' + msgContent)
     }

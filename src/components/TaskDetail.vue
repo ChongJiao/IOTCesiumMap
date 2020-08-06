@@ -15,45 +15,45 @@
         <div :class="processStatus[0] === '正在处理' ? 'step-doing' : 'step'" id="step1">
           <img src="../assets/preProcess.png" class="processIcon">
           <span :class="showTaskDetail[0] ? 'after-process': 'pre-process'">数据预处理</span>
-          <el-link type="primary" class="tag-link" v-on:click="showInformation(0)" v-show="showTaskDetail[0]">{{processStatus[0]}}</el-link>
+          <el-link type="primary" class="tag-link" @click="showInformation(0)" v-show="showTaskDetail[0]">{{processStatus[0]}}</el-link>
         </div>
         <img src="../assets/xiaojiantou.png" style="width: 3vw;">
         <div :class="processStatus[1] === '正在处理' ? 'step-doing' : 'step'" id="step2">
           <img src="../assets/sharpening.png" class="processIcon">
           <span :class="showTaskDetail[1] ? 'after-process': 'pre-process'">图像融合</span>
-          <el-link type="primary" class="tag-link" v-on:click="showInformation(1)"  v-show="showTaskDetail[1]">{{processStatus[1]}}</el-link>
+          <el-link type="primary" class="tag-link" @click="showInformation(1)"  v-show="showTaskDetail[1]">{{processStatus[1]}}</el-link>
         </div>
         <img src="../assets/xiaojiantou.png" style="width: 3vw;">
         <div :class="processStatus[2] === '正在处理' ? 'step-doing' : 'step'" id="step3">
           <img src="../assets/imgProcess.png" class="processIcon">
-          <span :class="showTaskDetail[2] ? 'after-process': 'pre-process'">图像处理</span>
-          <el-link type="primary" class="tag-link" v-on:click="showInformation(2)" v-show="showTaskDetail[2]">{{processStatus[2]}}</el-link>
+          <span :class="showTaskDetail[2] ? 'after-process': 'pre-process'">图像增强</span>
+          <el-link type="primary" class="tag-link" @click="showInformation(2)" v-show="showTaskDetail[2]">{{processStatus[2]}}</el-link>
         </div>
         <img src="../assets/xiaojiantou.png" style="width: 3vw;">
         <div :class="processStatus[3] === '正在处理' ? 'step-doing' : 'step'" id="step4">
           <img src="../assets/imgEnhence.png" class="processIcon">
-          <span :class="showTaskDetail[3] ? 'after-process': 'pre-process'">图像增强</span>
-          <el-link type="primary" class="tag-link" v-on:click="showInformation(3)" v-show="showTaskDetail[3]">{{processStatus[3]}}</el-link>
+          <span :class="showTaskDetail[3] ? 'after-process': 'pre-process'">图像瓦片切分</span>
+          <el-link type="primary" class="tag-link" @click="showInformation(3)" v-show="showTaskDetail[3]">{{processStatus[3]}}</el-link>
         </div>
         <img src="../assets/xiaojiantou.png" style="width: 3vw;">
         <div :class="processStatus[4] === '正在处理' ? 'step-doing' : 'step'" id="step5">
           <img src="../assets/object.png" class="processIcon">
           <span :class="showTaskDetail[4] ? 'after-process': 'pre-process'">目标识别</span>
-          <el-link type="primary" class="tag-link" v-on:click="showInformation(4)" v-show="showTaskDetail[4]">{{processStatus[4]}}</el-link>
+          <el-link type="primary" class="tag-link" @click="showInformation(4)" v-show="showTaskDetail[4]">{{processStatus[4]}}</el-link>
         </div>
       </div>
       <el-divider></el-divider>
-      <Stage1 :stageShowOne="stageOne" :allData="allInitData"></Stage1>
-      <Stage2 :stageShowTwo="stageTwo" :allData="allInitData"></Stage2>
-      <Stage3 :stageShowThree="stageThree" :allData="allInitData"></Stage3>
-      <Stage4 :stageShowFour="stageFour" :allData="allInitData"></Stage4>
-      <Stage5 :stageShowFive="stageFive" :allData="allInitData"></Stage5>
+      <Stage1 v-if="showStageDetail[0]" :allData="allInitData" :stageUrl="url"></Stage1>
+      <Stage2 v-if="showStageDetail[1]" :allData="allInitData" :stageUrl="url"></Stage2>
+      <Stage3 v-if="showStageDetail[2]" :allData="allInitData" :stageUrl="url"></Stage3>
+      <Stage4 v-if="showStageDetail[3]" :allData="allInitData" :stageUrl="url"></Stage4>
+      <Stage5 v-if="showStageDetail[4]" :allData="allInitData"></Stage5>
     </div>
   </div>
 </template>
 
 <script>
-import left from './left.vue'
+import left from './Left.vue'
 import Stage1 from './Stage1'
 import Stage2 from './Stage2'
 import Stage3 from './Stage3'
@@ -67,37 +67,83 @@ export default {
   data () {
     return {
       dataName: '',
-      showTaskDetail: [false, false, false, false, false],
-      processStatus: ['未处理', '未处理', '未处理', '未处理', '未处理'],
+      showTaskDetail: [true, true, false, false, false],
+      processStatus: ['未理中', '未处理', '未处理', '未处理', '未处理'],
+      showStageDetail: [false, false, false, false, false],
       taskId: 0,
-      stageOne: false,
-      stageTwo: false,
-      stageThree: false,
-      stageFour: false,
-      stageFive: false,
+      url: 'GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806',
       // 存放初始的所有阶段信息
       allInitData: []
     }
   },
   mounted () {
+    // 数据测试部分
+    this.allInitData = [
+      {
+        'id': 1,
+        'progress': 100,
+        'url': 'GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806'
+      },
+      {
+        'id': 2,
+        'progress': 20,
+        'url': 'GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806'
+      },
+      {
+        'id': 3,
+        'progress': 20,
+        'url': 'GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806'
+      },
+      {
+        'id': 4,
+        'progress': 100,
+        'url': 'GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806'
+      },
+      {
+        'id': 5,
+        'progress': 100,
+        'url': 'GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806'
+      }
+    ]
+    let base = this
     setTimeout(function () {
       if (!myStropheConn.myStropheConn.connFlag) {
         console.log('not login')
         myStropheConn.myStropheConn.connecting()
+        // 初始化，发送请求
+        // base.initTask()
+        base.stropheConn = myStropheConn.myStropheConn
+        // 接收消息
+        base.messageHandler = base.stropheConn.conn.addHandler(base.onMessage, null, 'message', null, null, null)
       }
     }, 2000)
-    console.log('task mounted')
+
     // 想从上一个界面获取任务id,可以通过路由的形式获取
-    this.taskId = this.$route.query.id
-    console.log(this.taskId)
-    // 初始化，发送请求
-    this.initTask()
-    // 接收消息
-    this.messageHandler = myStropheConn.myStropheConn.conn.addHandler(this.onMessage, null, 'message', null, null, null)
+
+    let params = this.$route.params
+    if (Object.keys(params).length === 0) {
+      this.url = 'GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806'
+    } else {
+      this.taskId = params.id
+      this.url = params.url
+    }
+
+    // 测试监听
+    // setInterval(function () {
+    //   console.log('change value in allInitData')
+    //   // base.$set(base.allInitData, 2, {
+    //   //   'id': 2,
+    //   //   'progress': 20,
+    //   //   'url': 'GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806'
+    //   // })
+    //   base.allInitData[1].progress = 10
+    // }, 5000)
   },
   destroyed () {
     console.log('Task destroyed')
-    myStropheConn.myStropheConn.conn.deleteHandler(this.messageHandler)
+    if (this.stropheConn !== undefined) {
+      this.stropheConn.conn.deleteHandler(this.messageHandler)
+    }
   },
   methods: {
     testMessage (msg) {
@@ -117,7 +163,7 @@ export default {
     initTask () {
       let msgContent = '{\'type\': \'singleQueryTask\', \'taskId\': {0}, \'userJID\': \'{1}\'}'
       msgContent = String.format(msgContent, this.taskId, myStropheConn.myStropheConn.userJID)
-      myStropheConn.myStropheConn.SendMessage(msgContent)
+      this.stropheConn.SendMessage(msgContent)
     },
     onMessage (msg) {
       // 解析出<message>的from、type属性，以及body子元素
@@ -138,23 +184,21 @@ export default {
               this.dataName = replyJson['name']
               let data = replyJson['data']
               let len = data.length
-              console.log(len)
               if (len < 1) {
                 return false
               }
               for (let i = 0; i < len; i++) {
                 this.allInitData.push(data[i])
+                this.showTaskDetail[i] = true
                 if (data[i]['progress'] === 100) {
-                  this.showTaskDetail[i] = true
                   this.processStatus[i] = '处理完'
                 } else {
-                  this.showTaskDetail[i] = true
                   this.processStatus[i] = '正在处理'
                 }
               }
               break
             // 阶段过程接收
-            case 'statusProcess':
+            case 'stageProcess':
               if (this.taskId === replyJson['taskId']) {
                 let stageId = replyJson['stageId']
                 // 如果是该阶段刚开始，初始时没有
@@ -174,7 +218,7 @@ export default {
               }
               break
             // 阶段结束接收
-            case 'statusFinished':
+            case 'stageFinished':
               if (this.taskId === replyJson['taskId']) {
                 let stageId = replyJson['stageId']
                 this.processStatus[stageId - 1] = '处理完'
@@ -198,25 +242,16 @@ export default {
       return true
     },
     showInformation (index) {
-      switch (index) {
-        case 0:
-          this.stageOne = !this.stageOne
-          break
-        case 1:
-          this.stageTwo = !this.stageTwo
-          break
-        case 2:
-          this.stageThree = !this.stageThree
-          break
-        case 3:
-          this.stageFour = !this.stageFour
-          break
-        case 4:
-          this.stageFive = !this.stageFive
-          break
-        default:
-          break
+      for (let i in this.showStageDetail) {
+        if (this.showStageDetail[i]) {
+          if (index === parseInt(i)) {
+            break
+          } else {
+            return
+          }
+        }
       }
+      this.$set(this.showStageDetail, index, !this.showStageDetail[index])
     },
     jumpToAllData () {
       this.$router.push({path: '/ProcessShow'})
