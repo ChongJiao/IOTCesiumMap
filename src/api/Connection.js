@@ -4,10 +4,10 @@ class StropheConn {
   conn = null
   // userJID = 'wz@127.0.0.1'
   // userPassword = '123456'
-  userJID = 'jc@desktop-98tu7o0'
+  userJID = 'jc@skh'
   userPassword = 'jiaochong123'
   BOSH_SERVER = 'http://127.0.0.1:7070/http-bind/'
-  controlJID = 'admin@desktop-98tu7o0'
+  controlJID = 'admin@skh'
   httpServer ='http://localhost:8000/GFData/'
   taskFlowList = ['computercenter@desktop-98tu7o0', 'imgenhance@desktop-98tu7o0', 'imgcesium@desktop-98tu7o0', 'imgdetector@desktop-98tu7o0']
   serverDirPath = ['srcData', 'imgSrcData', 'imgEnData', 'tileData', 'tileDeData']
