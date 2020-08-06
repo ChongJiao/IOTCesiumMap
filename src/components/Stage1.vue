@@ -55,36 +55,30 @@ export default {
   mounted () {
     this.baseUrl = myStropheConn.myStropheConn.httpServer + myStropheConn.myStropheConn.serverDirPath[0]
     this.originalImageUrl = this.baseUrl + '/' + this.stageUrl + '/' + this.stageUrl + '.jpg'
-    // this.progress = this.allData[0]['progress']
-    // let url = this.allData[0]['url']
-    // this.originalImageUrl = this.baseUrl + '/' + url + '/' + url + '.jpg'
-    // if (this.allData[0]['progress'] === 100) {
-    //   this.complete = true
-    //   // 去掉-g，相当于去掉最后两个字符
-    //   this.finishedImageUrl = this.baseUrl + '/' + url + '/' + url + '-MSS2.png'
-    // } else {
-    //   this.complete = false
-    // }
+    this.dealData()
+  },
+  methods: {
+    dealData () {
+      let len = this.allData.length
+      if (len >= 1) {
+        this.progress = this.allData[0]['progress']
+        let url = this.allData[0]['url']
+        if (this.allData[0]['progress'] === 100) {
+          this.complete = true
+          // 去掉-g，相当于去掉最后两个字符
+          this.finishedImageUrl = this.baseUrl + '/' + url + '/' + url + '-MSS2.png'
+        } else {
+          this.complete = false
+        }
+      }
+    }
   },
   watch: {
     // 深度监听数据变化，实时更新
-    stageUrl (val) {
-      this.stageUrl = val
-    },
     allData: {
       handler (nv, ov) {
-        let len = this.allData.length
-        if (len >= 1) {
-          this.progress = this.allData[0]['progress']
-          let url = this.allData[0]['url']
-          if (this.allData[0]['progress'] === 100) {
-            this.complete = true
-            // 去掉-g，相当于去掉最后两个字符
-            this.finishedImageUrl = this.baseUrl + url + '/' + url + '-g.png'
-          } else {
-            this.complete = false
-          }
-        }
+        console.log('handelData')
+        this.dealData()
       },
       deep: true
     }

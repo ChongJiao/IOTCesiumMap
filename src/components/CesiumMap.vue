@@ -2,8 +2,8 @@
 <div>
   <div class="viewer">
     <vc-viewer ref="viewer" @ready="ready">
-      <vc-layer-imagery :alpha="alpha" :imageryProvider="imageryProvider" :brightness="brightness" :contrast="contrast">
-      </vc-layer-imagery>
+<!--      <vc-layer-imagery :alpha="alpha" :imageryProvider="imageryProvider" :brightness="brightness" :contrast="contrast">-->
+<!--      </vc-layer-imagery>-->
       <vc-layer-imagery :alpha="alpha" :brightness="brightness" :contrast="contrast" v-if="showTileMap">
         <vc-provider-imagery-tile-mapservice
           :url="tileUrl0"
@@ -78,15 +78,18 @@ export default {
       }
     }, 2000)
 
-    let type = self.$route.params.type
-    if (type === 'results') {
+    // 获取路由参数
+    console.log('路由参数为')
+    let type = this.$route.params.type
+    if (type === 'result') {
       // 在地图中显示结果
-      let url = self.$route.params.url
-      let tileData = myStropheConn.myStropheConn.tileData
+      let url = this.$route.params.url
+      let tileData = myStropheConn.myStropheConn.serverDirPath[3]
       this.tileUrl0 = myStropheConn.myStropheConn.httpServer + tileData + '/' + url + '-pansharpen-' + '0'
       this.tileUrl1 = myStropheConn.myStropheConn.httpServer + tileData + '/' + url + '-pansharpen-' + '1'
       this.tileUrl2 = myStropheConn.myStropheConn.httpServer + tileData + '/' + url + '-pansharpen-' + '2'
       this.tileUrl3 = myStropheConn.myStropheConn.httpServer + tileData + '/' + url + '-pansharpen-' + '3'
+      console.log('展示瓦片地图为' + this.tileUrl0 + ' ' + this.tileUrl1 + ' ' + this.tileUrl2 + ' ' + this.tileUrl3)
       this.showTileMap = true
     }
   },
@@ -113,7 +116,6 @@ export default {
   },
   methods: {
     ready (cesiumInstance) {
-      // Main界面中的四张图片
       const { Cesium, viewer } = cesiumInstance
 
       viewer.scene.requestRenderMode = true

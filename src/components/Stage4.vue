@@ -70,14 +70,27 @@ export default {
     this.originalImageUrl1 = this.preUrl + '/' + this.stageUrl + '/' + this.stageUrl + '-imgen-1-g-r.png'
     this.originalImageUrl2 = this.preUrl + '/' + this.stageUrl + '/' + this.stageUrl + '-imgen-2-g-r.png'
     this.originalImageUrl3 = this.preUrl + '/' + this.stageUrl + '/' + this.stageUrl + '-imgen-3-g-r.png'
-    this.finishedImageUrl = this.baseUrl + '/' + 'Finished.jpg'
+
+    this.dealData()
+  },
+  methods: {
+    dealData () {
+      let len = this.allData.length
+      if (len >= 4) {
+        this.progress = this.allData[3]['progress']
+        if (this.allData[3]['progress'] === 100) {
+          this.complete = true
+          this.finishedImageUrl = this.baseUrl + '/' + 'Finished.jpg'
+        } else {
+          this.complete = false
+        }
+      }
+    }
   },
   data () {
     return {
-      stageShow: this.stageShowFour,
       stageData: this.allData,
       progress: 0,
-      baseUrl: 'http://127.0.0.1:8000/GFData',
       originalImageUrl0: '',
       originalImageUrl1: '',
       originalImageUrl2: '',
@@ -87,26 +100,10 @@ export default {
     }
   },
   watch: {
-    stageShowFour (val) {
-      this.stageShow = val
-    },
     // 监听数据变化
     allData: {
       handler (nv, ov) {
-        for (let i = 0; i < this.allData.length; i++) {
-          this.stageData[i] = this.allData[i]
-          // console.log(this.stageData[i])
-        }
-        let len = this.stageData.length
-        if (len >= 4) {
-          this.progress = this.stageData[3]['progress']
-          if (this.stageData[3]['progress'] === 100) {
-            this.complete = true
-            this.finishedImageUrl = this.baseUrl + '/' + 'Finished.jpg'
-          } else {
-            this.complete = false
-          }
-        }
+        this.dealData()
       },
       deep: true
     }

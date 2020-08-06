@@ -42,13 +42,27 @@ export default {
   props: ['allData'],
   mounted () {
     this.baseUrl = myStropheConn.myStropheConn.httpServer + myStropheConn.myStropheConn.serverDirPath[4]
+    this.dealData()
   },
   methods: {
+    dealData () {
+      let len = this.allData.length
+      if (len >= 5) {
+        this.progress = this.allData[4]['progress']
+        let url = this.allData[4]['url']
+        if (this.allData[4]['progress'] === 100) {
+          this.complete = true
+          this.resUrl = url
+        } else {
+          this.complete = false
+        }
+      }
+    },
     jumpToRes () {
       this.$router.push({
         name: 'CesiumMap',
         params: {
-          type: 1,
+          type: 'result',
           url: this.resUrl
         }
       })
@@ -56,7 +70,6 @@ export default {
   },
   data () {
     return {
-      stageShow: this.stageShowFive,
       stageData: this.allData,
       progress: 0,
       resUrl: '',
@@ -64,28 +77,11 @@ export default {
     }
   },
   watch: {
-    stageShowFive (val) {
-      this.stageShow = val
-    },
     // 监听数据变化
     allData: {
       handler (nv, ov) {
-        for (let i = 0; i < this.allData.length; i++) {
-          this.stageData[i] = this.allData[i]
-          // console.log(this.stageData[i])
-        }
-        let len = this.stageData.length
-        if (len >= 5) {
-          this.progress = this.stageData[4]['progress']
-          let url = this.stageData[4]['url']
-          this.startCompleteUrl = this.baseUrl + '/' + url + '.png'
-          if (this.stageData[4]['progress'] === 100) {
-            this.complete = true
-            this.resUrl = url
-          } else {
-            this.complete = false
-          }
-        }
+        console.log('handle all Data')
+        this.dealData()
       },
       deep: true
     }

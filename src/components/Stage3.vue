@@ -93,10 +93,16 @@ export default {
     this.originalImageUrl1 = this.preUrl + '/' + this.stageUrl + '/' + this.stageUrl + '-pansharpen-1-g-r.png'
     this.originalImageUrl2 = this.preUrl + '/' + this.stageUrl + '/' + this.stageUrl + '-pansharpen-2-g-r.png'
     this.originalImageUrl3 = this.preUrl + '/' + this.stageUrl + '/' + this.stageUrl + '-pansharpen-3-g-r.png'
+
+    this.dealData()
+
     let base = this
-    setInterval(function () {
+    this.timer = setInterval(function () {
       base.loadEnhanceImage(url)
     }, 5000)
+  },
+  destroyed () {
+    clearInterval(this.timer)
   },
   data () {
     return {
@@ -116,6 +122,12 @@ export default {
     }
   },
   methods: {
+    dealData () {
+      let len = this.allData.length
+      if (len >= 3) {
+        this.progress = this.allData[2]['progress']
+      }
+    },
     loadEnhanceImage (url) {
       this.runInPromise(url, '0')
       this.runInPromise(url, '1')
@@ -175,13 +187,7 @@ export default {
     // 监听数据变化
     allData: {
       handler (nv, ov) {
-        for (let i = 0; i < this.allData.length; i++) {
-          this.stageData[i] = this.allData[i]
-        }
-        let len = this.stageData.length
-        if (len >= 3) {
-          this.progress = this.stageData[2]['progress']
-        }
+        this.dealData()
       },
       deep: true
     }

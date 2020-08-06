@@ -67,44 +67,45 @@ export default {
   data () {
     return {
       dataName: '',
-      showTaskDetail: [true, true, false, false, false],
-      processStatus: ['处理中', '未处理', '未处理', '未处理', '未处理'],
+      showTaskDetail: [false, true, false, false, false],
+      processStatus: ['处理中', '处理中', '未处理', '未处理', '处理中'],
       showStageDetail: [false, false, false, false, false],
       taskId: 0,
       url: 'GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806',
       // 存放初始的所有阶段信息
-      allInitData: [
-        {
-          'id': 1,
-          'progress': 100,
-          'url': 'GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806'
-        },
-        {
-          'id': 2,
-          'progress': 20,
-          'url': 'GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806'
-        },
-        {
-          'id': 3,
-          'progress': 20,
-          'url': 'GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806'
-        },
-        {
-          'id': 4,
-          'progress': 100,
-          'url': 'GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806'
-        },
-        {
-          'id': 5,
-          'progress': 100,
-          'url': 'GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806'
-        }
-      ]
+      allInitData: []
     }
   },
   mounted () {
+    // 数据测试部分
+    this.allInitData = [
+      {
+        'id': 1,
+        'progress': 100,
+        'url': 'GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806'
+      },
+      {
+        'id': 2,
+        'progress': 20,
+        'url': 'GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806'
+      },
+      {
+        'id': 3,
+        'progress': 20,
+        'url': 'GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806'
+      },
+      {
+        'id': 4,
+        'progress': 100,
+        'url': 'GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806'
+      },
+      {
+        'id': 5,
+        'progress': 100,
+        'url': 'GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806'
+      }
+    ]
     let base = this
-    this.taskUrl = 'GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806'
     setTimeout(function () {
       if (!myStropheConn.myStropheConn.connFlag) {
         console.log('not login')
@@ -116,10 +117,24 @@ export default {
         base.messageHandler = base.stropheConn.conn.addHandler(base.onMessage, null, 'message', null, null, null)
       }
     }, 2000)
+
     // 想从上一个界面获取任务id,可以通过路由的形式获取
-    this.taskId = this.$route.query.id
-    this.taskUrl = this.$route.query.url
+
+    let params = this.$route.params
+    this.taskId = params.id
+    this.url = params.url
     console.log(this.taskId)
+
+    // 测试监听
+    // setInterval(function () {
+    //   console.log('change value in allInitData')
+    //   // base.$set(base.allInitData, 2, {
+    //   //   'id': 2,
+    //   //   'progress': 20,
+    //   //   'url': 'GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806'
+    //   // })
+    //   base.allInitData[1].progress = 10
+    // }, 5000)
   },
   destroyed () {
     console.log('Task destroyed')

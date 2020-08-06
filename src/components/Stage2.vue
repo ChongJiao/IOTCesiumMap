@@ -31,24 +31,28 @@
           <div style="float: left; width: 12.5vw; height: 14vw;margin-right: 2vw">
             <img :src="finishedImageUrl0" style="width: 12.5vw; height: 12.5vw; border: solid #4c43ff 2px" v-if="!initialImageShow[0]">
             <vue-loading type="bubbles" color="#d9544e" :size="{ width: '12.5vw', height: '12.5vw' }" style="border: solid #4c43ff 2px" v-if="initialImageShow[0]">
+              加载中
             </vue-loading>
             <p>子任务1</p>
           </div>
           <div style="float: left; width: 12.5vw; height: 14vw;">
             <img :src="finishedImageUrl1" style="width: 12.5vw; height: 12.5vw; border: solid #4c43ff 2px" v-if="!initialImageShow[1]">
             <vue-loading type="bubbles" color="#d9544e" :size="{ width: '12.5vw', height: '12.5vw' }" style="border: solid #4c43ff 2px" v-if="initialImageShow[1]">
+              加载中
             </vue-loading>
             <p>子任务2</p>
           </div>
           <div style="float: left; width: 12.5vw; height: 14vw;margin-right: 2vw">
           <img :src="finishedImageUrl2" style="width: 12.5vw; height: 12.5vw; border: solid #4c43ff 2px" v-if="!initialImageShow[2]">
             <vue-loading type="bubbles" color="#d9544e" :size="{ width: '12.5vw', height: '12.5vw' }" style="border: solid #4c43ff 2px" v-if="initialImageShow[2]">
+              加载中
             </vue-loading>
             <p>子任务3</p>
           </div>
           <div style="float: left; width: 12.5vw; height: 14vw;">
             <img :src="finishedImageUrl3" style="width: 12.5vw; height: 12.5vw; border: solid #4c43ff 2px" v-if="!initialImageShow[3]">
             <vue-loading type="bubbles" color="#d9544e" :size="{ width: '12.5vw', height: '12.5vw' }" style="border: solid #4c43ff 2px" v-if="initialImageShow[3]">
+              加载中
             </vue-loading>
             <p>子任务4</p>
           </div>
@@ -77,15 +81,22 @@ export default {
     this.preUrl = myStropheConn.myStropheConn.httpServer + myStropheConn.myStropheConn.serverDirPath[0]
     console.log(this)
     this.originalImageUrl = this.preUrl + '/' + this.stageUrl + '/' + this.stageUrl + '-MSS2.png'
+    this.dealData()
     let base = this
     this.timer = setInterval(function () {
       base.loadMergeImage(base.stageUrl)
     }, 5000)
   },
-  destroyed() {
+  destroyed () {
     clearInterval(this.timer)
   },
   methods: {
+    dealData () {
+      let len = this.allData.length
+      if (len >= 2) {
+        this.progress = this.allData[1]['progress']
+      }
+    },
     loadMergeImage (url) {
       this.runInPromise(url, '0')
       this.runInPromise(url, '1')
@@ -161,7 +172,6 @@ export default {
   },
   data () {
     return {
-      dealUrl: '',
       progress: 0,
       originalImageUrl: '',
       finishedImageUrl0: '',
@@ -173,21 +183,11 @@ export default {
     }
   },
   watch: {
-    stageUrl (val) {
-      console.log('fucklldasdhsaudie')
-      this.dealUrl = val
-    },
     // 监听数据变化
     allData: {
       handler (nv, ov) {
-        for (let i = 0; i < this.allData.length; i++) {
-          this.stageData[i] = this.allData[i]
-          // console.log(this.stageData[i])
-        }
-        let len = this.stageData.length
-        if (len >= 2) {
-          this.progress = this.stageData[1]['progress']
-        }
+        console.log('handle data')
+        this.dealData()
       },
       deep: true
     }
