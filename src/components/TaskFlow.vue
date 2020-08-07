@@ -138,7 +138,9 @@ export default {
         } else {
          // this.taskSource[taskId - 1]['tasksStatus'][stageId - 1]['processProgress'] = replyJson['process']
           this.$set(this.showStageDetail, index, !this.showStageDetail[index])
-          this.$set(this.taskSource[taskId - 1]['tasksStatus'][stageId - 1]['processProgress'],index,!)
+          let tmp = this.taskSource[taskId - 1]['taskStatus'][stageId - 1]
+          tmp['processProgress'] = replyJson['process']
+          this.$set(this.taskSource[taskId - 1]['tasksStatus'], stageId - 1, tmp)
           // this.taskSource[taskId - 1]['tasksStatus'][stageId - 1]['url'] = replyJson['url']
         }
         break
