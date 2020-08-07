@@ -122,8 +122,7 @@ export default {
     }
   },
   methods: {
-    ready (cesiumInstance) {
-      const { Cesium, viewer } = cesiumInstance
+    ready (cesiumInstance) {        const { Cesium, viewer } = cesiumInstance
 
       viewer.scene.requestRenderMode = true
       // viewer.scene.maximumRenderTimeChange = Infinity
