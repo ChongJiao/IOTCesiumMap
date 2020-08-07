@@ -29,30 +29,26 @@
         </div>
         <div style="width: 30vw; height: 25vw; float:left; position:relative;">
           <div style="float: left; width: 12.5vw; height: 14vw;margin-right: 2vw">
-            <img :src="finishedImageUrl0" style="width: 12.5vw; height: 12.5vw; border: solid #4c43ff 2px" v-if="!initialImageShow[0]">
-            <vue-loading type="bubbles" color="#d9544e" :size="{ width: '12.5vw', height: '12.5vw' }" style="border: solid #4c43ff 2px" v-if="initialImageShow[0]">
-              加载中
+            <img :src="finishedImageUrl0" style="width: 12vw; height: 12vw; border: solid #4c43ff 2px" v-if="!initialImageShow[0]">
+            <vue-loading type="bubbles" color="#d9544e" :size="{ width: '12vw', height: '12vw' }" style="border: solid #4c43ff 2px" v-if="initialImageShow[0]">
             </vue-loading>
             <p>子任务1</p>
           </div>
           <div style="float: left; width: 12.5vw; height: 14vw;">
-            <img :src="finishedImageUrl1" style="width: 12.5vw; height: 12.5vw; border: solid #4c43ff 2px" v-if="!initialImageShow[1]">
-            <vue-loading type="bubbles" color="#d9544e" :size="{ width: '12.5vw', height: '12.5vw' }" style="border: solid #4c43ff 2px" v-if="initialImageShow[1]">
-              加载中
+            <img :src="finishedImageUrl1" style="width: 12vw; height: 12vw; border: solid #4c43ff 2px" v-if="!initialImageShow[1]">
+            <vue-loading type="bubbles" color="#d9544e" :size="{ width: '12vw', height: '12vw' }" style="border: solid #4c43ff 2px" v-if="initialImageShow[1]">
             </vue-loading>
             <p>子任务2</p>
           </div>
           <div style="float: left; width: 12.5vw; height: 14vw;margin-right: 2vw">
-          <img :src="finishedImageUrl2" style="width: 12.5vw; height: 12.5vw; border: solid #4c43ff 2px" v-if="!initialImageShow[2]">
-            <vue-loading type="bubbles" color="#d9544e" :size="{ width: '12.5vw', height: '12.5vw' }" style="border: solid #4c43ff 2px" v-if="initialImageShow[2]">
-              加载中
+          <img :src="finishedImageUrl2" style="width: 12vw; height: 12vw; border: solid #4c43ff 2px" v-if="!initialImageShow[2]">
+            <vue-loading type="bubbles" color="#d9544e" :size="{ width: '12vw', height: '12vw' }" style="border: solid #4c43ff 2px" v-if="initialImageShow[2]">
             </vue-loading>
             <p>子任务3</p>
           </div>
           <div style="float: left; width: 12.5vw; height: 14vw;">
-            <img :src="finishedImageUrl3" style="width: 12.5vw; height: 12.5vw; border: solid #4c43ff 2px" v-if="!initialImageShow[3]">
-            <vue-loading type="bubbles" color="#d9544e" :size="{ width: '12.5vw', height: '12.5vw' }" style="border: solid #4c43ff 2px" v-if="initialImageShow[3]">
-              加载中
+            <img :src="finishedImageUrl3" style="width: 12vw; height: 12vw; border: solid #4c43ff 2px" v-if="!initialImageShow[3]">
+            <vue-loading type="bubbles" color="#d9544e" :size="{ width: '12vw', height: '12vw' }" style="border: solid #4c43ff 2px" v-if="initialImageShow[3]">
             </vue-loading>
             <p>子任务4</p>
           </div>
