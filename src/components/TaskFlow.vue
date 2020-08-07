@@ -137,7 +137,7 @@ export default {
           this.taskSource[taskId - 1]['tasksStatus'] = temp
         } else {
          // this.taskSource[taskId - 1]['tasksStatus'][stageId - 1]['processProgress'] = replyJson['process']
-          this.$set(this.showStageDetail, index, !this.showStageDetail[index])
+          //this.$set(this.showStageDetail, index, !this.showStageDetail[index])
           let tmp = this.taskSource[taskId - 1]['taskStatus'][stageId - 1]
           tmp['processProgress'] = replyJson['process']
           this.$set(this.taskSource[taskId - 1]['tasksStatus'], stageId - 1, tmp)
@@ -147,32 +147,35 @@ export default {
       default:
         break
     }
-    // replyJson=replyJsonFinished
-    // switch (replyJson['type']) {
-    //   case 'stageFinished':
-    //     let taskFinishedId = replyJson['taskId']
-    //     let stageFinishedId = replyJson['stageId']
-    //     if (stageFinishedId > this.taskSource[taskFinishedId - 1].length) {
-    //       let temp = this.taskSource[taskFinishedId - 1]['tasksStatus']
-    //       let singleTaskStatus = {}
-    //       singleTaskStatus['processProgress'] = '100'
-    //       singleTaskStatus['url'] = replyJson['url']
-    //       temp.push(singleTaskStatus)
-    //       this.taskSource[taskFinishedId - 1]['tasksStatus'] = temp
-    //     } else {
-    //       this.taskSource[taskFinishedId - 1]['tasksStatus'][stageFinishedId - 1]['processProgress'] = '100'
-    //       this.taskSource[taskFinishedId - 1]['tasksStatus'][stageFinishedId - 1]['url'] = replyJson['url']
-    //     }
-    //     break
-    // }
-    // setTimeout(function () {
-    //   if (!myStropheConn.myStropheConn.connFlag) {
-    //     console.log('not login')
-    //     myStropheConn.myStropheConn.connecting()
-    //   }
-    // }, 2000)
-    // this.messageHandler = myStropheConn.myStropheConn.conn.addHandler(this.onMessage, null, 'message', null, null, null)
-    // this.initQuery()
+    replyJson=replyJsonFinished
+    switch (replyJson['type']) {
+      case 'stageFinished':
+        let taskFinishedId = replyJson['taskId']
+        let stageFinishedId = replyJson['stageId']
+        if (stageFinishedId > this.taskSource[taskFinishedId - 1].length) {
+          let temp = this.taskSource[taskFinishedId - 1]['tasksStatus']
+          let singleTaskStatus = {}
+          singleTaskStatus['processProgress'] = '100'
+          singleTaskStatus['url'] = replyJson['url']
+          temp.push(singleTaskStatus)
+          this.taskSource[taskFinishedId - 1]['tasksStatus'] = temp
+        } else {
+          let tmp_finish=this.taskSource[taskFinishedIdId-1]['taskStatus'][stageFinishedIdId-1]
+          tmp_finish['processProgress']='100'
+          this.$set(this.taskSource[taskFinishedId-1]['taskStatus'],stageFinishedId-1,tmp_finish)
+          // this.taskSource[taskFinishedId - 1]['tasksStatus'][stageFinishedId - 1]['processProgress'] = '100'
+          // this.taskSource[taskFinishedId - 1]['tasksStatus'][stageFinishedId - 1]['url'] = replyJson['url']
+        }
+        break
+    }
+    setTimeout(function () {
+      if (!myStropheConn.myStropheConn.connFlag) {
+        console.log('not login')
+        myStropheConn.myStropheConn.connecting()
+      }
+    }, 2000)
+    this.messageHandler = myStropheConn.myStropheConn.conn.addHandler(this.onMessage, null, 'message', null, null, null)
+    this.initQuery()
   },
   destroyed () {
     console.log('Cesium destroyed')
