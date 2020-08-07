@@ -126,6 +126,9 @@ export default {
     } else {
       this.taskId = params.id
       this.url = params.url
+      this.dataName = params.name
+      console.log('id is ' + this.taskId)
+      console.log('url is ' + this.url)
     }
 
     // 测试监听
