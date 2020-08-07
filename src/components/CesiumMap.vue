@@ -4,6 +4,12 @@
     <vc-viewer ref="viewer" @ready="ready">
 <!--      <vc-layer-imagery :alpha="alpha" :imageryProvider="imageryProvider" :brightness="brightness" :contrast="contrast">-->
 <!--      </vc-layer-imagery>-->
+      <vc-layer-imagery :alpha="alpha" :brightness="brightness" :contrast="contrast">
+        <vc-provider-imagery-tile-mapservice
+          :url="baseMapUrl"
+          @readyPromise="imageryReady"
+        ></vc-provider-imagery-tile-mapservice>
+      </vc-layer-imagery>
       <vc-layer-imagery :alpha="alpha" :brightness="brightness" :contrast="contrast" v-if="showTileMap">
         <vc-provider-imagery-tile-mapservice
           :url="tileUrl0"
@@ -111,6 +117,7 @@ export default {
       tileUrl1: 'http://localhost:8000/GFData/tileData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806-pansharpen-0',
       tileUrl2: 'http://localhost:8000/GFData/tileData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806-pansharpen-0',
       tileUrl3: 'http://localhost:8000/GFData/tileData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806-pansharpen-0',
+      baseMapUrl: 'http://localhost:8000/BaseMap',
       showTileMap: false
     }
   },
