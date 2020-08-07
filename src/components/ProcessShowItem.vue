@@ -7,10 +7,11 @@
 <!--    </div>-->
     <div class="main">
       <div class="gaofenDiv">{{processShowItem.name}}</div>
-      <div class="col-3" tyle="margin-top: 19vh;margin-bottom: 10vh">
-            <el-progress :text-inside="true" :stroke-width="18" :percentage="this.progress"></el-progress>
+      <div class="col-2" style="margin-top: 2vh;margin-bottom: 2vh">
+            <el-progress :text="进度" text-inside="true" :stroke-width="20" :percentage="this.progress"></el-progress>
        </div>
       <div class="outerDiv">
+        <div:class=
         <div class="div1">
           <div class="imgDiv"><img :src="url[0]" class="imgStyle"></div>
           <span class="nameSpan">数据预处理</span>
@@ -23,7 +24,7 @@
           </div>
           <span class="nameSpan" >几何矫正与融合</span>
         </div>
-        <img src="../assets/fengefu.png" style="width: 10px;">
+        <img src="../assets/fengefu.png" style="width: 20vm;">
         <div class="div1">
           <div class="imgDiv">
             <div style="transform:rotate(30deg)"><img :src="url[2]" class="imgStyle"></div></div>
@@ -40,11 +41,11 @@
             <div style="transform:rotate(30deg)"><img :src="url[4]" class="imgStyle"></div></div>
           <span class="nameSpan">图像目标识别</span>
         </div>
-        <div style="width: 15%">
-          <img v-if="complete" src="../assets/yiwancheng.png" sstyle="margin-top:20px;width: 70px;height: 35px">
+        <div style="width: 10%">
+          <img v-if="complete" src="../assets/yiwancheng.png" style="margin-top:20vm;margin-right:10vm;width: 70px;height: 35px" onclick="jumpToDetail()">
         </div>
-        <div style="width: 15%">
-          <img v-if="!complete"  src="../assets/jinxingzhong.png" style="margin-top:40vm;width: 8vm;height: 4vm">
+        <div style="width: 10%">
+          <img v-if="!complete"  src="../assets/jinxingzhong.png" style="margin-top:2vw;margin-left:1vw;margin-right:10vw; width:3vw;height: 4vw" onclick="jumpToDetail()">
         </div>
       </div>
     </div>
@@ -154,6 +155,9 @@ export default {
   },
 
   methods: {
+    jumpToDetail () {
+      this.$router.push({path: '/TaskDetail', query: {id: this.processShowItem.id,url:this.processShowItem.taskStatus[0].url}})
+    }
 
   }
 }
@@ -172,8 +176,8 @@ export default {
     height: 2vh;
   }
   .gaofenDiv{
-    margin-top:5px;
-    margin-left:5px ;
+    margin-top:10px;
+    margin-left:10px ;
     background-image: url(../assets/gaofen.png);
     background-position:left;
     background-repeat:no-repeat;
@@ -189,27 +193,30 @@ export default {
     justify-content: space-around;
   }
   .div1{
-    width: 20%;
+    width: 25vw;
+    height: 8vw;
     //overflow: auto;
     border: solid 1px grey;
     display: inline-block;
   }
   .imgDiv{
     border-bottom: solid 1px grey;
-    width: 50px;
-    margin:10px;
+    width: 6vw;
+    height: 6vw;
+    margin:0.5vw;
     /*transform:rotate(30deg)*/
   }
   .imgStyle{
-    width: 50px;
-    height: 50px;
+    width: 5vw;
+    height: 5vw;
     display: block;
-    margin-bottom: 10px;
+    margin: 0.5vw;
+    margin-top: 1.5vw;
   }
   .nameSpan{
-    margin-top: -50px;
-    margin-left: 70px;
+    margin-top: -5.5vw;
+    margin-left: 7vw;
     display: block;
-    font-size: 14px;
+    font-size: 20px;
   }
 </style>

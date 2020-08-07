@@ -126,8 +126,9 @@ export default {
         let stageId = replyJsonProcessed['stageId']
         console.log(this.taskSource[taskId - 1]['tasksStatus'].length)
         console.log(stageId)
+       // console.log(this.taskSource[taskId - 1]['tasksStatus'].length)
         if (stageId > this.taskSource[taskId - 1]['tasksStatus'].length) {
-          console.log(taskId)
+          console.log("dhfduifh")
           let temp = this.taskSource[taskId - 1]['tasksStatus']
           let singleTaskStatus = {}
           // singleTaskStatus['processId'+processId.toString()]=processId.toString()//不同的阶段
@@ -138,11 +139,15 @@ export default {
         } else {
          // this.taskSource[taskId - 1]['tasksStatus'][stageId - 1]['processProgress'] = replyJson['process']
           //this.$set(this.showStageDetail, index, !this.showStageDetail[index])
-          let tmp = this.taskSource[taskId - 1]['taskStatus'][stageId - 1]
-          tmp['processProgress'] = replyJson['process']
-          this.$set(this.taskSource[taskId - 1]['tasksStatus'], stageId - 1, tmp)
+          let tmp = this.taskSource[taskId - 1]
+          tmp['tasksStatus'][stageId - 1]['processProgress'] = replyJson['process']
+          console.log(temp)
+          this.$set(this.taskSource, taskId - 1, tmp)
+          console.log(this.taskSource)
+
           // this.taskSource[taskId - 1]['tasksStatus'][stageId - 1]['url'] = replyJson['url']
         }
+        console.log(this.taskSource)
         break
       default:
         break
@@ -152,7 +157,11 @@ export default {
       case 'stageFinished':
         let taskFinishedId = replyJson['taskId']
         let stageFinishedId = replyJson['stageId']
-        if (stageFinishedId > this.taskSource[taskFinishedId - 1].length) {
+        console.log(this.taskSource)
+        console.log(taskFinishedId)
+        console.log(stageFinishedId)
+        console.log(this.taskSource[taskFinishedId - 1]['tasksStatus'].length)
+        if (stageFinishedId > this.taskSource[taskFinishedId - 1]['tasksStatus'].length) {
           let temp = this.taskSource[taskFinishedId - 1]['tasksStatus']
           let singleTaskStatus = {}
           singleTaskStatus['processProgress'] = '100'
@@ -160,9 +169,15 @@ export default {
           temp.push(singleTaskStatus)
           this.taskSource[taskFinishedId - 1]['tasksStatus'] = temp
         } else {
-          let tmp_finish=this.taskSource[taskFinishedIdId-1]['taskStatus'][stageFinishedIdId-1]
-          tmp_finish['processProgress']='100'
-          this.$set(this.taskSource[taskFinishedId-1]['taskStatus'],stageFinishedId-1,tmp_finish)
+          console.log("?????????????????")
+
+        //  console.log(this.taskSource)
+          let tmp_finish=this.taskSource[taskFinishedId-1]
+        //   console.log(tmp_finish)
+          tmp_finish['tasksStatus'][stageFinishedId-1]['processProgress']='100'
+          // console.log(taskFinishedId)
+          this.$set(this.taskSource,taskFinishedId-1,tmp_finish)
+          console.log(this.taskSource)
           // this.taskSource[taskFinishedId - 1]['tasksStatus'][stageFinishedId - 1]['processProgress'] = '100'
           // this.taskSource[taskFinishedId - 1]['tasksStatus'][stageFinishedId - 1]['url'] = replyJson['url']
         }
