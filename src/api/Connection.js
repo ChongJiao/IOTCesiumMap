@@ -8,7 +8,7 @@ class StropheConn {
   userPassword = 'jiaochong123'
   BOSH_SERVER = 'http://127.0.0.1:7070/http-bind/'
   controlJID = 'admin@skh'
-  httpServer ='http://localhost:8000/GFData/'
+  httpServer ='http://192.168.100.125:8000/GFData/'
   taskFlowList = ['computercenter@desktop-98tu7o0', 'imgenhance@desktop-98tu7o0', 'imgcesium@desktop-98tu7o0', 'imgdetector@desktop-98tu7o0']
   serverDirPath = ['srcData', 'imgSrcData', 'imgEnData', 'tileData', 'tileDeData']
   taskLength = 0

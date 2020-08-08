@@ -32,37 +32,17 @@ export default {
           base.taskListContent[1].taskStatus[base.runIndex].processProgress = '10'
           base.taskListContent[1].taskStatus[base.runIndex - 1].processProgress = progress.toString()
         }
-      } else {
         base.taskListContent[1].taskStatus[base.runIndex].processProgress = progress.toString()
       }
     }, 5000)
-    // replyJson=replyJsonFinished
-    // switch (replyJson['type']) {
-    //   case 'stageFinished':
-    //     let taskFinishedId = replyJson['taskId']
-    //     let stageFinishedId = replyJson['stageId']
-    //     if (stageFinishedId > this.taskSource[taskFinishedId - 1].length) {
-    //       let temp = this.taskSource[taskFinishedId - 1]['tasksStatus']
-    //       let singleTaskStatus = {}
-    //       singleTaskStatus['processProgress'] = '100'
-    //       singleTaskStatus['url'] = replyJson['url']
-    //       temp.push(singleTaskStatus)
-    //       this.taskSource[taskFinishedId - 1]['tasksStatus'] = temp
-    //     } else {
-    //       this.taskSource[taskFinishedId - 1]['tasksStatus'][stageFinishedId - 1]['processProgress'] = '100'
-    //       this.taskSource[taskFinishedId - 1]['tasksStatus'][stageFinishedId - 1]['url'] = replyJson['url']
-    //     }
-    //     break
-    // }
-    // setTimeout(function () {
-    //   if (!myStropheConn.myStropheConn.connFlag) {
-    //     console.log('not login')
-    //     myStropheConn.myStropheConn.connecting()
-    //   }
-    // }, 2000)
-    // this.messageHandler = myStropheConn.myStropheConn.conn.addHandler(this.onMessage, null, 'message', null, null, null)
-    // this.initQuery()
-  },
+    setTimeout(function () {
+      if (!myStropheConn.myStropheConn.connFlag) {
+        console.log('not login')
+        myStropheConn.myStropheConn.connecting()
+      }
+    }, 2000)
+    this.messageHandler = myStropheConn.myStropheConn.conn.addHandler(this.onMessage, null, 'message', null, null, null)
+    this.initQuery()  },
   destroyed () {
     console.log('Cesium destroyed')
     // myStropheConn.myStropheConn.conn.deleteHandler(this.messageHandler)
@@ -116,17 +96,15 @@ export default {
             'url': 'GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806'
           }]
         }
-      ]
-      // taskSource: []
-    }
+      ],
+      taskSource: []    }
   },
   methods: {
-    initQuery () {
-      let msgContent = '{\'type\':\'queryTask\',\'userJID\':\'{0}\'}'
+    initQuery ()       let msgContent = '{\'type\':\'queryTask\',\'userJID\':\'{0}\'}'
       msgContent = String.format(msgContent, myStropheConn.myStropheConn.userJID)
       myStropheConn.myStropheConn.SendMessage(msgContent)
     },
-    onMessage (msg) {
+      onMessage (msg) {
       console.log('all tasks process got')
       let type = msg.getAttribute('type')
       let elems = msg.getElementsByTagName('body')
@@ -150,7 +128,7 @@ export default {
                 tmp['name'] = task_data['name']
                 tmp['position'] = task_data['position']
                 let taskStatus = task_data['taskStatus']
-                tmp['tasksStatus'] = []
+                tmp['taskStatus'] = []
                 // eslint-disable-next-line camelcase
                 for (let index_step in taskStatus) {
                   let singleTaskStatus = {}
@@ -164,7 +142,7 @@ export default {
                   // {
 
                   // }
-                  tmp['tasksStatus'].push(singleTaskStatus)
+                  tmp['taskStatus'].push(singleTaskStatus)
                 }
 
                 // tmp['taskStatus']=taskStatus
@@ -175,37 +153,60 @@ export default {
               console.log(replyJson)
               let taskId = replyJson['taskId']
               let stageId = replyJson['stageId']
-              console.log(this.taskSource[taskId - 1]['tasksStatus'].length)
+              console.log(this.taskSource[taskId - 1]['taskStatus'].length)
               console.log(stageId)
-              if (stageId > this.taskSource[taskId - 1]['tasksStatus'].length) {
-                console.log(taskId)
-                let temp = this.taskSource[taskId - 1]['tasksStatus']
+              // console.log(this.taskSource[taskId - 1]['tasksStatus'].length)
+              if (stageId > this.taskSource[taskId - 1]['taskStatus'].length) {
+                console.log("dhfduifh")
+                let temp = this.taskSource[taskId - 1]['taskStatus']
                 let singleTaskStatus = {}
                 // singleTaskStatus['processId'+processId.toString()]=processId.toString()//不同的阶段
                 singleTaskStatus['processProgress'] = replyJson['process']
                 //  singleTaskStatus['url'] = replyJson['url']
                 temp.push(singleTaskStatus)
-                this.taskSource[taskId - 1]['tasksStatus'] = temp
+                this.taskSource[taskId - 1]['taskStatus'] = temp
               } else {
-                this.taskSource[taskId - 1]['tasksStatus'][stageId - 1]['processProgress'] = replyJson['process']
+                // this.taskSource[taskId - 1]['tasksStatus'][stageId - 1]['processProgress'] = replyJson['process']
+                //this.$set(this.showStageDetail, index, !this.showStageDetail[index])
+                // let tmp = this.taskSource[taskId - 1]
+                // tmp['tasksStatus'][stageId - 1]['processProgress'] = replyJson['process']
+                // console.log(temp)
+                // this.$set(this.taskSource, taskId - 1, tmp)
+                // console.log(this.taskSource)
+                this.taskSource[taskId - 1].taskStatus[stageId - 1].processProgress= replyJson['process']
                 // this.taskSource[taskId - 1]['tasksStatus'][stageId - 1]['url'] = replyJson['url']
               }
+              console.log(this.taskSource)
               break
             case 'stageFinished':
               let taskFinishedId = replyJson['taskId']
               let stageFinishedId = replyJson['stageId']
-              if (stageFinishedId > this.taskSource[taskFinishedId - 1].length) {
-                let temp = this.taskSource[taskFinishedId - 1]['tasksStatus']
+              console.log(this.taskSource)
+              console.log(taskFinishedId)
+              console.log(stageFinishedId)
+              console.log(this.taskSource[taskFinishedId - 1]['taskStatus'].length)
+              if (stageFinishedId > this.taskSource[taskFinishedId - 1]['taskStatus'].length) {
+                let temp = this.taskSource[taskFinishedId - 1]['taskStatus']
                 let singleTaskStatus = {}
                 singleTaskStatus['processProgress'] = '100'
                 singleTaskStatus['url'] = replyJson['url']
                 temp.push(singleTaskStatus)
-                this.taskSource[taskFinishedId - 1]['tasksStatus'] = temp
+                this.taskSource[taskFinishedId - 1]['taskStatus'] = temp
               } else {
-                console.log('888')
-                this.taskSource[taskFinishedId - 1]['tasksStatus'][stageFinishedId - 1]['processProgress'] = '100'
-                this.taskSource[taskFinishedId - 1]['tasksStatus'][stageFinishedId - 1]['url'] = replyJson['url']
-              }
+ 				console.log("?????????????????")
+
+                console.log(this.taskSource)
+                //   let tmp_finish=this.taskSource[taskFinishedId-1]
+                // //   console.log(tmp_finish)
+                //   tmp_finish['tasksStatus'][stageFinishedId-1]['processProgress']='100'
+                //   // console.log(taskFinishedId)
+                //   this.$set(this.taskSource,taskFinishedId-1,tmp_finish)
+                console.log(this.taskSource)
+                //   this.taskSource[taskId - 1]['tasksStatus'][stageId - 1]['processProgress'] =
+                let a = parseInt(this.taskSource[taskFinishedId - 1].taskStatus[stageFinishedId - 1].processProgress)
+                a += 1
+                this.taskSource[taskFinishedId - 1].taskStatus[stageFinishedId - 1].processProgress = a.toString()
+                this.taskSource[taskFinishedId - 1]['taskStatus'][stageFinishedId - 1]['url'] = replyJson['url']              }
               break
             default:
               break
