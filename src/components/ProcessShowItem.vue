@@ -7,14 +7,17 @@
 <!--    </div>-->
     <div class="main">
    <div class="div-name">
-        <div style="text-align: left;font-family: 华光黑体_CNKI; font-size: 1vw">名称:{{processData.name}} </div>
-        <div style="display: flex;display:-webkit-flex;align-items:stretch;">
+        <div style="text-align: left;font-family: 华光黑体_CNKI;font-size:1vw">名称:{{processData.name}}</div>
+<!--        <div style="text-align: left;font-family: 华光黑体_CNKI; font-size: 1vw">名称:{{processData.name}} </div>-->
+        <div style="display:flex;align-items:stretch;">
+<!--        <div style="display: flex;display:-webkit-flex;align-items:stretch;">-->
           <div style="height:inherit;font-family: 华光黑体_CNKI; font-size: 1vw">进度:</div>
           <div style="height:inherit;width: 40vw;">
             <el-progress :text-inside="true" :stroke-width="20" :percentage="this.progress"></el-progress>
           </div>
         </div>
-      </div>      <div class="outerDiv">
+      </div>
+      <div class="outerDiv">
    <div :class="this.runStatus[0] === 0 ? 'innerNotRun' : this.runStatus[0] === 1 ? 'innerRun' : 'innerFinished'">
           <div class="nameSpan">步骤1: 对数据预处理</div>
           <div class="imgDiv">
@@ -22,6 +25,7 @@
             <vue-loading type="bubbles" color="#d9544e" class="imgStyle" :size="{ width: '50%' }" v-if="initialImageShow[0]">
             </vue-loading>
           </div>        </div>
+        <div style="width:0.5%"></div>
 <!--        <img src="../assets/fengefu.png" style="width: 1vw;">-->
         <div :class="this.runStatus[1] === 0 ? 'innerNotRun' : this.runStatus[1] === 1 ? 'innerRun' : 'innerFinished'">
           <div class="nameSpan">步骤2: 图像矫正与融合</div>
@@ -31,7 +35,8 @@
             </vue-loading>
           </div>
         </div>
---        <img src="../assets/fengefu.png" style="width: 1vw;">-->
+        <div style="width:0.5%"></div>
+<!--        <img src="../assets/fengefu.png" style="width: 1vw;">-->
         <div :class="this.runStatus[2] === 0 ? 'innerNotRun' : this.runStatus[2] === 1 ? 'innerRun' : 'innerFinished'">
           <div class="nameSpan">步骤3: 图像增强去云去雾</div>          <div class="imgDiv">
             <img :src="url[2]" class="imgStyle" v-if="!initialImageShow[2]">
@@ -39,6 +44,7 @@
             </vue-loading>
           </div>
         </div>
+        <div style="width:0.5%"></div>
 <!--        <img src="../assets/fengefu.png" style="width: 1vw;">-->
         <div :class="this.runStatus[3] === 0 ? 'innerNotRun' : this.runStatus[3] === 1 ? 'innerRun' : 'innerFinished'">
           <div class="nameSpan">步骤4：对图像瓦片切分</div>
@@ -48,6 +54,7 @@
             </vue-loading>
           </div>
         </div>
+        <div style="width:0.5%"></div>
 <!--        <img src="../assets/fengefu.png" style="width: 1vw;">-->
         <div :class="this.runStatus[4] === 0 ? 'innerNotRun' : this.runStatus[4] === 1 ? 'innerRun' : 'innerFinished'">
           <div class="nameSpan">步骤5：图像目标识别 </div>
@@ -57,8 +64,8 @@
             </vue-loading>
           </div>
         </div>
-     <el-button type="success" v-if="complete" @click="jumpToTaskDetail">已完成</el-button>
-        <el-button type="warning" v-if="!complete" @click="jumpToTaskDetail">进行中</el-button>
+     <el-button type="primary" v-if="complete" @click="jumpToTaskDetail">已完成</el-button>
+        <el-button type="process" v-if="!complete" @click="jumpToTaskDetail">进行中</el-button>
 
       </div>
     </div>
@@ -185,7 +192,8 @@ export default {
           name: this.processData.name
         }
       })
-    }  }
+    }
+  }
 }
 </script>
 
@@ -193,7 +201,7 @@ export default {
   .main{
     width: 85vw;
     margin-top: 0.5vw;
-    border: 0.3vw solid dodgerblue;
+    border: 0.1vw solid CadetBlue;
     border-radius: 0.5vw;
     display: inline-block;
   }
@@ -208,27 +216,41 @@ export default {
     display: flex;
     /*justify-content: space-around;*/
   }
+  .el-button--primary
+  {
+    color:OliveDrab;
+    background-color:LemonChiffon;
+    border: 0.3vw solid white;
+    font-size: 0.8vw;
+  }
+  .el-button--process
+  {
+    color:IndianRed;
+    background-color:Bisque;
+    border: 0.3vw solid white;
+    font-size: 0.8vw;
+  }
   .innerNotRun{
-    background-color: #999999;
-    width: 25vw;
-    height: 8vw;
-    border: solid 1px grey;
+    background-color:AliceBlue;
+    width: 20%;
+    /*height: 8vw;*/
+    border: solid 2px CadetBlue;
     border-radius: 0.5vw;
     padding: 0.1vw;
     position: relative;
   }
   .innerRun {
-    background-color: red;
+    background-color: PeachPuff;
     width: 20%;
-    border: solid 1px grey;
+    border: solid 2px	CadetBlue;
     border-radius: 0.5vw;
     padding: 0.1vw;
     position: relative;
   }
   .innerFinished{
-    background-color: greenyellow;
+    background-color: Honeydew;
     width: 20%;
-    border: solid 1px grey;
+    border: solid 2px 	CadetBlue;
     border-radius: 0.5vw;
     padding: 0.1vw;
     position: relative;
@@ -249,7 +271,7 @@ export default {
   }
   .imgStyle{
   margin: auto;
-    border-bottom: solid 1px grey;
+    border-bottom: solid 1px	CadetBlue;
     width: 50%;    display: block;
   }
 

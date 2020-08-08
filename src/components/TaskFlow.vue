@@ -1,7 +1,7 @@
 <template>
   <div class="Tbody">
   <div class="title">任务列表</div>
-  <div v-for="(data, index) in taskSource" :key="index">
+  <div v-for="(data, index) in taskListContent" :key="index">
     <ProcessShowItem :processData="data">
     </ProcessShowItem>
   </div>
@@ -22,20 +22,20 @@ export default {
     console.log('Cesium mounted')
     let base = this
     this.runIndex = 2
- //    setInterval(function () {
- //      let progress = parseInt(base.taskListContent[1].taskStatus[base.runIndex].processProgress) + 10
- //      if (progress >= 100) {
- //        progress = 100
- //        if (base.taskListContent[1].taskStatus.length < 5) {
- //          base.taskListContent[1].taskStatus.push(base.taskListContent[1].taskStatus[2])
- //          base.runIndex += 1
- //          base.taskListContent[1].taskStatus[base.runIndex].processProgress = '10'
- //          base.taskListContent[1].taskStatus[base.runIndex - 1].processProgress = progress.toString()
- //        }
- // } else {
- //        base.taskListContent[1].taskStatus[base.runIndex].processProgress = progress.toString()
- //      }
- //    }, 5000)
+    setInterval(function () {
+      let progress = parseInt(base.taskListContent[1].taskStatus[base.runIndex].processProgress) + 10
+      if (progress >= 100) {
+        progress = 100
+        if (base.taskListContent[1].taskStatus.length < 5) {
+          base.taskListContent[1].taskStatus.push(base.taskListContent[1].taskStatus[2])
+          base.runIndex += 1
+          base.taskListContent[1].taskStatus[base.runIndex].processProgress = '10'
+          base.taskListContent[1].taskStatus[base.runIndex - 1].processProgress = progress.toString()
+        }
+ } else {
+        base.taskListContent[1].taskStatus[base.runIndex].processProgress = progress.toString()
+      }
+    }, 5000)
     setTimeout(function () {
       if (!myStropheConn.myStropheConn.connFlag) {
         console.log('not login')
