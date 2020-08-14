@@ -23,20 +23,16 @@
       <div class="showImage">
         <div style="width: 30vw; height: 25vw; float:left; position:relative;">
           <div style="float: left; width: 12.5vw; height: 14vw;margin-right: 2vw">
-            <img :src="originalImageUrl0" style="width: 12.5vw; height: 12.5vw; border: solid #4c43ff 2px">
-            <p>子任务1</p>
+            <img :src="originalImageUrl0" style="width: 12vw; height: 12vw; border: solid #4c43ff 2px">
           </div>
           <div style="float: left; width: 12.5vw; height: 14vw;">
-            <img :src="originalImageUrl1" style="width: 12.5vw; height: 12.5vw; border: solid #4c43ff 2px">
-            <p>子任务2</p>
+            <img :src="originalImageUrl1" style="width: 12vw; height: 12vw; border: solid #4c43ff 2px">
           </div>
           <div style="float: left; width: 12.5vw; height: 14vw;margin-right: 2vw">
-            <img :src="originalImageUrl2" style="width: 12.5vw; height: 12.5vw; border: solid #4c43ff 2px">
-            <p>子任务3</p>
+            <img :src="originalImageUrl2" style="width: 12vw; height: 12vw; border: solid #4c43ff 2px">
           </div>
           <div style="float: left; width: 12.5vw; height: 14vw;">
-            <img :src="originalImageUrl3" style="width: 12.5vw; height: 12.5vw; border: solid #4c43ff 2px">
-            <p>子任务4</p>
+            <img :src="originalImageUrl3" style="width: 12vw; height: 12vw; border: solid #4c43ff 2px">
           </div>
         </div>
         <div style="float:left;">
@@ -44,28 +40,24 @@
         </div>
         <div style="width: 30vw; height: 25vw; float:left; position:relative;">
           <div style="float: left; width: 12.5vw; height: 14vw;margin-right: 2vw">
-            <img :src="finishedImageUrl0" style="width: 12.5vw; height: 12.5vw; border: solid #4c43ff 2px" v-if="!initialImageShow[0]">
-            <vue-loading type="bubbles" color="#d9544e" :size="{ width: '12.5vw', height: '12.5vw' }" style="border: solid #4c43ff 2px" v-if="initialImageShow[0]">
+            <img :src="finishedImageUrl0" style="width: 12vw; height: 12vw; border: solid #4c43ff 2px" v-if="!initialImageShow[0]">
+            <vue-loading type="bubbles" color="#d9544e" :size="{ width: '12vw', height: '12vw' }" style="border: solid #4c43ff 2px" v-if="initialImageShow[0]">
             </vue-loading>
-            <p>子任务1</p>
           </div>
           <div style="float: left; width: 12.5vw; height: 14vw;">
-            <img :src="finishedImageUrl1" style="width: 12.5vw; height: 12.5vw; border: solid #4c43ff 2px" v-if="!initialImageShow[1]">
-            <vue-loading type="bubbles" color="#d9544e" :size="{ width: '12.5vw', height: '12.5vw' }" style="border: solid #4c43ff 2px" v-if="initialImageShow[1]">
+            <img :src="finishedImageUrl1" style="width: 12vw; height: 12vw; border: solid #4c43ff 2px" v-if="!initialImageShow[1]">
+            <vue-loading type="bubbles" color="#d9544e" :size="{ width: '12vw', height: '12vw' }" style="border: solid #4c43ff 2px" v-if="initialImageShow[1]">
             </vue-loading>
-            <p>子任务2</p>
           </div>
           <div style="float: left; width: 12.5vw; height: 14vw;margin-right: 2vw">
-            <img :src="finishedImageUrl2" style="width: 12.5vw; height: 12.5vw; border: solid #4c43ff 2px" v-if="!initialImageShow[2]">
-            <vue-loading type="bubbles" color="#d9544e" :size="{ width: '12.5vw', height: '12.5vw' }" style="border: solid #4c43ff 2px" v-if="initialImageShow[2]">
+            <img :src="finishedImageUrl2" style="width: 12vw; height: 12vw; border: solid #4c43ff 2px" v-if="!initialImageShow[2]">
+            <vue-loading type="bubbles" color="#d9544e" :size="{ width: '12vw', height: '12vw' }" style="border: solid #4c43ff 2px" v-if="initialImageShow[2]">
             </vue-loading>
-            <p>子任务3</p>
           </div>
           <div style="float: left; width: 12.5vw; height: 14vw;">
-            <img :src="finishedImageUrl3" style="width: 12.5vw; height: 12.5vw; border: solid #4c43ff 2px" v-if="!initialImageShow[3]">
-            <vue-loading type="bubbles" color="#d9544e" :size="{ width: '12.5vw', height: '12.5vw' }" style="border: solid #4c43ff 2px" v-if="initialImageShow[3]">
+            <img :src="finishedImageUrl3" style="width: 12vw; height: 12vw; border: solid #4c43ff 2px" v-if="!initialImageShow[3]">
+            <vue-loading type="bubbles" color="#d9544e" :size="{ width: '12vw', height: '12vw' }" style="border: solid #4c43ff 2px" v-if="initialImageShow[3]">
             </vue-loading>
-            <p>子任务4</p>
           </div>
         </div>
         <!--        </div>-->
@@ -87,8 +79,7 @@ export default {
     this.preUrl = myStropheConn.myStropheConn.httpServer + myStropheConn.myStropheConn.serverDirPath[1]
     console.log(this.baseUrl)
     console.log(this.preUrl)
-    this.progress = this.allData[2]['progress']
-    let url = this.allData[2]['url']
+    console.log(this.allData)
     this.originalImageUrl0 = this.preUrl + '/' + this.stageUrl + '/' + this.stageUrl + '-pansharpen-0-g-r.png'
     this.originalImageUrl1 = this.preUrl + '/' + this.stageUrl + '/' + this.stageUrl + '-pansharpen-1-g-r.png'
     this.originalImageUrl2 = this.preUrl + '/' + this.stageUrl + '/' + this.stageUrl + '-pansharpen-2-g-r.png'
@@ -98,7 +89,7 @@ export default {
 
     let base = this
     this.timer = setInterval(function () {
-      base.loadEnhanceImage(url)
+      base.loadEnhanceImage(base.stageUrl)
     }, 5000)
   },
   destroyed () {
@@ -125,7 +116,7 @@ export default {
     dealData () {
       let len = this.allData.length
       if (len >= 3) {
-        this.progress = this.allData[2]['progress']
+        this.progress = parseInt(this.allData[2]['progress'])
       }
     },
     loadEnhanceImage (url) {

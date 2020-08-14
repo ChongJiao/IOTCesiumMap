@@ -4,14 +4,13 @@ class StropheConn {
   conn = null
   // userJID = 'wz@127.0.0.1'
   // userPassword = '123456'
-  userJID = 'jc@skh'
-  userPassword = 'jiaochong123'
-  BOSH_SERVER = 'http://127.0.0.1:7070/http-bind/'
-  controlJID = 'admin@skh'
-  httpServer ='http://192.168.100.125:8000/GFData/'
-  taskFlowList = ['computercenter@desktop-98tu7o0', 'imgenhance@desktop-98tu7o0', 'imgcesium@desktop-98tu7o0', 'imgdetector@desktop-98tu7o0']
+  userJID = 'user_001@desktop-98tu7o0'
+  userCode = 'user_001'
+  userPassword = 'user_001'
+  BOSH_SERVER = 'http://192.168.1.121:7070/http-bind/'
+  httpServer ='http://192.168.1.121:8000/GFData/'
   serverDirPath = ['srcData', 'imgSrcData', 'imgEnData', 'tileData', 'tileDeData']
-  taskLength = 0
+  gkName = 'guankong@desktop-98tu7o0'
   setUserJid (user) {
     this.userJID = user
   }
@@ -24,11 +23,13 @@ class StropheConn {
     try {
       if (typeof JSON.parse(str) === 'object') {
         return true
+      } else {
+        return false
       }
     } catch (e) {
+      console.log('json parse error')
       return false
     }
-    return false
   }
   // 查询区域
   queryRegion (positions) {
@@ -66,19 +67,59 @@ class StropheConn {
     }
   }
   // 构建任务
-  MakeTask (url) {
+  MakeTask (url, id) {
     let taskFlowStr = '['
     for (let v in this.taskFlowList) {
       taskFlowStr += '"' + this.taskFlowList[v] + '"' + ','
     }
     taskFlowStr = taskFlowStr.substr(0, taskFlowStr.length - 1) + ']'
-    let msgContent = '{"type": "newTask", "url":"{0}", "content": {1}}'
-    msgContent = String.format(msgContent, url, taskFlowStr)
+    let msgContent = '{"type": "newTask", "url":"{0}", "satelliteId":"{1}","content": {2}}'
+    msgContent = String.format(msgContent, url, parseInt(id), taskFlowStr)
     console.log('send message is' + msgContent)
-    this.SendMessage(this.controlJID, msgContent)
-    this.taskLength += 1
+    this.SendMessage(msgContent)
   }
-
+  RandomValue (minVal, maxVal) {
+    return Math.random() * (maxVal - minVal) + minVal
+  }
+  // 入退网申请 pass
+  RequestInOrOutToNet (requestType) {
+    let msgContent = '{"typeid": 21101, "usercode":"{0}", "requesttype": {1}, "latitude": {2}, "longitude": {3}}'
+    let latitude = this.RandomValue(0, 90)
+    let longitude = this.RandomValue(0, 180)
+    msgContent = String.format(msgContent, this.userCode, requestType, latitude, longitude)
+    this.SendMessage(msgContent)
+  }
+  // 资源订阅查询协议 pass
+  RequestReSource () {
+    let msgContent = '{"typeid": 21103, "usercode":"{0}", "type": "query", "key": ""}'
+    msgContent = String.format(msgContent, this.userCode)
+    this.SendMessage(msgContent)
+  }
+  // 资源订阅/退订请求 pass
+  ResourceSubUnSub (requestType, itemList) {
+    let msgContent = '{"typeid": 21104, "usercode":"{0}", "requesttype": {1}, "resource": {2}}'
+    msgContent = String.format(msgContent, this.userCode, requestType, JSON.stringify(itemList))
+    this.SendMessage(msgContent)
+  }
+  replyFinished (taskid, address) {
+    let msgContent = '{"typeid": 21107, "nodecode":"{0}", "taskid": {1}, "date": "{2}", "result": {3}, "address": "{4}"}'
+    msgContent = String.format(msgContent, this.userCode, taskid, this.getDate(), 1, address)
+    this.SendMessage(msgContent)
+  }
+  replyStatuc (){
+    let msgContent = '{"typeid": 21215, "usercode":"{0}", "latitude": {1}, "longitude": {2}}'
+    let latitude = this.RandomValue(0, 90)
+    let longitude = this.RandomValue(0, 180)
+    msgContent = String.format(msgContent, this.userCode, latitude, longitude)
+    this.SendMessage(msgContent)
+  }
+  getDate () {
+    let date = new Date()
+    let year = date.getFullYear()
+    let month = date.getMonth()
+    let day = date.getDate()
+    return String(year) + '-' + String(month) + '-' + String(day)
+  }
   onMessage (msg) {
     // TODO 全局的消息回调函数，但仅处理部分消息接口: 包括任务状态监听，各节点状态监听等
     let type = msg.getAttribute('type')
@@ -90,12 +131,6 @@ class StropheConn {
       // console.log(msgContent)
       if (myStropheConn.isJsonStr(msgContent)) {
         // TODO 具体状态消息处理, 消息实体储存在该类中，以供其他组件调用
-        if (msgContent['type']) {
-          switch (msgContent['type']) {
-            case 'taskFinished':
-              this.taskLength -= 1
-          }
-        }
       }
       // console.log(fromJid + ' send message to ' + toJid + ' and the message content is ' + msgContent)
     }
@@ -105,7 +140,7 @@ class StropheConn {
   SendMessage (message) {
     if (this.connFlag) {
       let msg = Strophe.$msg({
-        to: this.controlJID,
+        to: this.gkName,
         from: this.userJID,
         type: 'chat'
       }).c('body', message)

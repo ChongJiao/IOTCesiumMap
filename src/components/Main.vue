@@ -1,8 +1,8 @@
 <template>
     <div class="body">
-      <div>
-        <left></left>
-      </div>
+<!--      <div>-->
+<!--        <left></left>-->
+<!--      </div>-->
       <div>
         <router-view></router-view>
       </div>
