@@ -45,6 +45,7 @@
         <el-button id="draw" icon="el-icon-thumb" v-on:click="toggle('handlerPolygon')" style="margin-top: 2%; margin-left:0.2vw">绘制</el-button>
         <el-button type="primary" icon="el-icon-delete" v-on:click="clear">清除</el-button>
         <el-button type="danger" icon="el-icon-search" v-on:click="MakeTask">执行</el-button>
+      <el-button type="danger" icon="el-icon-search" v-on:click="requestSource">资源</el-button>
       <el-button type="success" v-on:click="requestInOutNet" >{{NetStatus}} </el-button>
     </div>
     <el-tag class="rightList re1" v-on:click="showResource">
@@ -140,7 +141,7 @@ import RightItem from './RightItem'
 export default {
   name: 'CesiumMap',
   components: {RightItem},
-
+  // 状态信息添加在本地
   mounted () {
     console.log('Cesium mounted')
     let base = this
@@ -150,10 +151,12 @@ export default {
         myStropheConn.myStropheConn.connecting()
         setTimeout(function () {
           base.messageHandler = myStropheConn.myStropheConn.conn.addHandler(base.onMessage, null, 'message', null, null, null)
+          // myStropheConn.myStropheConn.RequestInOrOutToNet(1)
         }, 2000)
       } else {
         console.log('has login')
         base.messageHandler = myStropheConn.myStropheConn.conn.addHandler(base.onMessage, null, 'message', null, null, null)
+        // myStropheConn.myStropheConn.RequestInOrOutToNet(1)
       }
     }, 2000)
 
@@ -185,25 +188,7 @@ export default {
       bmKey: 'AgcbDCAOb9zMfquaT4Z-MdHX4AsHUNvs7xgdHefEA5myMHxZk87NTNgdLbG90IE-',
       Cesium: null,
       viewer: null,
-      resourceItems: [
-        {
-          id: '1',
-          name: '武汉',
-          level: '1',
-          fathercode: '0'
-        },
-        {
-          id: '2',
-          name: '武汉',
-          level: '1',
-          fathercode: '0'
-        },
-        {
-          id: '3',
-          name: '武汉',
-          level: '1',
-          fathercode: '0'
-        }],
+      resourceItems: [],
       tileUrl0: 'http://localhost:8000/GFData/tileData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806-pansharpen-0',
       tileUrl1: 'http://localhost:8000/GFData/tileData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806-pansharpen-0',
       tileUrl2: 'http://localhost:8000/GFData/tileData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806-pansharpen-0',
@@ -211,7 +196,7 @@ export default {
       baseMapUrl: 'http://192.168.1.121:8000/BaseMap',
       showTileMap: false,
       taskList: [],
-      NetStatus: '入网',
+      NetStatus: '退网',
       resourceShow: false,
       subResourceShow: false,
       subResource: [],
@@ -328,6 +313,7 @@ export default {
       } else {
         if (result === 1) {
           alert('退网成功！！！')
+          this.NetStatus = '入网'
         } else {
           alert('退网失败，请重新入网')
         }
@@ -407,8 +393,14 @@ export default {
       myStropheConn.myStropheConn.replyFinished(taskid, address)
     },
     handleStatus (replyJson) {
-      alert('状态查询')
-      myStropheConn.myStropheConn.replyStatuc()
+      console.log('状态查询')
+      myStropheConn.myStropheConn.replyStatus()
+    },
+    handleCheckStatus (replyJson) {
+      let result = replyJson['result']
+      if (result === 0) {
+        this.NetStatus = '入网'
+      }
     },
     onMessage (msg) {
       console.log('Cesium Message')
@@ -430,9 +422,6 @@ export default {
             console.log(replyJson)
             let typeId = replyJson['typeid']
             switch (typeId) {
-              case '1202':
-                alert('发送成功')
-                break
               case '12202':
                 this.handleRequestInOrOutNet(replyJson)
                 break
@@ -451,6 +440,9 @@ export default {
               case '12114':
                 this.handleStatus()
                 break
+              case '1202':
+                this.handleCheckStatus(replyJson)
+                break
               default:
                 break
             }
@@ -464,28 +456,32 @@ export default {
     },
     regionTaskMake (beginTime = ' ', endTime = ' ', period = 1) {
       // 采集需求
-      let positions = this.$refs.handlerPolygon.polylines[0].positions
-      let centerLng = 0
-      let centerLat = 0
-      let posList = []
-      for (let index in positions) {
-        let pos = this.Cesium.Ellipsoid.WGS84.cartesianToCartographic(positions[index])
-        let lng = this.Cesium.Math.toDegrees(pos.longitude)
-        let lat = this.Cesium.Math.toDegrees(pos.latitude)
-        centerLat += lat
-        centerLng += lng
-        posList.push([lat, lng])
-      }
-      centerLat /= positions.length
-      centerLng /= positions.length
+      // let positions = this.$refs.handlerPolygon.polylines[0].positions
+      // let centerLng = 0
+      // let centerLat = 0
+      // let posList = []
+      // for (let index in positions) {
+      //   let pos = this.Cesium.Ellipsoid.WGS84.cartesianToCartographic(positions[index])
+      //   let lng = this.Cesium.Math.toDegrees(pos.longitude)
+      //   let lat = this.Cesium.Math.toDegrees(pos.latitude)
+      //   centerLat += lat
+      //   centerLng += lng
+      //   posList.push([lat, lng])
+      // }
+      // centerLat /= positions.length
+      // centerLng /= positions.length
+      beginTime = ''
+      endTime = ''
+      let centerLat = '33.2333'
+      let centerLng = '92.456'
       let msgContent = '{"typeid": 21106, "usercode":"{0}", ' +
-        '"latitude": {1}, "longitude": {2}, ' +
-        '"width": {3}, ' +
-        '"begintime": {4}, "endtime": {5},' +
-        'period: {6}, capturearea: {7}}'
+        '"latitude": "{1}", "longitude": "{2}", ' +
+        '"width": "{3}", ' +
+        '"begintime": "{4}", "endtime": "{5}",' +
+        '"period": {6}, "capturearea": "{7}"}'
       msgContent = String.format(msgContent,
         myStropheConn.myStropheConn.userCode, centerLat, centerLng, 4000,
-        beginTime, endTime, period, JSON.stringify(posList))
+        beginTime, endTime, period, JSON.stringify([30.6552, 113.672, 30.5877, 114.045, 30.2668, 113.966, 30.3343, 113.594]))
       console.log(msgContent)
       myStropheConn.myStropheConn.SendMessage(msgContent)
     },

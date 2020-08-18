@@ -106,8 +106,8 @@ class StropheConn {
     msgContent = String.format(msgContent, this.userCode, taskid, this.getDate(), 1, address)
     this.SendMessage(msgContent)
   }
-  replyStatuc (){
-    let msgContent = '{"typeid": 21215, "usercode":"{0}", "latitude": {1}, "longitude": {2}}'
+  replyStatus () {
+    let msgContent = '{"typeid": 21215, "usercode":"{0}", "latitude": "{1}", "longitude": "{2}"}'
     let latitude = this.RandomValue(0, 90)
     let longitude = this.RandomValue(0, 180)
     msgContent = String.format(msgContent, this.userCode, latitude, longitude)
