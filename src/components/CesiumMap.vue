@@ -134,7 +134,7 @@
 </template>
 <script>
 
-import myStropheConn from '../api/Connection'
+import myStropheConn from '../api/Xmpp'
 import Strophe from 'strophe.js'
 import RightItem from './RightItem'
 

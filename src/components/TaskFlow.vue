@@ -11,7 +11,7 @@
 </template>
 
 <script>
-import myStropheConn from '../api/Connection'
+import myStropheConn from '../api/Xmpp'
 import Strophe from 'strophe.js'
 // import FlowItem from './FlowItem'
 import ProcessShowItem from './ProcessShowItem'

@@ -59,7 +59,7 @@
 </template>
 
 <script>
-import myStropheConn from '../api/Connection'
+import myStropheConn from '../api/Xmpp'
 export default {
   name: 'Stage2',
   props: {

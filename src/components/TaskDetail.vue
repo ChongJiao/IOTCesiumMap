@@ -59,7 +59,7 @@ import Stage2 from './Stage2'
 import Stage3 from './Stage3'
 import Stage4 from './Stage4'
 import Stage5 from './Stage5'
-import myStropheConn from '../api/Connection'
+import myStropheConn from '../api/Xmpp'
 import Strophe from 'strophe.js'
 export default {
   name: 'TaskDetail',
