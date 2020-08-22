@@ -1,41 +1,43 @@
 <template>
 <div>
   <div class="menu">
-    <el-button @click="handleOpen" style="color: #2f2f2f">
-      菜单
-    </el-button>
-    <el-menu class="el-menu-vertical-demo" :collapse="isCollapse">
+    <el-menu
+      default-active="1"
+      class="el-menu-demo"
+      mode="horizontal"
+      background-color="#545c64"
+      text-color="#fff"
+      active-text-color="#ffd04b">
+      <el-menu-item index="0">
+        <img src="../assets/logo.png" style="height: 80%"/>
+      </el-menu-item>
       <el-submenu index="1">
-        <template slot="title">
-          <i class="el-icon-location"></i>
-          <span slot="title">导航一</span>
-        </template>
-        <el-menu-item-group>
-          <span slot="title">分组一</span>
-          <el-menu-item index="1-1">选项1</el-menu-item>
-          <el-menu-item index="1-2">选项2</el-menu-item>
-        </el-menu-item-group>
-        <el-menu-item-group title="分组2">
-          <el-menu-item index="1-3">选项3</el-menu-item>
-        </el-menu-item-group>
-        <el-submenu index="1-4">
-          <span slot="title">选项4</span>
-          <el-menu-item index="1-4-1">选项1</el-menu-item>
-        </el-submenu>
+        <template slot="title">用户中心</template>
+        <el-menu-item index="1">
+          用户名: {{this.$xmpp.userJID}}
+        </el-menu-item>
       </el-submenu>
-      <el-menu-item index="2">
-        <i class="el-icon-menu"></i>
-        <span slot="title">导航二</span>
-      </el-menu-item>
-      <el-menu-item index="3" disabled>
-        <i class="el-icon-document"></i>
-        <span slot="title">导航三</span>
-      </el-menu-item>
-      <el-menu-item index="4">
-        <i class="el-icon-setting"></i>
-        <span slot="title">导航四</span>
-      </el-menu-item>
+
+      <el-submenu index="2">
+        <template slot="title">资源中心</template>
+        <el-menu-item index="2-1" @click="showResource">资源列表</el-menu-item>
+        <el-menu-item index="2-2" @click="showSubResource">订阅列表</el-menu-item>
+      </el-submenu>
+      <el-submenu index="3">
+        <template slot="title">任务中心</template>
+        <el-menu-item index="3-1" @click="showTask">任务列表</el-menu-item>
+        <el-menu-item index="3-2" @click="generateTask">任务生成</el-menu-item>
+      </el-submenu>
+      <el-menu-item index="4" v-on:click="requestInOutNet">{{NetStatus}}</el-menu-item>
     </el-menu>
+    <div class="toolBox" v-if="showTaskTools">
+<!--      <div id = "polygon" class= "toolDeSelect">-->
+<!--        <img class = "toolIcon" src="../assets/tool_Polygon.png">-->
+<!--      </div>-->
+      <el-button id="draw" icon="el-icon-thumb" v-on:click="toggle('handlerPolygon')">绘制</el-button>
+<!--      <el-button type="primary" icon="el-icon-delete" v-on:click="clear">清除</el-button>-->
+      <el-button type="danger" icon="el-icon-search" v-on:click="MakeTask">生成</el-button>
+    </div>
   </div>
   <div class="viewer">
     <vc-viewer ref="viewer" @ready="ready">
@@ -75,97 +77,115 @@
         @drawEvt="drawEvt"
       ></vc-handler-draw-polygon>
     </vc-viewer>
-    <div class="toolBox" v-if="showTools">
-      <div id = "polygon" class= "toolDeSelect">
-        <img class = "toolIcon" src="../assets/tool_Polygon.png">
-      </div>
-        <el-button id="draw" icon="el-icon-thumb" v-on:click="toggle('handlerPolygon')" style="margin-top: 2%; margin-left:0.2vw">绘制</el-button>
-        <el-button type="primary" icon="el-icon-delete" v-on:click="clear">清除</el-button>
-        <el-button type="danger" icon="el-icon-search" v-on:click="MakeTask">执行</el-button>
-      <el-button type="danger" icon="el-icon-search" v-on:click="requestSource">资源</el-button>
-      <el-button type="success" v-on:click="requestInOutNet" >{{NetStatus}} </el-button>
-    </div>
-    <el-tag class="rightList re1" v-on:click="showResource">
-      资源列表
-    </el-tag>
-    <el-tag class="rightList re2" v-on:click="showSubResource">
-      订阅列表
-    </el-tag>
-    <div class = "resource" v-if="resourceShow">
-      <p>资源列表</p>
-      <el-table
-        :row-style="{width:'100%'}"
-        :data="resourceItems"
-        border
-        @selection-change="handleSubSelectChange">
-        <el-table-column
-          type="selection"
-          width="55">
-        </el-table-column>
-        <el-table-column align="center"
-                         prop="id"
-                         label="序号"
-                         min-width="10%">
-        </el-table-column>
-        <el-table-column align="center"
-                         prop="name"
-                         style="border-style:solid;border-width:5px;"
-                         label="资源名称"
-                         min-width="30%">
-        </el-table-column>
-        <el-table-column align="center"
-                         prop="level"
-                         style="border-style:solid;border-width:5px;"
-                         label="级别"
-                         min-width="30%">
-        </el-table-column>
-        <el-table-column align="center"
-                         prop="fathercode"
-                         style="border-style:solid;border-width:5px;"
-                         label="父编号"
-                         min-width="30%">
-        </el-table-column>
-      </el-table>
-      <el-button style="margin-top: 1vh" :class="this.selectSubResource.length > 0 ? 'select' : 'deselect'" v-on:click="requestSub">订阅</el-button>
-    </div>
+  </div>
+  <div class = "info-window" v-if="resourceTableShow">
+    <p style="color: #e5f2fe">资源列表</p>
+    <el-table
+      :row-style="{width:'100%'}"
+      :data="resourceItems"
+      border
+      @selection-change="handleSubSelectChange">
+      <el-table-column
+        type="selection"
+        width="55">
+      </el-table-column>
+      <el-table-column align="center"
+                       prop="id"
+                       label="序号"
+                       min-width="10%">
+      </el-table-column>
+      <el-table-column align="center"
+                       prop="name"
+                       style="border-style:solid;border-width:5px;"
+                       label="资源名称"
+                       min-width="30%">
+      </el-table-column>
+      <el-table-column align="center"
+                       prop="level"
+                       style="border-style:solid;border-width:5px;"
+                       label="级别"
+                       min-width="30%">
+      </el-table-column>
+      <el-table-column align="center"
+                       prop="fathercode"
+                       style="border-style:solid;border-width:5px;"
+                       label="父编号"
+                       min-width="30%">
+      </el-table-column>
+    </el-table>
+    <el-button style="margin-top: 1vh" :class="this.selectSubResource.length > 0 ? 'select' : 'deselect'" v-on:click="requestSub">订阅</el-button>
+    <el-button style="margin-top: 1vh" type="success" v-on:click="requestSource">资源获取</el-button>
+  </div>
 
-    <div class = "resource" v-if="subResourceShow">
-      <p>订阅列表</p>
-      <el-table
-        :row-style="{width:'100%'}"
-        :data="subResource"
-        border
-        @selection-change="handleUnSubSelectChange">
-        <el-table-column
-          type="selection"
-          width="55">
-        </el-table-column>
-        <el-table-column align="center"
-                         prop="id"
-                         label="序号"
-                         min-width="10%">
-        </el-table-column>
-        <el-table-column align="center"
-                         prop="name"
-                         style="border-style:solid;border-width:5px;"
-                         label="资源名称"
-                         min-width="30%">
-        </el-table-column>
-        <el-table-column align="center"
-                         prop="level"
-                         style="border-style:solid;border-width:5px;"
-                         label="级别"
-                         min-width="30%">
-        </el-table-column>
-        <el-table-column align="center"
-                         prop="fathercode"
-                         style="border-style:solid;border-width:5px;"
-                         label="父编号"
-                         min-width="30%">
-        </el-table-column>
-      </el-table>
-      <el-button style="margin-top: 1vh" :class="this.selectUbSubResource.length > 0 ? 'select' : 'deselect'" v-on:click="requestUnSub">取消订阅</el-button>
-    </div>
+  <div class = "info-window" v-if="subResourceTableShow">
+    <p style="color: #e5f2fe">订阅列表</p>
+    <el-table
+      :row-style="{width:'100%'}"
+      :data="subResource"
+      border
+      @selection-change="handleUnSubSelectChange">
+      <el-table-column
+        type="selection"
+        width="55">
+      </el-table-column>
+      <el-table-column align="center"
+                       prop="id"
+                       label="序号"
+                       min-width="10%">
+      </el-table-column>
+      <el-table-column align="center"
+                       prop="name"
+                       style="border-style:solid;border-width:5px;"
+                       label="资源名称"
+                       min-width="30%">
+      </el-table-column>
+      <el-table-column align="center"
+                       prop="level"
+                       style="border-style:solid;border-width:5px;"
+                       label="级别"
+                       min-width="30%">
+      </el-table-column>
+      <el-table-column align="center"
+                       prop="fathercode"
+                       style="border-style:solid;border-width:5px;"
+                       label="父编号"
+                       min-width="30%">
+      </el-table-column>
+    </el-table>
+    <el-button style="margin-top: 1vh" :class="this.selectUbSubResource.length > 0 ? 'select' : 'deselect'" v-on:click="requestUnSub">取消订阅</el-button>
+  </div>
+
+  <div class = "info-window" v-if="showTaskTable">
+    <TaskContent v-on:workOnMap="ViewMapResults"></TaskContent>
+  </div>
+  <div class = "info-window" v-if="showTaskDetailTable">
+    <el-form ref="taskForm" :model="taskForm" label-width="calc(100px + .5vw)">
+      <el-form-item label="中心经度" class="label-item">
+        <el-input v-model="taskForm.lng"></el-input>
+      </el-form-item>
+      <el-form-item label="中心纬度">
+        <el-input v-model="taskForm.lat"></el-input>
+      </el-form-item>
+      <el-form-item label="采集幅宽">
+        <el-input v-model="taskForm.width"></el-input>
+      </el-form-item>
+      <el-form-item label="采集周期">
+        <el-input v-model="taskForm.period"></el-input>
+      </el-form-item>
+      <el-form-item label="扫描时间">
+        <el-col :span="11">
+          <el-date-picker type="date" placeholder="选择日期" v-model="taskForm.startDate" style="width: 100%;"></el-date-picker>
+        </el-col>
+        <el-col class="line" :span="2">-</el-col>
+        <el-col :span="11">
+          <el-time-picker placeholder="选择时间" v-model="taskForm.endDate" style="width: 100%;"></el-time-picker>
+        </el-col>
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click="regionTaskMake">立即创建</el-button>
+        <el-button>取消</el-button>
+      </el-form-item>
+    </el-form>
   </div>
 </div>
 </template>
@@ -173,10 +193,11 @@
 
 import Strophe from 'strophe.js'
 import RightItem from './RightItem'
+import TaskContent from './TaskContent'
 
 export default {
   name: 'CesiumMap',
-  components: {RightItem},
+  components: {TaskContent, RightItem},
   // 状态信息添加在本地
   mounted () {
     console.log('Cesium mounted')
@@ -218,8 +239,9 @@ export default {
   },
   data () {
     return {
-      isCollapse: true,
-      showTools: false,
+      showTaskTable: false,
+      showTaskDetailTable: false,
+      showTaskTools: false,
       alpha: 1,
       brightness: 1,
       contrast: 1,
@@ -235,12 +257,21 @@ export default {
       baseMapUrl: 'http://192.168.100.125:8000/BaseMap',
       showTileMap: false,
       taskList: [],
-      NetStatus: '退网',
-      resourceShow: false,
-      subResourceShow: false,
+      NetStatus: '申请入网',
+      resourceTableShow: false,
+      subResourceTableShow: false,
       subResource: [],
       selectSubResource: [],
-      selectUbSubResource: []
+      selectUbSubResource: [],
+      taskForm: {
+        lat: '',
+        lng: '',
+        width: '',
+        startDate: '',
+        endDate: '',
+        period: '',
+        desc: ''
+      }
     }
   },
   methods: {
@@ -249,6 +280,10 @@ export default {
     },
     handleOpen () {
       this.isCollapse = !this.isCollapse
+    },
+    ViewMapResults (url) {
+      // 可视化结果
+      console.log(url)
     },
     ready (cesiumInstance) {
       const {Cesium, viewer} = cesiumInstance
@@ -272,13 +307,17 @@ export default {
 
       let name = span.innerText
       if (name === '绘制') {
-        span.innerText = '停止'
+        span.innerText = '取消'
         i.className = 'el-icon-circle-close'
-        let pol = document.getElementById('polygon')
-        pol.className = 'toolSelect'
+        // let pol = document.getElementById('polygon')
+        // pol.className = 'toolSelect'
         // 新增shape 实体
         // this.polygonShape = this.addPolygonEntity()
       } else {
+        this.$refs.handlerPolygon.clear()
+        this.viewer.entities.removeAll()
+        this.viewer.scene.requestRender()
+
         span.innerText = '绘制'
         i.className = 'el-icon-thumb'
         let pol = document.getElementById('polygon')
@@ -286,10 +325,10 @@ export default {
       }
     },
     clear () {
-      console.log('clear')
       this.$refs.handlerPolygon.clear()
       this.viewer.entities.removeAll()
       this.viewer.scene.requestRender()
+      // this.$refs['handlerPolygon'].drawing = !this.$refs['handlerPolygon'].drawing
     },
     activeEvt (_) {
       this[_.type] = _.isActive
@@ -300,6 +339,43 @@ export default {
     drawEvt (result) {
       // result.finished && this.tooltip.setVisible(false)
       // console.log(result)
+    },
+    MakeTask () {
+      // this.regionTaskMake()
+      this.showTaskDetailTable = true
+    },
+    regionTaskMake (beginTime = ' ', endTime = ' ', period = 1) {
+      // 采集需求
+      // let positions = this.$refs.handlerPolygon.polylines[0].positions
+      // let centerLng = 0
+      // let centerLat = 0
+      // let posList = []
+      // for (let index in positions) {
+      //   let pos = this.Cesium.Ellipsoid.WGS84.cartesianToCartographic(positions[index])
+      //   let lng = this.Cesium.Math.toDegrees(pos.longitude)
+      //   let lat = this.Cesium.Math.toDegrees(pos.latitude)
+      //   centerLat += lat
+      //   centerLng += lng
+      //   posList.push([lat, lng])
+      // }
+      // centerLat /= positions.length
+      // centerLng /= positions.length
+      beginTime = ''
+      endTime = ''
+      let centerLat = '33.2333'
+      let centerLng = '92.456'
+      let msgContent = '{"typeid": 21106, "usercode":"{0}", ' +
+        '"latitude": "{1}", "longitude": "{2}", ' +
+        '"width": "{3}", ' +
+        '"begintime": "{4}", "endtime": "{5}",' +
+        '"period": {6}, "capturearea": "{7}"}'
+      msgContent = String.format(msgContent,
+        this.$xmpp.userCode, centerLat, centerLng, 4000,
+        beginTime, endTime, period, JSON.stringify([30.6552, 113.672, 30.5877, 114.045, 30.2668, 113.966, 30.3343, 113.594]))
+      console.log(msgContent)
+      this.$xmpp.SendMessage(msgContent)
+      this.showTaskDetailTable = false
+      this.clear()
     },
     imageryReady (imageryProvider) {
       this.viewer.camera.flyTo({destination: imageryProvider.rectangle})
@@ -336,13 +412,21 @@ export default {
         this.$xmpp.ResourceSubUnSub(0, items)
       }
     },
+    // 显示
+    generateTask () {
+      this.showTaskTools = !this.showTaskTools
+    },
+    // 展示任务列表
+    showTask () {
+      this.showTaskTable = !this.showTaskTable
+    },
     // 资源列表展示
     showResource () {
-      if (!this.subResourceShow) { this.resourceShow = !this.resourceShow }
+      this.resourceTableShow = !this.resourceTableShow
     },
     // 订阅列表展示
     showSubResource () {
-      if (!this.resourceShow) { this.subResourceShow = !this.subResourceShow }
+      this.subResourceTableShow = !this.subResourceTableShow
     },
     // 入网退网协议 pass
     handleRequestInOrOutNet (replyJson) {
@@ -371,7 +455,7 @@ export default {
       if (requesttype === 1) {
         if (result === 1) {
           alert('订阅成功')
-          this.resourceShow = false
+          this.resourceTableShow = false
           this.subResource = this.selectSubResource
           console.log('sub resource is')
           console.log(this.subResource)
@@ -496,40 +580,6 @@ export default {
       }
       return true
     },
-    MakeTask () {
-      this.regionTaskMake()
-    },
-    regionTaskMake (beginTime = ' ', endTime = ' ', period = 1) {
-      // 采集需求
-      // let positions = this.$refs.handlerPolygon.polylines[0].positions
-      // let centerLng = 0
-      // let centerLat = 0
-      // let posList = []
-      // for (let index in positions) {
-      //   let pos = this.Cesium.Ellipsoid.WGS84.cartesianToCartographic(positions[index])
-      //   let lng = this.Cesium.Math.toDegrees(pos.longitude)
-      //   let lat = this.Cesium.Math.toDegrees(pos.latitude)
-      //   centerLat += lat
-      //   centerLng += lng
-      //   posList.push([lat, lng])
-      // }
-      // centerLat /= positions.length
-      // centerLng /= positions.length
-      beginTime = ''
-      endTime = ''
-      let centerLat = '33.2333'
-      let centerLng = '92.456'
-      let msgContent = '{"typeid": 21106, "usercode":"{0}", ' +
-        '"latitude": "{1}", "longitude": "{2}", ' +
-        '"width": "{3}", ' +
-        '"begintime": "{4}", "endtime": "{5}",' +
-        '"period": {6}, "capturearea": "{7}"}'
-      msgContent = String.format(msgContent,
-        this.$xmpp.userCode, centerLat, centerLng, 4000,
-        beginTime, endTime, period, JSON.stringify([30.6552, 113.672, 30.5877, 114.045, 30.2668, 113.966, 30.3343, 113.594]))
-      console.log(msgContent)
-      this.$xmpp.SendMessage(msgContent)
-    },
     addRegionResults: function (dataJson) {
       // let addShape = null
       for (let index in dataJson) {
@@ -573,10 +623,10 @@ export default {
 </script>
 <style scoped>
   .menu{
+    width:100%;
     position:absolute;
     top:0;
-    left:0;
-    z-index:15
+    z-index:15;
   }
   .viewer {
     position: absolute;
@@ -587,13 +637,11 @@ export default {
     z-index: 12;
   }
   .toolBox {
-    position: absolute;
+    padding: 0.2vw;
+    float: right;
     border-radius: 0.5vh;
-    top: 1vh;
-    right: 3vw;
     display: inline-block;
     background-color: #2f2f2f;
-    z-index: 15;
   }
   .toolSelect{
     float:left;
@@ -627,20 +675,37 @@ export default {
   .re2{
     top: 15vh
   }
-  .resource{
+  .info-window{
+    z-index: 20;
+    position: absolute;
+    padding: 1vw;
+    top:20vh;
+    width: 60vw;
+    left: 20vw;
+    display: inline-block;
+    background-color: #336699;
+  }
+  .task{
     z-index: 20;
     position: absolute;
     padding: 1vw;
     top:20vw;
-    width: 60vw;
-    left: 20vw;
+    width:80vw;
+    left: 10vw;
     display: inline-block;
-    background-color: dodgerblue;
+    background-color: #336699;
   }
   .select{
     background-color: orange;
   }
   .deselect{
     background-color: #999999;
+  }
+</style>
+<style>
+  .label-item,.el-form-item__label {
+    font-size: calc(12px + .5vw);
+    color: #CCCCFF;
+    font-family: Serif;
   }
 </style>
