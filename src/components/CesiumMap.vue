@@ -1,14 +1,51 @@
 <template>
 <div>
+  <div class="menu">
+    <el-button @click="handleOpen" style="color: #2f2f2f">
+      菜单
+    </el-button>
+    <el-menu class="el-menu-vertical-demo" :collapse="isCollapse">
+      <el-submenu index="1">
+        <template slot="title">
+          <i class="el-icon-location"></i>
+          <span slot="title">导航一</span>
+        </template>
+        <el-menu-item-group>
+          <span slot="title">分组一</span>
+          <el-menu-item index="1-1">选项1</el-menu-item>
+          <el-menu-item index="1-2">选项2</el-menu-item>
+        </el-menu-item-group>
+        <el-menu-item-group title="分组2">
+          <el-menu-item index="1-3">选项3</el-menu-item>
+        </el-menu-item-group>
+        <el-submenu index="1-4">
+          <span slot="title">选项4</span>
+          <el-menu-item index="1-4-1">选项1</el-menu-item>
+        </el-submenu>
+      </el-submenu>
+      <el-menu-item index="2">
+        <i class="el-icon-menu"></i>
+        <span slot="title">导航二</span>
+      </el-menu-item>
+      <el-menu-item index="3" disabled>
+        <i class="el-icon-document"></i>
+        <span slot="title">导航三</span>
+      </el-menu-item>
+      <el-menu-item index="4">
+        <i class="el-icon-setting"></i>
+        <span slot="title">导航四</span>
+      </el-menu-item>
+    </el-menu>
+  </div>
   <div class="viewer">
     <vc-viewer ref="viewer" @ready="ready">
 <!--      <vc-layer-imagery :alpha="alpha" :imageryProvider="imageryProvider" :brightness="brightness" :contrast="contrast">-->
 <!--      </vc-layer-imagery>-->
-      <vc-layer-imagery :alpha="alpha" :brightness="brightness" :contrast="contrast">
-        <vc-provider-imagery-tile-mapservice
-          :url="baseMapUrl"
-        ></vc-provider-imagery-tile-mapservice>
-      </vc-layer-imagery>
+<!--      <vc-layer-imagery :alpha="alpha" :brightness="brightness" :contrast="contrast">-->
+<!--        <vc-provider-imagery-tile-mapservice-->
+<!--          :url="baseMapUrl"-->
+<!--        ></vc-provider-imagery-tile-mapservice>-->
+<!--      </vc-layer-imagery>-->
       <vc-layer-imagery :alpha="alpha" :brightness="brightness" :contrast="contrast" v-if="showTileMap">
         <vc-provider-imagery-tile-mapservice
           :url="tileUrl0"
@@ -38,7 +75,7 @@
         @drawEvt="drawEvt"
       ></vc-handler-draw-polygon>
     </vc-viewer>
-    <div class="toolBox" >
+    <div class="toolBox" v-if="showTools">
       <div id = "polygon" class= "toolDeSelect">
         <img class = "toolIcon" src="../assets/tool_Polygon.png">
       </div>
@@ -134,7 +171,6 @@
 </template>
 <script>
 
-import myStropheConn from '../api/Xmpp'
 import Strophe from 'strophe.js'
 import RightItem from './RightItem'
 
@@ -144,18 +180,19 @@ export default {
   // 状态信息添加在本地
   mounted () {
     console.log('Cesium mounted')
+    console.log(this.$xmpp)
     let base = this
     setTimeout(function () {
-      if (!myStropheConn.myStropheConn.connFlag) {
+      if (!base.$xmpp.connFlag) {
         console.log('not login')
-        myStropheConn.myStropheConn.connecting()
+        // base.$xmpp.normalConnnected()
         setTimeout(function () {
-          base.messageHandler = myStropheConn.myStropheConn.conn.addHandler(base.onMessage, null, 'message', null, null, null)
+          base.messageHandler = base.$xmpp.conn.addHandler(base.onMessage, null, 'message', null, null, null)
           // myStropheConn.myStropheConn.RequestInOrOutToNet(1)
         }, 2000)
       } else {
         console.log('has login')
-        base.messageHandler = myStropheConn.myStropheConn.conn.addHandler(base.onMessage, null, 'message', null, null, null)
+        base.messageHandler = base.$xmpp.conn.addHandler(base.onMessage, null, 'message', null, null, null)
         // myStropheConn.myStropheConn.RequestInOrOutToNet(1)
       }
     }, 2000)
@@ -166,21 +203,23 @@ export default {
     if (type === 'result') {
       // 在地图中显示结果
       let url = this.$route.params.url
-      let tileData = myStropheConn.myStropheConn.serverDirPath[3]
-      this.tileUrl0 = myStropheConn.myStropheConn.httpServer + tileData + '/' + url + '/' + url + '-tiles-' + '0'
-      this.tileUrl1 = myStropheConn.myStropheConn.httpServer + tileData + '/' + url + '/' + url + '-tiles-' + '1'
-      this.tileUrl2 = myStropheConn.myStropheConn.httpServer + tileData + '/' + url + '/' + url + '-tiles-' + '2'
-      this.tileUrl3 = myStropheConn.myStropheConn.httpServer + tileData + '/' + url + '/' + url + '-tiles-' + '3'
+      let tileData = this.$xmpp.serverDirPath[3]
+      this.tileUrl0 = this.$xmpp.httpServer + tileData + '/' + url + '/' + url + '-tiles-' + '0'
+      this.tileUrl1 = this.$xmpp.httpServer + tileData + '/' + url + '/' + url + '-tiles-' + '1'
+      this.tileUrl2 = this.$xmpp.httpServer + tileData + '/' + url + '/' + url + '-tiles-' + '2'
+      this.tileUrl3 = this.$xmpp.httpServer + tileData + '/' + url + '/' + url + '-tiles-' + '3'
       console.log('展示瓦片地图为' + this.tileUrl0 + ' ' + this.tileUrl1 + ' ' + this.tileUrl2 + ' ' + this.tileUrl3)
       this.showTileMap = true
     }
   },
   destroyed () {
     console.log('Cesium destroyed')
-    if (myStropheConn !== undefined) { myStropheConn.myStropheConn.conn.deleteHandler(this.messageHandler) }
+    if (this.$xmpp.conn != null) this.$xmpp.conn.deleteHandler(this.messageHandler)
   },
   data () {
     return {
+      isCollapse: true,
+      showTools: false,
       alpha: 1,
       brightness: 1,
       contrast: 1,
@@ -193,7 +232,7 @@ export default {
       tileUrl1: 'http://localhost:8000/GFData/tileData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806-pansharpen-0',
       tileUrl2: 'http://localhost:8000/GFData/tileData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806-pansharpen-0',
       tileUrl3: 'http://localhost:8000/GFData/tileData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806-pansharpen-0',
-      baseMapUrl: 'http://192.168.1.121:8000/BaseMap',
+      baseMapUrl: 'http://192.168.100.125:8000/BaseMap',
       showTileMap: false,
       taskList: [],
       NetStatus: '退网',
@@ -205,6 +244,12 @@ export default {
     }
   },
   methods: {
+    logout () {
+
+    },
+    handleOpen () {
+      this.isCollapse = !this.isCollapse
+    },
     ready (cesiumInstance) {
       const {Cesium, viewer} = cesiumInstance
       viewer.scene.requestRenderMode = true
@@ -261,14 +306,14 @@ export default {
     },
     // 资源请求
     requestSource () {
-      myStropheConn.myStropheConn.RequestReSource()
+      this.$xmpp.RequestReSource()
     },
     // 入网退网请求
     requestInOutNet () {
       if (this.NetStatus === '入网') {
-        myStropheConn.myStropheConn.RequestInOrOutToNet(1)
+        this.$xmpp.RequestInOrOutToNet(1)
       } else {
-        myStropheConn.myStropheConn.RequestInOrOutToNet(0)
+        this.$xmpp.RequestInOrOutToNet(0)
       }
     },
     // 资源订阅请求
@@ -278,7 +323,7 @@ export default {
         for (let i in this.selectSubResource) {
           items.push(this.selectSubResource[i].id)
         }
-        myStropheConn.myStropheConn.ResourceSubUnSub(1, items)
+        this.$xmpp.ResourceSubUnSub(1, items)
       }
     },
     // 资源退订请求
@@ -288,7 +333,7 @@ export default {
         for (let i in this.selectUbSubResource) {
           items.push(this.selectUbSubResource[i].id)
         }
-        myStropheConn.myStropheConn.ResourceSubUnSub(0, items)
+        this.$xmpp.ResourceSubUnSub(0, items)
       }
     },
     // 资源列表展示
@@ -390,11 +435,11 @@ export default {
       let address = replyJson['address']
       alert('success task is ' + taskid)
       alert('the address is ' + address)
-      myStropheConn.myStropheConn.replyFinished(taskid, address)
+      this.$xmpp.replyFinished(taskid, address)
     },
     handleStatus (replyJson) {
       console.log('状态查询')
-      myStropheConn.myStropheConn.replyStatus()
+      this.$xmpp.replyStatus()
     },
     handleCheckStatus (replyJson) {
       let result = replyJson['result']
@@ -408,7 +453,7 @@ export default {
       let index = fromJid.indexOf('/')
       fromJid = fromJid.substr(0, index)
       console.log(fromJid)
-      if (fromJid !== myStropheConn.myStropheConn.gkName) {
+      if (fromJid !== this.$xmpp.gkName) {
         console.log('发送方非管控中心，无法读取数据')
       } else {
         let type = msg.getAttribute('type')
@@ -417,7 +462,7 @@ export default {
           let msgContent = Strophe.Strophe.getText(elems[0])
           msgContent = msgContent.replace(/&apos;/g, '"')
           msgContent = msgContent.replace(/&quot;/g, '"')
-          if (myStropheConn.myStropheConn.isJsonStr(msgContent)) {
+          if (this.$xmpp.isJsonStr(msgContent)) {
             let replyJson = JSON.parse(msgContent)
             console.log(replyJson)
             let typeId = replyJson['typeid']
@@ -480,10 +525,10 @@ export default {
         '"begintime": "{4}", "endtime": "{5}",' +
         '"period": {6}, "capturearea": "{7}"}'
       msgContent = String.format(msgContent,
-        myStropheConn.myStropheConn.userCode, centerLat, centerLng, 4000,
+        this.$xmpp.userCode, centerLat, centerLng, 4000,
         beginTime, endTime, period, JSON.stringify([30.6552, 113.672, 30.5877, 114.045, 30.2668, 113.966, 30.3343, 113.594]))
       console.log(msgContent)
-      myStropheConn.myStropheConn.SendMessage(msgContent)
+      this.$xmpp.SendMessage(msgContent)
     },
     addRegionResults: function (dataJson) {
       // let addShape = null
@@ -527,6 +572,12 @@ export default {
 }
 </script>
 <style scoped>
+  .menu{
+    position:absolute;
+    top:0;
+    left:0;
+    z-index:15
+  }
   .viewer {
     position: absolute;
     top:0;

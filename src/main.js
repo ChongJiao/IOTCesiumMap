@@ -12,13 +12,14 @@ import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 import VueRouter from 'vue-router'
 import VueLoading from 'vue-loading-template'
-import Xmpp from 'api/Xmpp'
+import Xmpp from './api/Xmpp.js'
+
 Vue.use(VueCesium, {
   // cesiumPath 是指引用的Cesium.js路径，如
   // 项目本地的Cesium Build包，vue项目需要将Cesium Build包放static目录：
-  cesiumPath: 'http://192.168.1.121:8000/Cesium/Cesium.js'
+  // cesiumPath: 'http://192.168.100.125:8000/Cesium/Cesium.js'
   // 个人在线Cesium Build包：
-  // cesiumPath: 'https://zouyaoji.top/vue-cesium/statics/Cesium/Cesium.js'
+  cesiumPath: 'https://zouyaoji.top/vue-cesium/statics/Cesium/Cesium.js'
   // 个人在线SuperMap Cesium Build包（在官方基础上二次开发出来的）：
   // cesiumPath: 'https://zouyaoji.top/vue-cesium/statics/SuperMapCesium/Cesium.js'
   // 官方在线Cesium Build包，有CDN加速，推荐用这个：
@@ -32,7 +33,7 @@ Vue.use(BootstrapVue)
 Vue.use(VueRouter)
 Vue.use(VueLoading /** options **/)
 Vue.config.productionTip = false
-Vue.prototype.$xmpp = Xmpp
+Vue.prototype.$xmpp = Xmpp.myStropheConn
 /* eslint-disable no-new */
 new Vue({
   el: '#app',

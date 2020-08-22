@@ -75,17 +75,17 @@
 <!--      <div style="position:fixed; left:1rem; top:10rem; z-index: 8;">-->
 <!--        <el-button style="margin-right: 1rem" type="success" @click="TestTile()">测试</el-button>-->
 <!--      </div>-->
-      <el-container class="task" v-show="taskSendFlag">
-        <el-row id="flow" style="width: 100%; margin: auto; padding-left: 1rem; padding-right: 1rem">
-          <el-steps :active="taskActiveCode" simple>
-            <el-step title="发起请求" icon="el-icon-edit" ></el-step>
-            <el-step title="数据预处理" icon="el-icon-s-tools"></el-step>
-            <el-step title="图像增强" icon = "el-icon-picture-outline"></el-step>
-            <el-step title="影像生成" icon = "el-icon-cloudy"></el-step>
-            <el-step title="目标识别" icon = "el-icon-picture"></el-step>
-          </el-steps>
-        </el-row>
-      </el-container>
+<!--      <el-container class="task" v-show="taskSendFlag">-->
+<!--        <el-row id="flow" style="width: 100%; margin: auto; padding-left: 1rem; padding-right: 1rem">-->
+<!--          <el-steps :active="taskActiveCode" simple>-->
+<!--            <el-step title="发起请求" icon="el-icon-edit" ></el-step>-->
+<!--            <el-step title="数据预处理" icon="el-icon-s-tools"></el-step>-->
+<!--            <el-step title="图像增强" icon = "el-icon-picture-outline"></el-step>-->
+<!--            <el-step title="影像生成" icon = "el-icon-cloudy"></el-step>-->
+<!--            <el-step title="目标识别" icon = "el-icon-picture"></el-step>-->
+<!--          </el-steps>-->
+<!--        </el-row>-->
+<!--      </el-container>-->
 <!--      <Window :show="WindowPopUpShow" :title="WindowPopUpTitle" :data="taskData" @closed="closeTasksWindow">-->
 <!--      </Window>-->
     </div>

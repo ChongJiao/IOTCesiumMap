@@ -7,16 +7,19 @@ class StropheConn {
   userJID = 'user_001@desktop-98tu7o0'
   userCode = 'user_001'
   userPassword = 'user_001'
-  BOSH_SERVER = 'http://192.168.1.121:7070/http-bind/'
-  httpServer ='http://192.168.1.121:8000/GFData/'
+  BOSH_SERVER = 'http://127.0.0.1:7070/http-bind/'
+  httpServer ='http://127.0.0.1:8000/GFData/'
   serverDirPath = ['srcData', 'imgSrcData', 'imgEnData', 'tileData', 'tileDeData']
   gkName = 'guankong@desktop-98tu7o0'
   setUserJid (user) {
     this.userJID = user
   }
-  connecting () {
-    console.log('connecting')
+  initial () {
+    console.log('initial')
     this.conn = new Strophe.Strophe.Connection(this.BOSH_SERVER)
+  }
+  // 断线是否重连
+  normalConnnected () {
     this.conn.connect(this.userJID, this.userPassword, onConnected)
   }
   isJsonStr (str) {
@@ -128,7 +131,7 @@ class StropheConn {
       let msgContent = Strophe.Strophe.getText(elems[0])
       msgContent = msgContent.replace(/&apos;/g, '"')
       msgContent = msgContent.replace(/&quot;/g, '"')
-      // console.log(msgContent)
+      console.log(msgContent)
       if (myStropheConn.isJsonStr(msgContent)) {
         // TODO 具体状态消息处理, 消息实体储存在该类中，以供其他组件调用
       }
@@ -153,28 +156,45 @@ class StropheConn {
 let myStropheConn = new StropheConn()
 function onConnected (status) {
   console.log('connected function')
-  if (status === Strophe.Strophe.Status.CONNFAIL) {
-    myStropheConn.connectCode = '连接失败'
-    myStropheConn.connFlag = false
-  } else if (status === Strophe.Strophe.Status.AUTHFAIL) {
-    myStropheConn.connectCode = '登陆失败'
-    myStropheConn.connFlag = false
-  } else if (status === Strophe.Strophe.Status.CONNECTED) {
-    myStropheConn.connectCode = '已登陆'
-    myStropheConn.connFlag = true
-    console.log('已登陆')
-    this.addHandler(myStropheConn.onMessage, null, 'message', null, null, null)
-    // 首先要发送一个<presence>给服务器（initial presence）
-    this.send(Strophe.$pres().tree())
-  } else if (status === Strophe.Strophe.Status.CONNECTING) {
-    console.log('正在登陆')
-  } else {
-    myStropheConn.connectCode = '自动登陆失败'
-    myStropheConn.connFlag = false
+  switch (status) {
+    case Strophe.Strophe.Status.CONNFAIL:
+      myStropheConn.connectCode = '连接失败'
+      myStropheConn.connFlag = false
+      console.log('连接失败')
+      break
+    case Strophe.Strophe.Status.AUTHFAIL:
+      myStropheConn.connectCode = '登陆失败'
+      myStropheConn.connFlag = false
+      console.log('登陆失败')
+      break
+    case Strophe.Strophe.Status.CONNECTED:
+      myStropheConn.connectCode = '已登陆'
+      myStropheConn.connFlag = true
+      console.log('已登陆')
+      this.addHandler(myStropheConn.onMessage, null, 'message', null, null, null)
+      // 首先要发送一个<presence>给服务器（initial presence）
+      this.send(Strophe.$pres().tree())
+      break
+    case Strophe.Strophe.Status.CONNECTING:
+      console.log('正在登陆')
+      break
+    case Strophe.Strophe.Status.DISCONNECTING:
+      console.log('正在登出....')
+      break
+    case Strophe.Strophe.Status.DISCONNECTED:
+      // TODO 跳转出登陆界面
+      alert('已退出登陆，请重新登陆')
+      // myStropheConn.conn.connect(myStropheConn.userJID, myStropheConn.userPassword, onConnected)
+      break
+    default:
+      myStropheConn.connectCode = '自动登陆失败'
+      myStropheConn.connFlag = false
+      console.log('自动登陆失败')
+      break
   }
 }
-console.log('run one')
-// myStropheConn.connecting()
+// console.log('run one')
+myStropheConn.initial()
 
 export default {
   myStropheConn
