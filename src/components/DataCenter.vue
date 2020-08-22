@@ -87,7 +87,7 @@
 </template>
 
 <script>
-import myStropheConn from '../api/Connection'
+import myStropheConn from '../api/Xmpp'
 import Strophe from 'strophe.js'
 export default {
   name: 'DataCenter',
@@ -102,6 +102,10 @@ export default {
       if (!myStropheConn.myStropheConn.connFlag) {
         console.log('not login')
         myStropheConn.myStropheConn.connecting()
+        setTimeout(function () {
+          base.initData()
+          base.messageHandler = myStropheConn.myStropheConn.conn.addHandler(base.onMessage, null, 'message', null, null, null)
+        }, 2000)
       } else {
         base.initData()
         base.messageHandler = myStropheConn.myStropheConn.conn.addHandler(base.onMessage, null, 'message', null, null, null)
@@ -144,8 +148,10 @@ export default {
               data['pos2'] = posArray.slice(2, 4)
               data['pos3'] = posArray.slice(4, 6)
               data['pos4'] = posArray.slice(6, 8)
-              let srcData = myStropheConn.myStropheConn.srcData
+              let srcData = myStropheConn.myStropheConn.serverDirPath[0]
+              data['urlName'] = data['url']
               data['url'] = myStropheConn.myStropheConn.httpServer + srcData + '/' + data['url'] + '/' + data['url'] + '.jpg'
+              console.log(data['url'])
               this.tableData.push(data)
             }
           }
@@ -158,7 +164,8 @@ export default {
     newTask (index, row) {
       console.log(index, row)
       if (myStropheConn.myStropheConn.taskLength === 0) {
-        myStropheConn.myStropheConn.MakeTask(this.imageUrl)
+        console.log(row)
+        myStropheConn.myStropheConn.MakeTask(row.urlName, row.id)
       } else {
         alert('请等待处理完当前任务')
       }

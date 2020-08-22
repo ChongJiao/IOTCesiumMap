@@ -1,16 +1,14 @@
 <template>
   <div id="body">
-<!--    <top></top>-->
-<!--    <left></left>-->
-<!--    <div class="return">-->
-<!--      <img v-bind src="../assets/return2.png" style="width: 30px; height: 30px;">-->
-<!--    </div>-->
+    <!--    <top></top>-->
+    <!--    <left></left>-->
+    <!--    <div class="return">-->
+    <!--      <img v-bind src="../assets/return2.png" style="width: 30px; height: 30px;">-->
+    <!--    </div>-->
     <div class="main">
-   <div class="div-name">
+      <div class="div-name">
         <div style="text-align: left;font-family: 华光黑体_CNKI;font-size:1vw">名称:{{processData.name}}</div>
-<!--        <div style="text-align: left;font-family: 华光黑体_CNKI; font-size: 1vw">名称:{{processData.name}} </div>-->
         <div style="display:flex;align-items:stretch;">
-<!--        <div style="display: flex;display:-webkit-flex;align-items:stretch;">-->
           <div style="height:inherit;font-family: 华光黑体_CNKI; font-size: 1vw">进度:</div>
           <div style="height:inherit;width: 40vw;">
             <el-progress :text-inside="true" :stroke-width="20" :percentage="this.progress"></el-progress>
@@ -18,7 +16,7 @@
         </div>
       </div>
       <div class="outerDiv">
-   <div :class="this.runStatus[0] === 0 ? 'innerNotRun' : this.runStatus[0] === 1 ? 'innerRun' : 'innerFinished'">
+        <div :class="this.runStatus[0] === 0 ? 'innerNotRun' : this.runStatus[0] === 1 ? 'innerRun' : 'innerFinished'">
           <div class="nameSpan">步骤1: 对数据预处理</div>
           <div class="imgDiv">
             <img :src="url[0]" class="imgStyle" v-if="!initialImageShow[0]">
@@ -26,7 +24,6 @@
             </vue-loading>
           </div>        </div>
         <div style="width:0.5%"></div>
-<!--        <img src="../assets/fengefu.png" style="width: 1vw;">-->
         <div :class="this.runStatus[1] === 0 ? 'innerNotRun' : this.runStatus[1] === 1 ? 'innerRun' : 'innerFinished'">
           <div class="nameSpan">步骤2: 图像矫正与融合</div>
           <div class="imgDiv">
@@ -36,16 +33,14 @@
           </div>
         </div>
         <div style="width:0.5%"></div>
-<!--        <img src="../assets/fengefu.png" style="width: 1vw;">-->
         <div :class="this.runStatus[2] === 0 ? 'innerNotRun' : this.runStatus[2] === 1 ? 'innerRun' : 'innerFinished'">
           <div class="nameSpan">步骤3: 图像增强去云去雾</div>          <div class="imgDiv">
-            <img :src="url[2]" class="imgStyle" v-if="!initialImageShow[2]">
-            <vue-loading type="bubbles" color="#d9544e" class="imgStyle" :size="{ width: '50%' }" v-if="initialImageShow[2]">
-            </vue-loading>
-          </div>
+          <img :src="url[2]" class="imgStyle" v-if="!initialImageShow[2]">
+          <vue-loading type="bubbles" color="#d9544e" class="imgStyle" :size="{ width: '50%' }" v-if="initialImageShow[2]">
+          </vue-loading>
+        </div>
         </div>
         <div style="width:0.5%"></div>
-<!--        <img src="../assets/fengefu.png" style="width: 1vw;">-->
         <div :class="this.runStatus[3] === 0 ? 'innerNotRun' : this.runStatus[3] === 1 ? 'innerRun' : 'innerFinished'">
           <div class="nameSpan">步骤4：对图像瓦片切分</div>
           <div class="imgDiv">
@@ -55,7 +50,6 @@
           </div>
         </div>
         <div style="width:0.5%"></div>
-<!--        <img src="../assets/fengefu.png" style="width: 1vw;">-->
         <div :class="this.runStatus[4] === 0 ? 'innerNotRun' : this.runStatus[4] === 1 ? 'innerRun' : 'innerFinished'">
           <div class="nameSpan">步骤5：图像目标识别 </div>
           <div class="imgDiv">
@@ -64,16 +58,14 @@
             </vue-loading>
           </div>
         </div>
-     <el-button type="primary" v-if="complete" @click="jumpToTaskDetail">已完成</el-button>
+        <el-button type="primary" v-if="complete" @click="jumpToTaskDetail">已完成</el-button>
         <el-button type="process" v-if="!complete" @click="jumpToTaskDetail">进行中</el-button>
-
       </div>
     </div>
   </div>
 </template>
-
 <script>
-import myStropheConn from '../api/Connection'
+import myStropheConn from '../api/Xmpp'
 export default {
   name: 'ProcessShowItem',
   props: ['processData'],
@@ -98,13 +90,11 @@ export default {
   watch: {
     processData: {
       handler (nv, ov) {
-        console.log('handle data')
         this.handleChangeData()
       },
       deep: true
     }
   },
-
   methods: {
     handleChangeData () {
       console.log(this.processData)
@@ -120,7 +110,9 @@ export default {
         this.$set(this.initialImageShow, index, false)
         index += 1
       }
+      console.log(this.processData.taskStatus[len - 1])
       this.progress = parseInt(this.processData.taskStatus[len - 1].processProgress)
+      console.log(this.progress)
       if (this.progress === 100 && len === 5) {
         console.log('complete')
         this.complete = true
@@ -146,14 +138,14 @@ export default {
             resUrl = baseServer + preDir + '/' + url + '/' + url + '-MSS2.png'
             this.runStatus[index] = 1
           } else {
-            resUrl = baseServer + baseDir + '/' + url + '/' + url + '-pansharpen-r-0.png'
+            resUrl = baseServer + baseDir + '/' + url + '/' + url + '-pansharpen-0-g-r.png'
             this.runStatus[index] = 2
           }
           break
         case 2:
           if (progress < 100) {
             let preDir = myStropheConn.myStropheConn.serverDirPath[index - 1]
-            resUrl = baseServer + preDir + '/' + url + '/' + url + '-pansharpen-r-0.png'
+            resUrl = baseServer + preDir + '/' + url + '/' + url + '-pansharpen-0-g-r.png'
             this.runStatus[index] = 1
           } else {
             resUrl = baseServer + baseDir + '/' + url + '/' + url + '-imgen-0-g-r.png'
@@ -242,7 +234,7 @@ export default {
   .innerRun {
     background-color: PeachPuff;
     width: 20%;
-    border: solid 2px	CadetBlue;
+    border: solid 2px CadetBlue;
     border-radius: 0.5vw;
     padding: 0.1vw;
     position: relative;
@@ -250,7 +242,7 @@ export default {
   .innerFinished{
     background-color: Honeydew;
     width: 20%;
-    border: solid 2px 	CadetBlue;
+    border: solid 2px CadetBlue;
     border-radius: 0.5vw;
     padding: 0.1vw;
     position: relative;
@@ -271,8 +263,8 @@ export default {
   }
   .imgStyle{
   margin: auto;
-    border-bottom: solid 1px	CadetBlue;
-    width: 50%;    display: block;
+    border-bottom: solid 1px CadetBlue;
+    width: 50%;
+    display: block;
   }
-
 </style>

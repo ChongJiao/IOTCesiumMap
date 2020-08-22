@@ -59,7 +59,7 @@ import Stage2 from './Stage2'
 import Stage3 from './Stage3'
 import Stage4 from './Stage4'
 import Stage5 from './Stage5'
-import myStropheConn from '../api/Connection'
+import myStropheConn from '../api/Xmpp'
 import Strophe from 'strophe.js'
 export default {
   name: 'TaskDetail',
@@ -67,7 +67,7 @@ export default {
   data () {
     return {
       dataName: '',
-      showTaskDetail: [true, true, false, false, false],
+      showTaskDetail: [false, false, false, false, false],
       processStatus: ['未理中', '未处理', '未处理', '未处理', '未处理'],
       showStageDetail: [false, false, false, false, false],
       taskId: 0,
@@ -78,43 +78,18 @@ export default {
   },
   mounted () {
     // 数据测试部分
-    this.allInitData = [
-      {
-        'id': 1,
-        'progress': 100,
-        'url': 'GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806'
-      },
-      {
-        'id': 2,
-        'progress': 20,
-        'url': 'GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806'
-      },
-      {
-        'id': 3,
-        'progress': 20,
-        'url': 'GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806'
-      },
-      {
-        'id': 4,
-        'progress': 100,
-        'url': 'GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806'
-      },
-      {
-        'id': 5,
-        'progress': 100,
-        'url': 'GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806'
-      }
-    ]
     let base = this
     setTimeout(function () {
       if (!myStropheConn.myStropheConn.connFlag) {
         console.log('not login')
         myStropheConn.myStropheConn.connecting()
-        // 初始化，发送请求
-        // base.initTask()
-        base.stropheConn = myStropheConn.myStropheConn
-        // 接收消息
-        base.messageHandler = base.stropheConn.conn.addHandler(base.onMessage, null, 'message', null, null, null)
+        setTimeout(function () {
+          base.messageHandler = myStropheConn.myStropheConn.conn.addHandler(base.onMessage, null, 'message', null, null, null)
+          base.initTask()
+        }, 2000)
+      } else {
+        base.messageHandler = myStropheConn.myStropheConn.conn.addHandler(base.onMessage, null, 'message', null, null, null)
+        base.initTask()
       }
     }, 2000)
 
@@ -122,7 +97,9 @@ export default {
 
     let params = this.$route.params
     if (Object.keys(params).length === 0) {
-      this.url = 'GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806'
+      if (this.$route.path !== '/ProcessShow') {
+        this.$router.push({path: '/ProcessShow'})
+      }
     } else {
       this.taskId = params.id
       this.url = params.url
@@ -130,48 +107,20 @@ export default {
       console.log('id is ' + this.taskId)
       console.log('url is ' + this.url)
     }
-
-    // 测试监听
-    // setInterval(function () {
-    //   console.log('change value in allInitData')
-    //   // base.$set(base.allInitData, 2, {
-    //   //   'id': 2,
-    //   //   'progress': 20,
-    //   //   'url': 'GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806'
-    //   // })
-    //   base.allInitData[1].progress = 10
-    // }, 5000)
   },
   destroyed () {
     console.log('Task destroyed')
-    if (this.stropheConn !== undefined) {
-      this.stropheConn.conn.deleteHandler(this.messageHandler)
+    if (myStropheConn.myStropheConn.conn != null) {
+      myStropheConn.myStropheConn.conn.deleteHandler(this.messageHandler)
     }
   },
   methods: {
-    testMessage (msg) {
-      console.log('Task Message')
-      let fromJid = msg.getAttribute('from')
-      let toJid = msg.getAttribute('to')
-      let type = msg.getAttribute('type')
-      let elems = msg.getElementsByTagName('body')
-      if (type === 'chat' && elems.length > 0) {
-        let msgContent = Strophe.Strophe.getText(elems[0])
-        msgContent = msgContent.replace(/&apos;/g, '"')
-        msgContent = msgContent.replace(/&quot;/g, '"')
-        console.log(fromJid + ' send message to ' + toJid + ' and the message content is ' + msgContent)
-      }
-      return true
-    },
     initTask () {
       let msgContent = '{\'type\': \'singleQueryTask\', \'taskId\': {0}, \'userJID\': \'{1}\'}'
       msgContent = String.format(msgContent, this.taskId, myStropheConn.myStropheConn.userJID)
-      this.stropheConn.SendMessage(msgContent)
+      myStropheConn.myStropheConn.SendMessage(msgContent)
     },
     onMessage (msg) {
-      // 解析出<message>的from、type属性，以及body子元素
-      // let fromJid = msg.getAttribute('from')
-      // let toJid = msg.getAttribute('to')
       let type = msg.getAttribute('type')
       let elems = msg.getElementsByTagName('body')
 
@@ -181,6 +130,7 @@ export default {
         msgContent = msgContent.replace(/&quot;/g, '"')
         if (myStropheConn.myStropheConn.isJsonStr(msgContent)) {
           let replyJson = JSON.parse(msgContent)
+          console.log('replyJson')
           console.log(replyJson)
           switch (replyJson['type']) {
             case 'singleTaskList':
@@ -191,8 +141,10 @@ export default {
                 return false
               }
               for (let i = 0; i < len; i++) {
+                this.$set(this.showTaskDetail, i, true)
+                data[i]['progress'] = parseInt(data[i]['progress'])
                 this.allInitData.push(data[i])
-                this.showTaskDetail[i] = true
+                console.log(this.allInitData)
                 if (data[i]['progress'] === 100) {
                   this.processStatus[i] = '处理完'
                 } else {
@@ -202,35 +154,46 @@ export default {
               break
             // 阶段过程接收
             case 'stageProcess':
+              console.log('TaskDetail stageProcess')
+              console.log(replyJson)
               if (this.taskId === replyJson['taskId']) {
                 let stageId = replyJson['stageId']
                 // 如果是该阶段刚开始，初始时没有
                 if (stageId > this.allInitData.length) {
                   let temp = {}
                   temp['stageId'] = replyJson['stageId'] - 1
-                  temp['progress'] = replyJson['progress']
+                  temp['progress'] = parseInt(replyJson['progress'])
                   temp['url'] = replyJson['url']
+                  console.log('push temp is')
+                  console.log(temp)
                   this.allInitData.push(temp)
                 } else {
                   let progress = replyJson['progress']
                   // 文档中阶段从1开始，而页面中为了方便从阶段编号从0开始
-                  if (stageId - 1 >= 0) {
-                    this.allInitData[stageId - 1]['progress'] = progress
-                  }
+                  console.log('update progress is ')
+                  console.log(progress)
+                  this.allInitData[stageId - 1]['progress'] = parseInt(progress)
                 }
               }
               break
             // 阶段结束接收
             case 'stageFinished':
+              console.log('stageFinished')
               if (this.taskId === replyJson['taskId']) {
                 let stageId = replyJson['stageId']
                 this.processStatus[stageId - 1] = '处理完'
                 // 该阶段处理完，默认处理下一个阶段
                 if (stageId <= 4) {
-                  this.showTaskDetail[stageId] = true
+                  this.$set(this.showTaskDetail, stageId, true)
                   this.processStatus[stageId] = '正在处理'
                 }
-                this.$forceUpdate()
+                if (stageId > this.allInitData) {
+                  let temp = {}
+                  temp['stageId'] = replyJson['stageId'] - 1
+                  temp['progress'] = parseInt(replyJson['progress'])
+                  temp['url'] = replyJson['url']
+                  this.allInitData.push(temp)
+                }
                 if (stageId - 1 >= 0) {
                   this.allInitData[stageId - 1]['progress'] = 100
                 }

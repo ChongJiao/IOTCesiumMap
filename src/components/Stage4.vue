@@ -23,20 +23,16 @@
       <div class="showImage">
         <div style="width: 30vw; height: 25vw; float:left; position:relative;">
           <div style="float: left; width: 12.5vw; height: 14vw;margin-right: 2vw">
-            <img :src="originalImageUrl0" style="width: 12.5vw; height: 12.5vw; border: solid #4c43ff 2px">
-            <p>子任务1</p>
+            <img :src="originalImageUrl0" style="width: 12vw; height: 12vw; border: solid #4c43ff 2px">
           </div>
           <div style="float: left; width: 12.5vw; height: 14vw;">
-            <img :src="originalImageUrl1" style="width: 12.5vw; height: 12.5vw; border: solid #4c43ff 2px">
-            <p>子任务2</p>
+            <img :src="originalImageUrl1" style="width: 12vw; height: 12vw; border: solid #4c43ff 2px">
           </div>
           <div style="float: left; width: 12.5vw; height: 14vw;margin-right: 2vw">
-            <img :src="originalImageUrl2" style="width: 12.5vw; height: 12.5vw; border: solid #4c43ff 2px">
-            <p>子任务3</p>
+            <img :src="originalImageUrl2" style="width: 12vw; height: 12vw; border: solid #4c43ff 2px">
           </div>
           <div style="float: left; width: 12.5vw; height: 14vw;">
-            <img :src="originalImageUrl3" style="width: 12.5vw; height: 12.5vw; border: solid #4c43ff 2px">
-            <p>子任务4</p>
+            <img :src="originalImageUrl3" style="width: 12vw; height: 12vw; border: solid #4c43ff 2px">
           </div>
         </div>
         <div style="float:left;">
@@ -55,7 +51,7 @@
 </template>
 
 <script>
-import myStropheConn from '../api/Connection'
+import myStropheConn from '../api/Xmpp'
 
 export default {
   name: 'Stage4',
