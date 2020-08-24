@@ -165,7 +165,7 @@ export default {
                 let temp = this.taskSource[taskId - 1]['taskStatus']
                 let singleTaskStatus = {}
                 // singleTaskStatus['processId'+processId.toString()]=processId.toString()//不同的阶段
-                singleTaskStatus['processProgress'] = replyJson['process']
+                singleTaskStatus['processProgress'] = replyJson['progress']
                 //  singleTaskStatus['url'] = replyJson['url']
                 temp.push(singleTaskStatus)
                 this.taskSource[taskId - 1]['taskStatus'] = temp
@@ -177,7 +177,7 @@ export default {
                 // console.log(temp)
                 // this.$set(this.taskSource, taskId - 1, tmp)
                 // console.log(this.taskSource)
-                this.taskSource[taskId - 1].taskStatus[stageId - 1].processProgress= replyJson['process']
+                this.taskSource[taskId - 1].taskStatus[stageId - 1].processProgress= replyJson['progress']
                 // this.taskSource[taskId - 1]['tasksStatus'][stageId - 1]['url'] = replyJson['url']
               }
               console.log(this.taskSource)
