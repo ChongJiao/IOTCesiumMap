@@ -1,4 +1,4 @@
-import Strophe from 'strophe.js'
+import Strophe from 'strophe.js' //从管控中获取的
 class StropheConn {
   connFlag = false
   conn = null

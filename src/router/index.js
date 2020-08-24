@@ -6,6 +6,7 @@ import UrlNotFound from '../components/UrlNotFound'
 import NodesChart from '../components/NodesChart'
 import ProcessShow from '../components/TaskFlow'
 import DataCenter from '../components/DataCenter'
+import LoginWidget from '../components/LoginWidget'
 import Login from '../components/Login'
 Vue.use(Router)
 
@@ -13,8 +14,8 @@ export default new Router({
   routes: [
     {
       path: '/',
-      name: 'CesiumMap',
-      component: CesiumMap
+      name: 'Login',
+      component: Login
     },
     {
       path: '/CesiumMap',
