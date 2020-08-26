@@ -78,6 +78,7 @@
       ></vc-handler-draw-polygon>
     </vc-viewer>
   </div>
+<!--  资源列表-->
   <div class = "info-window" v-if="resourceTableShow">
     <p style="color: #e5f2fe">资源列表</p>
     <el-table
@@ -116,7 +117,7 @@
     <el-button style="margin-top: 1vh" :class="this.selectSubResource.length > 0 ? 'select' : 'deselect'" v-on:click="requestSub">订阅</el-button>
     <el-button style="margin-top: 1vh" type="success" v-on:click="requestSource">资源获取</el-button>
   </div>
-
+<!--订阅列表-->
   <div class = "info-window" v-if="subResourceTableShow">
     <p style="color: #e5f2fe">订阅列表</p>
     <el-table
@@ -152,12 +153,13 @@
                        min-width="30%">
       </el-table-column>
     </el-table>
-    <el-button style="margin-top: 1vh" :class="this.selectUbSubResource.length > 0 ? 'select' : 'deselect'" v-on:click="requestUnSub">取消订阅</el-button>
+    <el-button style="margin-top: 1vh" :class="this.selectUnSubResource.length > 0 ? 'select' : 'deselect'" v-on:click="requestUnSub">取消订阅</el-button>
   </div>
-
+<!--任务列表-->
   <div class = "info-window" v-if="showTaskTable">
     <TaskContent v-on:workOnMap="ViewMapResults"></TaskContent>
   </div>
+<!--  任务信息表格-->
   <div class = "info-window" v-if="showTaskDetailTable">
     <el-form ref="taskForm" :model="taskForm" label-width="calc(100px + .5vw)">
       <el-form-item label="中心经度" class="label-item">
@@ -172,7 +174,16 @@
       <el-form-item label="采集周期">
         <el-input v-model="taskForm.period"></el-input>
       </el-form-item>
-      <el-form-item label="扫描时间">
+      <el-form-item label="开始时间">
+        <el-col :span="11">
+          <el-date-picker type="date" placeholder="选择日期" v-model="taskForm.startDate" style="width: 100%;"></el-date-picker>
+        </el-col>
+        <el-col class="line" :span="2">-</el-col>
+        <el-col :span="11">
+          <el-time-picker placeholder="选择时间" v-model="taskForm.endDate" style="width: 100%;"></el-time-picker>
+        </el-col>
+      </el-form-item>
+      <el-form-item label="结束时间">
         <el-col :span="11">
           <el-date-picker type="date" placeholder="选择日期" v-model="taskForm.startDate" style="width: 100%;"></el-date-picker>
         </el-col>
@@ -200,6 +211,7 @@ export default {
   components: {TaskContent, RightItem},
   // 状态信息添加在本地
   mounted () {
+    // TODO 从数据库中获取订阅的资源列表到 变量 subResource（list）
     console.log('Cesium mounted')
     console.log(this.$xmpp)
     let base = this
@@ -262,7 +274,7 @@ export default {
       subResourceTableShow: false,
       subResource: [],
       selectSubResource: [],
-      selectUbSubResource: [],
+      selectUnSubResource: [],
       taskForm: {
         lat: '',
         lng: '',
@@ -377,6 +389,7 @@ export default {
       this.showTaskDetailTable = false
       this.clear()
     },
+    // cesium加载瓦片触发函数
     imageryReady (imageryProvider) {
       this.viewer.camera.flyTo({destination: imageryProvider.rectangle})
     },
@@ -400,14 +413,15 @@ export default {
           items.push(this.selectSubResource[i].id)
         }
         this.$xmpp.ResourceSubUnSub(1, items)
+        // TODO 将items的信息插入数据库
       }
     },
     // 资源退订请求
     requestUnSub () {
-      if (this.selectUbSubResource.length > 0) {
+      if (this.selectUnSubResource.length > 0) {
         let items = []
-        for (let i in this.selectUbSubResource) {
-          items.push(this.selectUbSubResource[i].id)
+        for (let i in this.selectUnSubResource) {
+          items.push(this.selectUnSubResource[i].id)
         }
         this.$xmpp.ResourceSubUnSub(0, items)
       }
@@ -430,6 +444,7 @@ export default {
     },
     // 入网退网协议 pass
     handleRequestInOrOutNet (replyJson) {
+      // TODO 数据库做相应更新
       let requestType = replyJson['requesttype']
       let result = replyJson['result']
       if (requestType === 1) {
@@ -465,8 +480,9 @@ export default {
       } else {
         if (result === 1) {
           alert('退订成功')
-          for (let i in this.selectUbSubResource) {
-            let id = this.selectUbSubResource[i].id
+          // TODO 在数据库中删除相应的selectUnSubResource
+          for (let i in this.selectUnSubResource) {
+            let id = this.selectUnSubResource[i].id
             console.log(id)
             for (let j in this.subResource) {
               console.log(this.subResource[j].id)
@@ -510,6 +526,7 @@ export default {
         // TODO 页面中进行更新任务列表
         this.clear()
         this.taskList.push(taskId)
+        // TODO 新建任务到数据库中
       } else {
         alert('创建任务失败')
       }
@@ -616,7 +633,7 @@ export default {
       this.selectSubResource = val
     },
     handleUnSubSelectChange (val) {
-      this.selectUbSubResource = val
+      this.selectUnSubResource = val
     }
   }
 }
