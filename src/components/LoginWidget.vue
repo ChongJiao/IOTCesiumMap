@@ -100,7 +100,7 @@ export default {
         default:
           this.$xmpp.connectCode = '登陆失败'
           this.$xmpp.connFlag = false
-          alert('登陆失败')
+          this.$message('登陆失败')
           break
       }
     },
@@ -140,7 +140,7 @@ export default {
   .vue-template {
     float: right;
     margin-left: auto;
-    background: linear-gradient(90deg, #F0F0F0	,70%, #BEBEBE);
+    background: linear-gradient(90deg, #F0F0F0, 70%, #BEBEBE);
     padding: 1vw;
     margin-right: 10vw;
     width: 80vw;

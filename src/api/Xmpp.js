@@ -1,4 +1,4 @@
-import Strophe from 'strophe.js' //从管控中获取的
+import Strophe from 'strophe.js'
 class StropheConn {
   connFlag = false
   conn = null
@@ -92,7 +92,7 @@ class StropheConn {
     let latitude = this.RandomValue(0, 90)
     let longitude = this.RandomValue(0, 180)
     msgContent = String.format(msgContent, this.userCode, requestType, latitude, longitude)
-    this.SendMessage(msgContent)  //从这里发送消息给管控，然后管控回复消息给用户处理
+    this.SendMessage(msgContent) // 从这里发送消息给管控，然后管控回复消息给用户处理
   }
   // 资源订阅查询协议 pass
   RequestReSource () {

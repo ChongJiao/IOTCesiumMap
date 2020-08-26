@@ -18,14 +18,14 @@ SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- ----------------------------
--- Table structure for record
+-- Table structure for resource
 -- ----------------------------
-DROP TABLE IF EXISTS `record`;
-CREATE TABLE `record`  (
+DROP TABLE IF EXISTS `resource`;
+CREATE TABLE `resource`  (
   `resourceId` int(0) NOT NULL,
   `resourceName` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   `fathercode` int(0) NULL DEFAULT NULL,
-  `level` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+  `resourceLevel` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
   `status` int(0) NULL DEFAULT NULL,
   `usercode` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
   `updatetime` datetime(0) NULL DEFAULT NULL,
@@ -33,8 +33,8 @@ CREATE TABLE `record`  (
 ) ENGINE = InnoDB;
 
 
-INSERT INTO `record` VALUES (1, '资源1号', 0, '1', 0, 'user_001', NULL);
-INSERT INTO `record` VALUES (2, '资源2号', 0, '1', 1, 'user_001', NULL);
+INSERT INTO `resource` VALUES (1, '资源1号', 0, '1', 0, 'user_001', NULL);
+INSERT INTO `resource` VALUES (2, '资源2号', 0, '1', 1, 'user_001', NULL);
 
 DROP TABLE IF EXISTS `task`;
 CREATE TABLE `task`  (
@@ -49,14 +49,14 @@ INSERT INTO `task` VALUES ( 2, 'user_001', 0, NULL);
 
 
 
-DROP TABLE IF EXISTS `usertonet`;
-CREATE TABLE `usertonet`  (
+DROP TABLE IF EXISTS `user2net`;
+CREATE TABLE `user2net`  (
   `usercode` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   `status` int(0) NOT NULL,
   `longitude` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
   `latitude` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL
 ) ENGINE = InnoDB;
 
-INSERT INTO `usertonet` VALUES ('user_001', 1, NULL, NULL);
-INSERT INTO `usertonet` VALUES ('user_002', 0, NULL, NULL);
-INSERT INTO `usertonet` VALUES ('user_003', 0, NULL, NULL);
+INSERT INTO `user2net` VALUES ('user_001', 1, NULL, NULL);
+INSERT INTO `user2net` VALUES ('user_002', 0, NULL, NULL);
+INSERT INTO `user2net` VALUES ('user_003', 0, NULL, NULL);

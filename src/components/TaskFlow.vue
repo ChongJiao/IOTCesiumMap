@@ -109,12 +109,12 @@ export default {
               if (stageId > this.taskListContent[taskId - 1]['taskStatus'].length) {
                 let temp = this.taskListContent[taskId - 1]['taskStatus']
                 let singleTaskStatus = {}
-singleTaskStatus['processProgress'] = replyJson['progress']
+                singleTaskStatus['processProgress'] = replyJson['progress']
 
                 temp.push(singleTaskStatus)
                 this.taskListContent[taskId - 1]['taskStatus'] = temp
               } else {
- 				 this.taskListContent[taskId - 1].taskStatus[taskId - 1].url = replyJson['url']
+                this.taskListContent[taskId - 1].taskStatus[taskId - 1].url = replyJson['url']
               }
               console.log(this.taskListContent)
               break

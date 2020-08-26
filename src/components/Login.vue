@@ -4,10 +4,10 @@
     <div class="video-container">
       <!--    <Login></Login>-->
       <div :style="fixStyle" class="filter"></div>
-      <video :style="fixStyle" autoplay loop muted class="fillWidth" v-on:canplay="canplay"
-      poster="../assets/oceans.png">
-      <source src="../assets/New-jumbo.mp4" type="video/mp4" >
-    </video>
+<!--      <video :style="fixStyle" autoplay loop muted class="fillWidth" v-on:canplay="canplay"-->
+<!--      poster="../assets/oceans.png">-->
+<!--        <source src="../assets/New-jumbo.mp4" type="video/mp4" >-->
+<!--      </video>-->
 
 <!--        <video :style="fixStyle" autoplay loop muted class="fillWidth" v-on:canplay="canplay">-->
 <!--            <source-->
@@ -23,52 +23,51 @@
   </div>
 </template>
 <script>
-  import LoginWidget from './LoginWidget'
-  export default {
-    name: 'Login',
-    data() {
-      return {
-        vedioCanPlay: false,
-        fixStyle: ''
-      }
-    },
-    components:{LoginWidget},
-    methods: {
-      canplay() {
-        this.vedioCanPlay = true
-
-      }
-    },
-    mounted: function() {
-      window.onresize = () => {
-        const windowWidth = document.body.clientWidth
-        const windowHeight = document.body.clientHeight
-        const windowAspectRatio = windowHeight / windowWidth
-        let videoWidth
-        let videoHeight
-        if (windowAspectRatio < 0.5625) {
-          videoWidth = windowWidth
-          videoHeight = videoWidth * 0.5625
-          this.fixStyle = {
-            height: windowWidth * 0.5625 + 'px',
-            width: windowWidth + 'px',
-            'margin-bottom': (windowHeight - videoHeight) / 2 + 'px',
-            'margin-left': 'initial'
-          }
-        } else {
-          videoHeight = windowHeight
-          videoWidth = videoHeight / 0.5625
-          this.fixStyle = {
-            height: windowHeight + 'px',
-            width: windowHeight / 0.5625 + 'px',
-            'margin-left': (windowWidth - videoWidth) / 2 + 'px',
-            'margin-bottom': 'initial'
-          }
+import LoginWidget from './LoginWidget'
+export default {
+  name: 'Login',
+  data () {
+    return {
+      vedioCanPlay: false,
+      fixStyle: ''
+    }
+  },
+  components: {LoginWidget},
+  methods: {
+    canplay () {
+      this.vedioCanPlay = true
+    }
+  },
+  mounted: function () {
+    window.onresize = () => {
+      const windowWidth = document.body.clientWidth
+      const windowHeight = document.body.clientHeight
+      const windowAspectRatio = windowHeight / windowWidth
+      let videoWidth
+      let videoHeight
+      if (windowAspectRatio < 0.5625) {
+        videoWidth = windowWidth
+        videoHeight = videoWidth * 0.5625
+        this.fixStyle = {
+          height: windowWidth * 0.5625 + 'px',
+          width: windowWidth + 'px',
+          'margin-bottom': (windowHeight - videoHeight) / 2 + 'px',
+          'margin-left': 'initial'
+        }
+      } else {
+        videoHeight = windowHeight
+        videoWidth = videoHeight / 0.5625
+        this.fixStyle = {
+          height: windowHeight + 'px',
+          width: windowHeight / 0.5625 + 'px',
+          'margin-left': (windowWidth - videoWidth) / 2 + 'px',
+          'margin-bottom': 'initial'
         }
       }
-      window.onresize()
     }
+    window.onresize()
   }
+}
 </script>
 
 <style scoped>

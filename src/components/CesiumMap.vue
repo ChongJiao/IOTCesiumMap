@@ -91,24 +91,24 @@
         width="55">
       </el-table-column>
       <el-table-column align="center"
-                       prop="id"
+                       prop="resourceId"
                        label="序号"
                        min-width="10%">
       </el-table-column>
       <el-table-column align="center"
-                       prop="name"
+                       prop="resourceName"
                        style="border-style:solid;border-width:5px;"
                        label="资源名称"
                        min-width="30%">
       </el-table-column>
       <el-table-column align="center"
-                       prop="level"
+                       prop="resourceLevel"
                        style="border-style:solid;border-width:5px;"
                        label="级别"
                        min-width="30%">
       </el-table-column>
       <el-table-column align="center"
-                       prop="fathercode"
+                       prop="fatherCode"
                        style="border-style:solid;border-width:5px;"
                        label="父编号"
                        min-width="30%">
@@ -130,24 +130,24 @@
         width="55">
       </el-table-column>
       <el-table-column align="center"
-                       prop="id"
+                       prop="resourceId"
                        label="序号"
                        min-width="10%">
       </el-table-column>
       <el-table-column align="center"
-                       prop="name"
+                       prop="resourceName"
                        style="border-style:solid;border-width:5px;"
                        label="资源名称"
                        min-width="30%">
       </el-table-column>
       <el-table-column align="center"
-                       prop="level"
+                       prop="resourceLevel"
                        style="border-style:solid;border-width:5px;"
                        label="级别"
                        min-width="30%">
       </el-table-column>
       <el-table-column align="center"
-                       prop="fathercode"
+                       prop="fatherCode"
                        style="border-style:solid;border-width:5px;"
                        label="父编号"
                        min-width="30%">
@@ -163,10 +163,10 @@
   <div class = "info-window" v-if="showTaskDetailTable">
     <el-form ref="taskForm" :model="taskForm" label-width="calc(100px + .5vw)">
       <el-form-item label="中心经度" class="label-item">
-        <el-input v-model="taskForm.lng"></el-input>
+        <el-input v-model="taskForm.longitude"></el-input>
       </el-form-item>
       <el-form-item label="中心纬度">
-        <el-input v-model="taskForm.lat"></el-input>
+        <el-input v-model="taskForm.latitude"></el-input>
       </el-form-item>
       <el-form-item label="采集幅宽">
         <el-input v-model="taskForm.width"></el-input>
@@ -180,16 +180,16 @@
         </el-col>
         <el-col class="line" :span="2">-</el-col>
         <el-col :span="11">
-          <el-time-picker placeholder="选择时间" v-model="taskForm.endDate" style="width: 100%;"></el-time-picker>
+          <el-time-picker placeholder="选择时间" v-model="taskForm.startTime" style="width: 100%;"></el-time-picker>
         </el-col>
       </el-form-item>
       <el-form-item label="结束时间">
         <el-col :span="11">
-          <el-date-picker type="date" placeholder="选择日期" v-model="taskForm.startDate" style="width: 100%;"></el-date-picker>
+          <el-date-picker type="date" placeholder="选择日期" v-model="taskForm.endDate" style="width: 100%;"></el-date-picker>
         </el-col>
         <el-col class="line" :span="2">-</el-col>
         <el-col :span="11">
-          <el-time-picker placeholder="选择时间" v-model="taskForm.endDate" style="width: 100%;"></el-time-picker>
+          <el-time-picker placeholder="选择时间" v-model="taskForm.endTime" style="width: 100%;"></el-time-picker>
         </el-col>
       </el-form-item>
       <el-form-item>
@@ -203,7 +203,6 @@
 <script>
 
 import Strophe from 'strophe.js'
-import  myHttp from '../api/Http'
 import RightItem from './RightItem'
 import TaskContent from './TaskContent'
 export default {
@@ -211,10 +210,29 @@ export default {
   components: {TaskContent, RightItem},
   // 状态信息添加在本地
   mounted () {
-
-    // TODO 从数据库中获取订阅的资源列表到 变量 subResource（list）    myHttp.myHttp.setUserStatus(this.$xmpp.userCode,0,this.$xmpp.userLongitude,this.$xmpp.userLatitude)    console.log('Cesium mounted')
-    console.log(this.$xmpp)
+    // TODO 从数据库中获取订阅的资源列表到 变量 subResource（list）
     let base = this
+    // 获取用户入网状态 passed
+    this.$http.getUserNetStatus(this.$xmpp.userCode).then(result => {
+      if (result === 1) {
+        base.NetStatus = '申请退网'
+      } else {
+        base.NetStatus = '申请入网'
+      }
+    }).catch((reason) => {
+      base.NetStatus = '用户异常'
+      console.log(reason)
+    })
+    // 获取订阅资源列表 pass
+    this.$http.getUserSubResourceList(this.$xmpp.userCode).then((result) => {
+      console.log(result)
+      this.subResource = result
+    }).catch((reason) => {
+      console.log(reason)
+    })
+
+    console.log('Cesium mounted')
+    console.log(this.$xmpp)
     setTimeout(function () {
       if (!base.$xmpp.connFlag) {
         console.log('not login')
@@ -252,7 +270,7 @@ export default {
   data () {
     return {
       showTaskTable: false,
-      showTaskDetailTable: false,
+      showTaskDetailTable: true,
       showTaskTools: false,
       alpha: 1,
       brightness: 1,
@@ -261,7 +279,23 @@ export default {
       bmKey: 'AgcbDCAOb9zMfquaT4Z-MdHX4AsHUNvs7xgdHefEA5myMHxZk87NTNgdLbG90IE-',
       Cesium: null,
       viewer: null,
-      resourceItems: [],
+      resourceItems: [{
+        resourceId: '3',
+        resourceName: '黄石',
+        resourceLevel: '0',
+        fatherCode: '2'
+      }, {
+        resourceId: '4',
+        resourceName: '大冶',
+        resourceLevel: '0',
+        fatherCode: '2'
+      },
+      {
+        resourceId: '5',
+        resourceName: '西安',
+        resourceLevel: '0',
+        fatherCode: '2'
+      }],
       tileUrl0: 'http://localhost:8000/GFData/tileData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806-pansharpen-0',
       tileUrl1: 'http://localhost:8000/GFData/tileData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806-pansharpen-0',
       tileUrl2: 'http://localhost:8000/GFData/tileData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806-pansharpen-0',
@@ -276,23 +310,19 @@ export default {
       selectSubResource: [],
       selectUnSubResource: [],
       taskForm: {
-        lat: '',
-        lng: '',
+        latitude: '',
+        longitude: '',
         width: '',
         startDate: '',
+        startTime: '',
         endDate: '',
+        endTime: '',
         period: '',
         desc: ''
       }
     }
   },
   methods: {
-    logout () {
-
-    },
-    handleOpen () {
-      this.isCollapse = !this.isCollapse
-    },
     ViewMapResults (url) {
       // 可视化结果
       console.log(url)
@@ -353,11 +383,7 @@ export default {
       // console.log(result)
     },
     MakeTask () {
-      // this.regionTaskMake()
-      this.showTaskDetailTable = true
-    },
-    regionTaskMake (beginTime = ' ', endTime = ' ', period = 1) {
-      // 采集需求
+      // TODO 获得中心经纬度以及幅宽
       // let positions = this.$refs.handlerPolygon.polylines[0].positions
       // let centerLng = 0
       // let centerLat = 0
@@ -372,22 +398,50 @@ export default {
       // }
       // centerLat /= positions.length
       // centerLng /= positions.length
-      beginTime = ''
-      endTime = ''
-      let centerLat = '33.2333'
-      let centerLng = '92.456'
-      let msgContent = '{"typeid": 21106, "usercode":"{0}", ' +
-        '"latitude": "{1}", "longitude": "{2}", ' +
-        '"width": "{3}", ' +
-        '"begintime": "{4}", "endtime": "{5}",' +
-        '"period": {6}, "capturearea": "{7}"}'
-      msgContent = String.format(msgContent,
-        this.$xmpp.userCode, centerLat, centerLng, 4000,
-        beginTime, endTime, period, JSON.stringify([30.6552, 113.672, 30.5877, 114.045, 30.2668, 113.966, 30.3343, 113.594]))
-      console.log(msgContent)
-      this.$xmpp.SendMessage(msgContent)
-      this.showTaskDetailTable = false
-      this.clear()
+      this.showTaskDetailTable = true
+    },
+    getTimeFormat (date, time) {
+      let timeFormat = '{0}-{1}-{2} {3}:{4}:{5}'
+      let timeString = String.format(timeFormat, date.getFullYear(), date.getMonth() + 1, date.getDate(), time.getHours(), time.getMinutes(), time.getSeconds())
+      return timeString
+    },
+    regionTaskMake () {
+      // 采集需求 XMPP部分
+      // let msgContent = '{"typeid": 21106, "usercode":"{0}", ' +
+      //   '"latitude": "{1}", "longitude": "{2}", ' +
+      //   '"width": "{3}", ' +
+      //   '"begintime": "{4}", "endtime": "{5}",' +
+      //   '"period": {6}, "capturearea": "{7}"}'
+      // msgContent = String.format(msgContent,
+      //   this.$xmpp.userCode, this.taskForm.lat, this.taskForm.lng, this.taskForm.width,
+      //   beginTime, endTime, this.taskForm.period, JSON.stringify([30.6552, 113.672, 30.5877, 114.045, 30.2668, 113.966, 30.3343, 113.594]))
+      // console.log(msgContent)
+      // this.$xmpp.SendMessage(msgContent)
+      // this.showTaskDetailTable = false
+
+      // http 测试 pass
+      let date = new Date(this.taskForm.startDate)
+      let time = new Date(this.taskForm.startTime)
+      let beginTime = this.getTimeFormat(date, time)
+      date = new Date(this.taskForm.endDate)
+      time = new Date(this.taskForm.endTime)
+      let endTime = this.getTimeFormat(date, time)
+      let data = JSON.parse(JSON.stringify(this.taskForm))
+      delete data.startDate
+      delete data.startTime
+      delete data.endDate
+      delete data.endTime
+      data.beginTime = beginTime
+      data.endTime = endTime
+      data.captureArea = 'test test test'
+      data.taskId = '3'
+      data.status = '0'
+      this.$http.dealTask(data, this.$xmpp.userCode, 'new').then((result) => {
+        this.$message('任务创建成功')
+      }).catch((reason) => {
+        this.$message('任务创建失败')
+      })
+      // this.clear()
     },
     // cesium加载瓦片触发函数
     imageryReady (imageryProvider) {
@@ -413,7 +467,18 @@ export default {
           items.push(this.selectSubResource[i].id)
         }
         this.$xmpp.ResourceSubUnSub(1, items)
-        // TODO 将items的信息插入数据库
+
+        // let base = this
+        // this.$http.setResourceSubscribe(this.selectSubResource, this.$xmpp.userCode, 'new').then((result) => {
+        //   this.$message('订阅成功')
+        //   // 更新页面订阅内容
+        //   base.subResource = base.subResource.concat(base.selectSubResource)
+        //   console.log(base.subResource)
+        //   console.log(result)
+        // }).catch((reason) => {
+        //   this.$message('订阅失败')
+        //   console.log(reason)
+        // })
       }
     },
     // 资源退订请求
@@ -424,6 +489,26 @@ export default {
           items.push(this.selectUnSubResource[i].id)
         }
         this.$xmpp.ResourceSubUnSub(0, items)
+
+        // let base = this
+        // this.$http.setResourceSubscribe(this.selectUnSubResource, this.$xmpp.userCode, 'delete').then((result) => {
+        //   base.$message('退订成功')
+        //   for (let i in base.selectUnSubResource) {
+        //     let resourceId = base.selectUnSubResource[i].resourceId
+        //     console.log(resourceId)
+        //     for (let j in base.subResource) {
+        //       console.log(base.subResource[j].resourceId)
+        //       if (resourceId === base.subResource[j].resourceId) {
+        //         console.log('remove')
+        //         base.subResource.splice(j, 1)
+        //         break
+        //       }
+        //     }
+        //   }
+        // }).catch((reason) => {
+        //   // TODO 数据库中需要删除，这里是管控退订成功，但是数据库删除失败
+        //   base.$message('退订失败')
+        // })
       }
     },
     // 显示
@@ -449,18 +534,33 @@ export default {
       let result = replyJson['result']
       if (requestType === 1) {
         if (result === 1) {
-          alert('入网成功！！！')
-          myHttp.myHttp.setUserStatus(this.$xmpp.userCode,1,this.$xmpp.userLongitude,this.$xmpp.userLatitude)
-          this.NetStatus = '退网'
+          this.$http.setUserStatus(this.$xmpp.userCode, 1, this.$xmpp.userLongitude, this.$xmpp.userLatitude).then(result => {
+            if (result === 'success') {
+              this.$message('入网成功')
+            }
+            console.log(result)
+          }).catch((reason) => {
+            this.$message('本地入网记录失败！！！')
+            console.log(reason)
+          })
+          this.NetStatus = '申请退网'
         } else {
-          alert('入网失败，请重新入网')
+          this.$message('管控入网失败，请重新入网')
         }
       } else {
         if (result === 1) {
-          alert('退网成功！！！')
-          this.NetStatus = '入网'
+          this.$http.setUserStatus(this.$xmpp.userCode, 0, this.$xmpp.userLongitude, this.$xmpp.userLatitude).then(result => {
+            if (result === 'success') {
+              this.$message('退网成功')
+            }
+            console.log(result)
+          }).catch((reason) => {
+            this.$message('本地退网失败！！！')
+            console.log(reason)
+          })
+          this.NetStatus = '申请入网'
         } else {
-          alert('退网失败，请重新入网')
+          this.$message('管控退网失败，请重新退网')
         }
       }
     },
@@ -470,30 +570,48 @@ export default {
       let result = replyJson['result']
       if (requesttype === 1) {
         if (result === 1) {
-          alert('订阅成功')
+          this.$message('订阅成功')
           this.resourceTableShow = false
-          this.subResource = this.selectSubResource
           console.log('sub resource is')
           console.log(this.subResource)
+          // Fixed 在数据库中插入订阅的资源信息 selectSubResource pass
+          let base = this
+          this.$http.setResourceSubscribe(this.selectSubResource, this.$xmpp.userCode, 'new').then((result) => {
+            this.$message('订阅成功')
+            // 更新页面订阅内容
+            base.subResource = base.subResource.concat(base.selectSubResource)
+            console.log(base.subResource)
+            console.log(result)
+          }).catch((reason) => {
+            this.$message('订阅失败')
+            console.log(reason)
+          })
         } else {
-          alert('订阅失败')
+          // TODO 数据库中需要添加订阅，这里是管控订阅成功，但是数据库新增失败
+          this.$message('订阅失败')
         }
       } else {
         if (result === 1) {
-          alert('退订成功')
-          // TODO 在数据库中删除相应的selectUnSubResource
-          for (let i in this.selectUnSubResource) {
-            let id = this.selectUnSubResource[i].id
-            console.log(id)
-            for (let j in this.subResource) {
-              console.log(this.subResource[j].id)
-              if (id === this.subResource[j].id) {
-                console.log('remove')
-                this.subResource.splice(j, 1)
-                break
+          // Fixed 在数据库中删除相应的 selectUnSubResource
+          let base = this
+          this.$http.setResourceSubscribe(this.selectUnSubResource, this.$xmpp.userCode, 'delete').then((result) => {
+            base.$message('退订成功')
+            for (let i in base.selectUnSubResource) {
+              let resourceId = base.selectUnSubResource[i].resourceId
+              console.log(resourceId)
+              for (let j in base.subResource) {
+                console.log(base.subResource[j].resourceId)
+                if (resourceId === base.subResource[j].resourceId) {
+                  console.log('remove')
+                  base.subResource.splice(j, 1)
+                  break
+                }
               }
             }
-          }
+          }).catch((reason) => {
+            // TODO 数据库中需要删除，这里是管控退订成功，但是数据库删除失败
+            base.$message('退订失败')
+          })
         } else { alert('退订失败') }
       }
     },
@@ -509,12 +627,21 @@ export default {
           let content = resourcelist[i]
           let data = content.split(',')
           let obj = Object()
-          obj.id = data[0]
-          obj.name = data[1]
-          obj.level = data[2]
-          obj.fathercode = data[3]
+          obj.resourceId = data[0]
+          obj.resourceName = data[1]
+          obj.resourceLevel = data[2]
+          obj.fatherCode = data[3]
           console.log(obj)
-          this.resourceItems.push(obj)
+          let find = false
+          for (let i in this.subResource) {
+            if (this.subResource[i].resourceId === data[0]) {
+              find = true
+              break
+            }
+          }
+          if (!find) {
+            this.resourceItems.push(obj)
+          }
         }
       }
     },
@@ -525,6 +652,28 @@ export default {
       if (result === 1) {
         alert('创建任务成功')
         // TODO 页面中进行更新任务列表
+        // Fixed 完成任务新建测试
+        let date = new Date(this.taskForm.startDate)
+        let time = new Date(this.taskForm.startTime)
+        let beginTime = this.getTimeFormat(date, time)
+        date = new Date(this.taskForm.endDate)
+        time = new Date(this.taskForm.endTime)
+        let endTime = this.getTimeFormat(date, time)
+        let data = JSON.parse(JSON.stringify(this.taskForm))
+        delete data.startDate
+        delete data.startTime
+        delete data.endDate
+        delete data.endTime
+        data.beginTime = beginTime
+        data.endTime = endTime
+        data.captureArea = 'test test test'
+        data.taskId = '3'
+        data.status = '0'
+        this.$http.dealTask(data, this.$xmpp.userCode, 'new').then((result) => {
+          this.$message('任务创建成功')
+        }).catch((reason) => {
+          this.$message('任务创建失败')
+        })
         this.clear()
         this.taskList.push(taskId)
         // TODO 新建任务到数据库中
@@ -568,12 +717,12 @@ export default {
             let replyJson = JSON.parse(msgContent)
             console.log(replyJson)
             let typeId = replyJson['typeid']
-            switch (typeId) {     ////收到管控回复的消息的有关处理
+            switch (typeId) { /// /收到管控回复的消息的有关处理
               case '12202':
-                this.handleRequestInOrOutNet(replyJson)   //入网退网
+                this.handleRequestInOrOutNet(replyJson) // 入网退网
                 break
               case '21103':
-                this.handleRequestResource(replyJson) //显示所有资源
+                this.handleRequestResource(replyJson) // 显示所有资源
                 break
               case '12205':
                 this.handleSubUnSubRequest(replyJson)
