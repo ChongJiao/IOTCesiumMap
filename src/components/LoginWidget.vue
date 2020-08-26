@@ -69,7 +69,7 @@ export default {
   //   }
   // },
   methods: {
-    Login (formName) {
+    LoginWidget (formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
           this.connected()

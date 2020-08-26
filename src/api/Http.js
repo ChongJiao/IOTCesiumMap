@@ -6,12 +6,12 @@ axios.defaults.withCredentials = false
 class HttpPort {
   http = axios
   // 获取用户状态信息
-  getUserNetStatus (userId) {
+  getUserNetStatus (usercode) {
     let base = this
     let p = new Promise(function (resolve, reject) {
       base.http.get('/status', {
         params: {
-          userId: userId
+          usercode: usercode
         }
       }).then(res => {
         let status = res.data['status']
@@ -24,16 +24,22 @@ class HttpPort {
     })
     return p
   }
-  // 设定用户状态
-  setUserStatus (userId, status) {
+  // 设定用户状态 !!!已完成
+  setUserStatus (usercode, status,longitude,latitude) {
     let base = this
+    var formData=new FormData();
+    console.log(typeof usercode)
+    console.log("sdsdkajsd")
+    console.log(usercode)
+    console.log("进入了设定用户状态")
+    formData.append( 'usercode',usercode)
+    formData.append('status',status)
+    formData.append('longitude',longitude)
+    formData.append( 'latitude',latitude)
+    console.log(formData.get('usercode'))
+
     let p = new Promise(function (resolve, reject) {
-      base.http.get('/setStatus', {
-        params: {
-          userId: userId,
-          status: status
-        }
-      }).then(res => {
+      base.http.post('/setStatus',formData).then(res => {
         let result = res.data['res']
         if (result === 0) {
           reject(new Error('error'))
@@ -45,12 +51,12 @@ class HttpPort {
     return p
   }
   // 获取用户订阅资源列表
-  getUserSubResourceList (userId) {
+  getUserSubResourceList (usercode) {
     let base = this
     let p = new Promise(function (resolve, reject) {
       base.http.get('/resource', {
         params: {
-          userId: userId
+          usercode: usercode
         }
       }).then(res => {
         let data = res.data
@@ -113,6 +119,6 @@ class HttpPort {
   }
 }
 let myHttp = new HttpPort()
-export {
+export default {
   myHttp
 }

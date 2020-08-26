@@ -192,14 +192,20 @@
 <script>
 
 import Strophe from 'strophe.js'
+import  myHttp from '../api/Http'
 import RightItem from './RightItem'
 import TaskContent from './TaskContent'
-
 export default {
   name: 'CesiumMap',
   components: {TaskContent, RightItem},
   // 状态信息添加在本地
   mounted () {
+    //在mouted里测试入网退网接口
+    myHttp.myHttp.setUserStatus(this.$xmpp.userCode,0,this.$xmpp.userLongitude,this.$xmpp.userLatitude)
+
+
+
+
     console.log('Cesium mounted')
     console.log(this.$xmpp)
     let base = this
@@ -435,6 +441,7 @@ export default {
       if (requestType === 1) {
         if (result === 1) {
           alert('入网成功！！！')
+          myHttp.myHttp.setUserStatus(this.$xmpp.userCode,1,this.$xmpp.userLongitude,this.$xmpp.userLatitude)
           this.NetStatus = '退网'
         } else {
           alert('入网失败，请重新入网')
@@ -550,12 +557,12 @@ export default {
             let replyJson = JSON.parse(msgContent)
             console.log(replyJson)
             let typeId = replyJson['typeid']
-            switch (typeId) {
+            switch (typeId) {     ////收到管控回复的消息的有关处理
               case '12202':
-                this.handleRequestInOrOutNet(replyJson)
+                this.handleRequestInOrOutNet(replyJson)   //入网退网
                 break
               case '21103':
-                this.handleRequestResource(replyJson)
+                this.handleRequestResource(replyJson) //显示所有资源
                 break
               case '12205':
                 this.handleSubUnSubRequest(replyJson)

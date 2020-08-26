@@ -13,8 +13,11 @@ import 'bootstrap-vue/dist/bootstrap-vue.css'
 import VueRouter from 'vue-router'
 import VueLoading from 'vue-loading-template'
 import Xmpp from './api/Xmpp.js'
+import http from './api/Http'
 import Video from 'video.js'
 import 'video.js/dist/video-js.css'
+import axios from 'axios'
+import VueAxios from 'vue-axios'
 
 Vue.prototype.$video = Video
 Vue.use(VueCesium, {
@@ -35,8 +38,10 @@ Vue.use(ElementUI)
 Vue.use(BootstrapVue)
 Vue.use(VueRouter)
 Vue.use(VueLoading /** options **/)
+Vue.use(VueAxios, axios);// import 'bootstrap/dist/css/bootstrap.min.css'
 Vue.config.productionTip = false
 Vue.prototype.$xmpp = Xmpp.myStropheConn
+Vue.prototype.$http = http.myHttp
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
