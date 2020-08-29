@@ -6,18 +6,18 @@
       :data="taskContent"
       border>
       <el-table-column align="center"
-                       prop="id"
+                       prop="taskId"
                        label="序号"
                        min-width="10%">
       </el-table-column>
       <el-table-column align="center"
-                       prop="lng"
+                       prop="longitude"
                        style="border-style:solid;border-width:5px;"
                        label="中心经度"
                        min-width="10%">
       </el-table-column>
       <el-table-column align="center"
-                       prop="lat"
+                       prop="latitude"
                        style="border-style:solid;border-width:5px;"
                        label="中心维度"
                        min-width="10%">
@@ -35,7 +35,7 @@
                        min-width="10%">
       </el-table-column>
       <el-table-column align="center"
-                       prop="startTime"
+                       prop="beginTime"
                        style="border-style:solid;border-width:5px;"
                        label="开始时间"
                        min-width="20%">
@@ -52,12 +52,15 @@
                        label="状态"
                        min-width="10%">
         <template slot-scope="scope">
-          <div v-if="scope.row.status === '1'">
+          <div v-if="scope.row.status === 1">
             <el-button @click="handleViewRes(scope.row)" type="text" size="small">查看结果</el-button>
           </div>
-          <div v-if="scope.row.status === '0'" v-loading="true" style="width: 80%;height: 100%; margin: auto">
-            执行中，请稍后
-          </div>
+          <vue-loading v-if="scope.row.status === 0" type="spiningDubbles" color="#d9544e" :size="{ width: '50%' }" >
+            执行中
+          </vue-loading>
+<!--          <div v-if="scope.row.status === 0" v-loading="true">-->
+<!--            正在执行-->
+<!--          </div>-->
         </template>
       </el-table-column>
     </el-table>
@@ -71,22 +74,33 @@ export default {
     return {
       taskContent: [
         {
-          id: '1',
-          lat: '32.356',
-          lng: '125.678',
+          taskId: '1',
+          latitude: '32.356',
+          longitude: '125.678',
           width: '400m',
-          startTime: '2020-8-22 12:20:20',
+          beginTime: '2020-8-22 12:20:20',
           endTime: '2020-8-22 15:30:30',
           period: '1',
-          status: '1',
-          url: 'https://182.412.423.12:8000/Gdasdw'
+          status: 1,
+          address: 'https://182.412.423.12:8000/Gdasdw'
         }
       ]
     }
   },
+  mounted () {
+    // 获取所有已经创建的任务信息
+    this.$http.dealTask({}, this.$xmpp.userCode, 'all').then((result) => {
+      console.log('task all')
+      console.log(result.data)
+      this.taskContent = result.data
+    }).catch((reason) => {
+      this.$message('获取任务列表失败')
+      console.log(reason)
+    })
+  },
   methods: {
     handleViewRes (row) {
-      this.$emit('workOnMap', row.url)
+      this.$emit('workOnMap', row.address)
     }
   }
 }

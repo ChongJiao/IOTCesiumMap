@@ -73,8 +73,7 @@ router.get('/resource', function (req, res) {
 })
 
 // 用户第一次订阅资源时，为插入数据，接口为/resource?type=new
-// 用户修改订阅资源状态时，为修改数据，再次订阅或者取消订阅，接口为/resource?type=update
-// 其中post的数据应该都存放于表单中，而不应放入路径参数中
+// 用户修改订阅资源状态时，为修改数据，再次订阅或者取消订阅，接口为/resource?type=delete
 router.post('/resourceOp', function (req, res) {
   let type = req.query['type']
   // 新建用户订阅信息
@@ -113,7 +112,6 @@ router.post('/resourceOp', function (req, res) {
 // 添加任务，接口为/task?type=new
 // 修改任务状态，接口为/task?type=update
 router.post('/task', function (req, res) {
-  let responseJson = {'status': 0}
   let type = req.query['type']
   // 新建任务
   if (type === 'new') {
@@ -130,16 +128,35 @@ router.post('/task', function (req, res) {
       })
     })
   }
-  // 修改任务状态
+  // 修改任务状态, 表示已完成
   if (type === 'update') {
     let form = new multiparty.Form()
     form.parse(req, function (err, postJson) {
       if (err) {
         console.log(err)
       }
-      hibernateModel.updateTaskStatus(postJson)
-      responseJson['status'] = 1
-      res.send(responseJson)
+      hibernateModel.updateTaskStatus(postJson.data).then((result) => {
+        res.send({'type': 'success'})
+      }).catch((result) => {
+        res.send({'type': 'error'})
+      })
+    })
+  }
+  // 获取某个用户的所有任务内容
+  if (type === 'all') {
+    let form = new multiparty.Form()
+    form.parse(req, function (err, postJson) {
+      if (err) {
+        console.log(err)
+      }
+      hibernateModel.queryTask(postJson.userCode[0]).then((result) => {
+        let r = {}
+        r.type = 'success'
+        r.data = result
+        res.send(r)
+      }).catch((reason) => {
+        res.send({'type': 'error'})
+      })
     })
   }
 })

@@ -1,5 +1,5 @@
 import axios from 'axios' // 本文件从数据库获取相关信息
-axios.defaults.timeout = 8000
+axios.defaults.timeout = 80000
 axios.defaults.baseURL = 'http://127.0.0.1:3000'
 axios.defaults.withCredentials = false
 
@@ -89,7 +89,7 @@ class HttpPort {
     })
     return p
   }
-  // 任务添加
+  // 任务添加,状态更新
   dealTask (data, userCode, type) {
     let base = this
     let url = '/task?type={0}'
@@ -101,7 +101,7 @@ class HttpPort {
       base.http.post(url, formData)
         .then(res => {
           if (res.data.type === 'success') {
-            resolve('success')
+            resolve(res.data)
           } else {
             reject(new Error('error'))
           }

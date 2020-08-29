@@ -13,27 +13,30 @@
       </el-menu-item>
       <el-submenu index="1">
         <template slot="title">用户中心</template>
-        <el-menu-item index="1">
-          用户名: {{this.$xmpp.userJID}}
+        <el-menu-item index="1-1">
+          用户名: {{this.userName}}
+        </el-menu-item>
+        <el-menu-item index="1-2">
+          域名: {{this.userDomain}}
+        </el-menu-item>
+        <el-menu-item index="1-3" @click="Logout">
+          登出
         </el-menu-item>
       </el-submenu>
 
       <el-submenu index="2">
         <template slot="title">资源中心</template>
-        <el-menu-item index="2-1" @click="showResource">资源列表</el-menu-item>
-        <el-menu-item index="2-2" @click="showSubResource">订阅列表</el-menu-item>
+        <el-menu-item index="2-1" @click="openWindow($event, 0)">资源列表</el-menu-item>
+        <el-menu-item index="2-2" @click="openWindow($event, 1)">订阅列表</el-menu-item>
       </el-submenu>
       <el-submenu index="3">
         <template slot="title">任务中心</template>
-        <el-menu-item index="3-1" @click="showTask">任务列表</el-menu-item>
-        <el-menu-item index="3-2" @click="generateTask">任务生成</el-menu-item>
+        <el-menu-item index="3-1" @click="openWindow($event, 2)">任务列表</el-menu-item>
+        <el-menu-item index="3-2" @click="openWindow($event, 3)">任务生成</el-menu-item>
       </el-submenu>
       <el-menu-item index="4" v-on:click="requestInOutNet">{{NetStatus}}</el-menu-item>
     </el-menu>
-    <div class="toolBox" v-if="showTaskTools">
-<!--      <div id = "polygon" class= "toolDeSelect">-->
-<!--        <img class = "toolIcon" src="../assets/tool_Polygon.png">-->
-<!--      </div>-->
+    <div class="toolBox" v-if="showFlag[3]">
       <el-button id="draw" icon="el-icon-thumb" v-on:click="toggle('handlerPolygon')">绘制</el-button>
 <!--      <el-button type="primary" icon="el-icon-delete" v-on:click="clear">清除</el-button>-->
       <el-button type="danger" icon="el-icon-search" v-on:click="MakeTask">生成</el-button>
@@ -79,8 +82,9 @@
     </vc-viewer>
   </div>
 <!--  资源列表-->
-  <div class = "info-window" v-if="resourceTableShow">
-    <p style="color: #e5f2fe">资源列表</p>
+  <div class = "info-window" v-if="showFlag[0]">
+    <el-button icon="el-icon-error" size ="small" type="danger" class="close-info-window" @click="closeWindow(0)">关闭</el-button>
+    <p style="color: #e5f2fe;">资源列表</p>
     <el-table
       :row-style="{width:'100%'}"
       :data="resourceItems"
@@ -118,7 +122,8 @@
     <el-button style="margin-top: 1vh" type="success" v-on:click="requestSource">资源获取</el-button>
   </div>
 <!--订阅列表-->
-  <div class = "info-window" v-if="subResourceTableShow">
+  <div class = "info-window" v-if="showFlag[1]">
+    <el-button icon="el-icon-error" size ="small" type="danger" class="close-info-window" @click="closeWindow(1)">关闭</el-button>
     <p style="color: #e5f2fe">订阅列表</p>
     <el-table
       :row-style="{width:'100%'}"
@@ -156,8 +161,10 @@
     <el-button style="margin-top: 1vh" :class="this.selectUnSubResource.length > 0 ? 'select' : 'deselect'" v-on:click="requestUnSub">取消订阅</el-button>
   </div>
 <!--任务列表-->
-  <div class = "info-window" v-if="showTaskTable">
-    <TaskContent v-on:workOnMap="ViewMapResults"></TaskContent>
+  <div class = "info-window" v-if="showFlag[2]">
+    <el-button icon="el-icon-error" size ="small" type="danger" class="close-info-window" @click="closeWindow(2)">关闭</el-button>
+    <TaskContent v-on:workOnMap="ViewMapResults">
+    </TaskContent>
   </div>
 <!--  任务信息表格-->
   <div class = "info-window" v-if="showTaskDetailTable">
@@ -194,7 +201,7 @@
       </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="regionTaskMake">立即创建</el-button>
-        <el-button>取消</el-button>
+        <el-button @click="closeTaskTable">取消</el-button>
       </el-form-item>
     </el-form>
   </div>
@@ -210,68 +217,36 @@ export default {
   components: {TaskContent, RightItem},
   // 状态信息添加在本地
   mounted () {
-    // TODO 从数据库中获取订阅的资源列表到 变量 subResource（list）
-    let base = this
-    // 获取用户入网状态 passed
-    this.$http.getUserNetStatus(this.$xmpp.userCode).then(result => {
-      if (result === 1) {
-        base.NetStatus = '申请退网'
+    if (!this.$xmpp.connFlag) {
+      console.log('not login')
+      let name = this.$xmpp.getCookie('userCode')
+      let password = this.$xmpp.getCookie('password')
+      let domain = this.$xmpp.getCookie('domain')
+      if (name !== null && password !== null && domain !== null) {
+        this.$xmpp.conn.connect(name + '@' + domain, password, this.connectedCallback)
       } else {
-        base.NetStatus = '申请入网'
+        this.$router.push({name: 'Login'})
       }
-    }).catch((reason) => {
-      base.NetStatus = '用户异常'
-      console.log(reason)
-    })
-    // 获取订阅资源列表 pass
-    this.$http.getUserSubResourceList(this.$xmpp.userCode).then((result) => {
-      console.log(result)
-      this.subResource = result
-    }).catch((reason) => {
-      console.log(reason)
-    })
-
-    console.log('Cesium mounted')
-    console.log(this.$xmpp)
-    setTimeout(function () {
-      if (!base.$xmpp.connFlag) {
-        console.log('not login')
-        // base.$xmpp.normalConnnected()
-        setTimeout(function () {
-          base.messageHandler = base.$xmpp.conn.addHandler(base.onMessage, null, 'message', null, null, null)
-          // myStropheConn.myStropheConn.RequestInOrOutToNet(1)
-        }, 2000)
-      } else {
-        console.log('has login')
-        base.messageHandler = base.$xmpp.conn.addHandler(base.onMessage, null, 'message', null, null, null)
-        // myStropheConn.myStropheConn.RequestInOrOutToNet(1)
-      }
-    }, 2000)
-
-    // 获取路由参数
-    console.log('路由参数为')
-    let type = this.$route.params.type
-    if (type === 'result') {
-      // 在地图中显示结果
-      let url = this.$route.params.url
-      let tileData = this.$xmpp.serverDirPath[3]
-      this.tileUrl0 = this.$xmpp.httpServer + tileData + '/' + url + '/' + url + '-tiles-' + '0'
-      this.tileUrl1 = this.$xmpp.httpServer + tileData + '/' + url + '/' + url + '-tiles-' + '1'
-      this.tileUrl2 = this.$xmpp.httpServer + tileData + '/' + url + '/' + url + '-tiles-' + '2'
-      this.tileUrl3 = this.$xmpp.httpServer + tileData + '/' + url + '/' + url + '-tiles-' + '3'
-      console.log('展示瓦片地图为' + this.tileUrl0 + ' ' + this.tileUrl1 + ' ' + this.tileUrl2 + ' ' + this.tileUrl3)
-      this.showTileMap = true
+    } else {
+      this.userName = this.$xmpp.userCode
+      this.userDomain = this.$xmpp.domain
+      console.log('has login')
+      this.init()
     }
   },
-  destroyed () {
-    console.log('Cesium destroyed')
-    if (this.$xmpp.conn != null) this.$xmpp.conn.deleteHandler(this.messageHandler)
-  },
+  // destroyed () {
+  //   console.log('Cesium destroyed')
+  //   if (this.$xmpp.conn != null && this.messageHandler !== undefined) {
+  //     this.$xmpp.conn.deleteHandler(this.messageHandler)
+  //     console.log('delete message handler')
+  //   }
+  // },
   data () {
     return {
-      showTaskTable: false,
-      showTaskDetailTable: true,
-      showTaskTools: false,
+      userName: '',
+      userDomain: '',
+      showFlag: [false, false, false, false],
+      showTaskDetailTable: false,
       alpha: 1,
       brightness: 1,
       contrast: 1,
@@ -304,8 +279,6 @@ export default {
       showTileMap: false,
       taskList: [],
       NetStatus: '申请入网',
-      resourceTableShow: false,
-      subResourceTableShow: false,
       subResource: [],
       selectSubResource: [],
       selectUnSubResource: [],
@@ -323,6 +296,45 @@ export default {
     }
   },
   methods: {
+    init () {
+      // 初始化相关内容
+      // TODO 从数据库中获取订阅的资源列表到 变量 subResource（list）
+      let base = this
+      // 获取用户入网状态 passed
+      this.$http.getUserNetStatus(this.$xmpp.userCode).then(result => {
+        if (result === 1) {
+          base.NetStatus = '申请退网'
+        } else {
+          base.NetStatus = '申请入网'
+        }
+      }).catch((reason) => {
+        base.NetStatus = '用户异常'
+        console.log(reason)
+      })
+      // 获取订阅资源列表 pass
+      this.$http.getUserSubResourceList(this.$xmpp.userCode).then((result) => {
+        console.log(result)
+        this.subResource = result
+      }).catch((reason) => {
+        console.log(reason)
+      })
+      base.messageHandler = base.$xmpp.conn.addHandler(base.onMessage, null, 'message', null, null, null)
+
+      // 获取路由参数
+      console.log('路由参数为')
+      let type = this.$route.params.type
+      if (type === 'result') {
+        // 在地图中显示结果
+        let url = this.$route.params.url
+        let tileData = this.$xmpp.serverDirPath[3]
+        this.tileUrl0 = this.$xmpp.httpServer + tileData + '/' + url + '/' + url + '-tiles-' + '0'
+        this.tileUrl1 = this.$xmpp.httpServer + tileData + '/' + url + '/' + url + '-tiles-' + '1'
+        this.tileUrl2 = this.$xmpp.httpServer + tileData + '/' + url + '/' + url + '-tiles-' + '2'
+        this.tileUrl3 = this.$xmpp.httpServer + tileData + '/' + url + '/' + url + '-tiles-' + '3'
+        console.log('展示瓦片地图为' + this.tileUrl0 + ' ' + this.tileUrl1 + ' ' + this.tileUrl2 + ' ' + this.tileUrl3)
+        this.showTileMap = true
+      }
+    },
     ViewMapResults (url) {
       // 可视化结果
       console.log(url)
@@ -351,19 +363,12 @@ export default {
       if (name === '绘制') {
         span.innerText = '取消'
         i.className = 'el-icon-circle-close'
-        // let pol = document.getElementById('polygon')
-        // pol.className = 'toolSelect'
-        // 新增shape 实体
-        // this.polygonShape = this.addPolygonEntity()
       } else {
         this.$refs.handlerPolygon.clear()
         this.viewer.entities.removeAll()
         this.viewer.scene.requestRender()
-
         span.innerText = '绘制'
         i.className = 'el-icon-thumb'
-        let pol = document.getElementById('polygon')
-        pol.className = 'toolDeSelect'
       }
     },
     clear () {
@@ -384,21 +389,46 @@ export default {
     },
     MakeTask () {
       // TODO 获得中心经纬度以及幅宽
-      // let positions = this.$refs.handlerPolygon.polylines[0].positions
-      // let centerLng = 0
-      // let centerLat = 0
-      // let posList = []
-      // for (let index in positions) {
-      //   let pos = this.Cesium.Ellipsoid.WGS84.cartesianToCartographic(positions[index])
-      //   let lng = this.Cesium.Math.toDegrees(pos.longitude)
-      //   let lat = this.Cesium.Math.toDegrees(pos.latitude)
-      //   centerLat += lat
-      //   centerLng += lng
-      //   posList.push([lat, lng])
-      // }
-      // centerLat /= positions.length
-      // centerLng /= positions.length
+      let t = this.$refs.handlerPolygon.polylines[0].positions
+      let positions = JSON.parse(JSON.stringify(t))
+      positions = positions.splice(0, positions.length - 1)
+      if (positions.length <= 2) {
+        this.$message('请绘制正确矩形')
+        return
+      }
+      console.log('position length ' + positions.length)
+      let centerLng = 0
+      let centerLat = 0
+      this.posList = []
+      let maxLng = -180
+      let minLng = 180
+      for (let index in positions) {
+        let pos = this.Cesium.Ellipsoid.WGS84.cartesianToCartographic(positions[index])
+        let lng = this.Cesium.Math.toDegrees(pos.longitude)
+        let lat = this.Cesium.Math.toDegrees(pos.latitude)
+        maxLng = maxLng > lng ? maxLng : lng
+        minLng = minLng < lng ? minLng : lng
+        centerLat += lat
+        centerLng += lng
+        this.posList.push(lat)
+        this.posList.push(lng)
+      }
+      centerLat /= positions.length
+      centerLng /= positions.length
+      // console.log('max lng ' + maxLng)
+      // console.log('min lng ' + minLng)
+      // console.log('centerLat ' + Math.abs(centerLat))
+      // console.log('centerLat ' + Math.abs(centerLat))
+      let width = (maxLng - minLng) * 110 * 1000 * Math.cos((Math.abs(centerLat) / 180) * Math.PI)
+      width = parseInt(width)
+      // console.log(width)
+      this.taskForm.width = width
+      this.taskForm.latitude = centerLat
+      this.taskForm.longitude = centerLng
       this.showTaskDetailTable = true
+    },
+    closeTaskTable () {
+      this.showTaskDetailTable = false
     },
     getTimeFormat (date, time) {
       let timeFormat = '{0}-{1}-{2} {3}:{4}:{5}'
@@ -407,41 +437,47 @@ export default {
     },
     regionTaskMake () {
       // 采集需求 XMPP部分
-      // let msgContent = '{"typeid": 21106, "usercode":"{0}", ' +
-      //   '"latitude": "{1}", "longitude": "{2}", ' +
-      //   '"width": "{3}", ' +
-      //   '"begintime": "{4}", "endtime": "{5}",' +
-      //   '"period": {6}, "capturearea": "{7}"}'
-      // msgContent = String.format(msgContent,
-      //   this.$xmpp.userCode, this.taskForm.lat, this.taskForm.lng, this.taskForm.width,
-      //   beginTime, endTime, this.taskForm.period, JSON.stringify([30.6552, 113.672, 30.5877, 114.045, 30.2668, 113.966, 30.3343, 113.594]))
-      // console.log(msgContent)
-      // this.$xmpp.SendMessage(msgContent)
-      // this.showTaskDetailTable = false
-
-      // http 测试 pass
       let date = new Date(this.taskForm.startDate)
       let time = new Date(this.taskForm.startTime)
       let beginTime = this.getTimeFormat(date, time)
       date = new Date(this.taskForm.endDate)
       time = new Date(this.taskForm.endTime)
       let endTime = this.getTimeFormat(date, time)
-      let data = JSON.parse(JSON.stringify(this.taskForm))
-      delete data.startDate
-      delete data.startTime
-      delete data.endDate
-      delete data.endTime
-      data.beginTime = beginTime
-      data.endTime = endTime
-      data.captureArea = 'test test test'
-      data.taskId = '3'
-      data.status = '0'
-      this.$http.dealTask(data, this.$xmpp.userCode, 'new').then((result) => {
-        this.$message('任务创建成功')
-      }).catch((reason) => {
-        this.$message('任务创建失败')
-      })
-      // this.clear()
+      let msgContent = '{"typeid": 21106, "usercode":"{0}", ' +
+        '"latitude": "{1}", "longitude": "{2}", ' +
+        '"width": "{3}", ' +
+        '"begintime": "{4}", "endtime": "{5}",' +
+        '"period": {6}, "capturearea": "{7}"}'
+      msgContent = String.format(msgContent,
+        this.$xmpp.userCode, this.taskForm.lat, this.taskForm.lng, this.taskForm.width,
+        beginTime, endTime, this.taskForm.period, JSON.stringify(this.posList))
+      console.log(msgContent)
+      this.$xmpp.SendMessage(msgContent)
+      this.showTaskDetailTable = false
+      this.clear()
+
+      // http 测试 pass, 需要在消息的handle中添加
+      // let date = new Date(this.taskForm.startDate)
+      // let time = new Date(this.taskForm.startTime)
+      // let beginTime = this.getTimeFormat(date, time)
+      // date = new Date(this.taskForm.endDate)
+      // time = new Date(this.taskForm.endTime)
+      // let endTime = this.getTimeFormat(date, time)
+      // let data = JSON.parse(JSON.stringify(this.taskForm))
+      // delete data.startDate
+      // delete data.startTime
+      // delete data.endDate
+      // delete data.endTime
+      // data.beginTime = beginTime
+      // data.endTime = endTime
+      // data.captureArea = 'test test test'
+      // data.taskId = '3'
+      // data.status = '0'
+      // this.$http.dealTask(data, this.$xmpp.userCode, 'new').then((result) => {
+      //   this.$message('任务创建成功')
+      // }).catch((reason) => {
+      //   this.$message('任务创建失败')
+      // })
     },
     // cesium加载瓦片触发函数
     imageryReady (imageryProvider) {
@@ -511,21 +547,23 @@ export default {
         // })
       }
     },
-    // 显示
-    generateTask () {
-      this.showTaskTools = !this.showTaskTools
+    // 显示变量；0 为资源列表，1表示订阅列表，2表示任务列表，3表示任务工具
+    openWindow (dom, index) {
+      console.log(dom.$el)
+      for (let i in this.showFlag) {
+        if (this.showFlag[i] && i !== index.toString()) {
+          console.log(dom.$el.classList)
+          dom.$el.classList.remove('active')
+          console.log(dom.$el.classList)
+          this.$message('请先关闭当前窗口')
+          return
+        }
+      }
+      this.$set(this.showFlag, index, true)
     },
-    // 展示任务列表
-    showTask () {
-      this.showTaskTable = !this.showTaskTable
-    },
-    // 资源列表展示
-    showResource () {
-      this.resourceTableShow = !this.resourceTableShow
-    },
-    // 订阅列表展示
-    showSubResource () {
-      this.subResourceTableShow = !this.subResourceTableShow
+    // 关闭所有列表窗口
+    closeWindow (index) {
+      this.$set(this.showFlag, index, false)
     },
     // 入网退网协议 pass
     handleRequestInOrOutNet (replyJson) {
@@ -687,6 +725,16 @@ export default {
       alert('success task is ' + taskid)
       alert('the address is ' + address)
       this.$xmpp.replyFinished(taskid, address)
+      // test passed
+      let data = {}
+      data.taskId = taskid
+      data.status = '1'
+      data.address = address
+      this.$http.dealTask(data, this.$xmpp.userCode, 'update').then((result) => {
+        this.$message('任务状态更新成功')
+      }).catch((reason) => {
+        this.$message('任务状态更新失败')
+      })
     },
     handleStatus (replyJson) {
       console.log('状态查询')
@@ -784,6 +832,52 @@ export default {
     },
     handleUnSubSelectChange (val) {
       this.selectUnSubResource = val
+    },
+    connectedCallback (status) {
+      // 通过cookie缓存登陆
+      console.log('connected function')
+      console.log(status)
+      switch (status) {
+        case Strophe.Strophe.Status.CONNECTED:
+          this.$message('登陆成功')
+          this.$xmpp.connFlag = true
+          // 首先要发送一个<presence>给服务器（initial presence）
+          this.$xmpp.conn.send(Strophe.$pres().tree())
+
+          let name = this.$xmpp.getCookie('userCode')
+          let password = this.$xmpp.getCookie('password')
+          let domain = this.$xmpp.getCookie('domain')
+          this.userName = name
+          this.userDomain = domain
+          this.$xmpp.userCode = name
+          this.$xmpp.password = password
+          this.$xmpp.domain = domain
+          console.log(this.$xmpp.userCode)
+          this.init()
+          break
+        case Strophe.Strophe.Status.CONNECTING:
+          console.log('正在登陆')
+          break
+        case Strophe.Strophe.Status.DISCONNECTING:
+          this.$message('正在登出')
+          break
+        case Strophe.Strophe.Status.DISCONNECTED:
+          this.$message('登出成功')
+          this.$xmpp.connFlag = false
+          this.$xmpp.delCookie('userCode')
+          this.$xmpp.delCookie('password')
+          this.$xmpp.delCookie('domain')
+          this.$router.push({name: 'Login'})
+          break
+        default:
+          this.$xmpp.connFlag = false
+          this.$message('登陆失败')
+          this.$router.push({name: 'Login'})
+          break
+      }
+    },
+    Logout () {
+      this.$xmpp.disconnect('user disconnect')
     }
   }
 }
@@ -851,6 +945,12 @@ export default {
     left: 20vw;
     display: inline-block;
     background-color: #336699;
+  }
+  .close-info-window
+  {
+    position: absolute;
+    right:1vw;
+    top: 1vw;
   }
   .task{
     z-index: 20;

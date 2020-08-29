@@ -44,6 +44,7 @@ class HibernateSqlMap {
       .columnMap('endTime', 'endTime')
       .columnMap('period', 'period')
       .columnMap('captureArea', 'captureArea')
+      .columnMap('address', 'address')
 
     /***
      这里添加表格的MAP
@@ -193,31 +194,40 @@ class HibernateSqlMap {
 
   // 修改任务状态,将taskId和status都封装在data中
   updateTaskStatus (data) {
+    data = JSON.parse(data)
     let hibernateSql = this
     let table = hibernateSql.taskMap.table
-
-    let sql = 'update %s set %s = %d where %s = %d'
-    sql = util.format(sql, table, hibernateSql.taskMap.status.columnName, data['status'], hibernateSql.taskMap.taskId.columnName, data['taskId'])
+    let sql = "update %s set %s = %d, %s='%s' where %s = %d"
+    sql = util.format(sql, table,
+      hibernateSql.taskMap.status.columnName, data['status'],
+      hibernateSql.taskMap.address.columnName, data['address'],
+      hibernateSql.taskMap.taskId.columnName, data['taskId'])
     console.log(sql)
-    let update = hibernateSql.session.executeSql(sql)
-    update.then(function (result) {
-      console.log(result)
-    }).catch(function (error) {
-      console.log('error: ' + error)
+    let p = new Promise(function (resolve, reject) {
+      let update = hibernateSql.session.executeSql(sql)
+      update.then(function (result) {
+        resolve(result)
+      }).catch(function (error) {
+        console.log('error: ' + error)
+        reject(new Error('-1'))
+      })
     })
+    return p
   }
 
-  // 查询任务信息
-  selectTask (taskId, callback) {
+  queryTask (userCode) {
     let hibernateSql = this
-    let user = hibernateSql.session.query(hibernateSql.taskMap).where(
-      hibernateSql.taskMap.taskId.Equal(taskId)
-    )
-    user.then(function (result) {
-      callback(result)
-    }).catch(function (error) {
-      callback('error')
+    let p = new Promise(function (resolve, reject) {
+      hibernateSql.session.query(hibernateSql.taskMap).where(
+        hibernateSql.taskMap.userCode.Equal(userCode)
+      ).then((results) => {
+        resolve(results)
+      }).catch((reason) => {
+        reject(new Error('-1'))
+        console.log(reason)
+      })
     })
+    return p
   }
 }
 

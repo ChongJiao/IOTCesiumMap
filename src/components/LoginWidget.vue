@@ -85,33 +85,46 @@ export default {
       switch (status) {
         case Strophe.Strophe.Status.CONNECTED:
           this.$message('登陆成功')
-          this.$xmpp.connectCode = '已登陆'
           this.$xmpp.connFlag = true
-          console.log('已登陆')
           this.fullscreenLoading = true
-          this.$xmpp.conn.addHandler(this.$xmpp.onMessage, null, 'message', null, null, null)
           // 首先要发送一个<presence>给服务器（initial presence）
           this.$xmpp.conn.send(Strophe.$pres().tree())
+          this.$xmpp.userCode = this.LoginForm.username
+          this.$xmpp.password = this.LoginForm.password
+          this.$xmpp.domain = this.LoginForm.domain
+
+          // fixed 记录到cookie中
+          this.$xmpp.setCookie('userCode', this.LoginForm.username)
+          this.$xmpp.setCookie('password', this.LoginForm.password)
+          this.$xmpp.setCookie('domain', this.LoginForm.domain)
+
           this.$router.push({name: 'CesiumMap'})
           break
         case Strophe.Strophe.Status.CONNECTING:
           console.log('正在登陆')
           break
+        case Strophe.Strophe.Status.DISCONNECTING:
+          this.$message('1111')
+          break
+        case Strophe.Strophe.Status.DISCONNECTED:
+          this.$message('2222')
+          this.$xmpp.connFlag = false
+          this.$xmpp.delCookie('userCode')
+          this.$xmpp.delCookie('password')
+          this.$xmpp.delCookie('domain')
+          location.reload()
+          break
         default:
-          this.$xmpp.connectCode = '登陆失败'
           this.$xmpp.connFlag = false
           this.$message('登陆失败')
+          this.fullscreenLoading = false
           break
       }
     },
     connected () {
       this.fullscreenLoading = true
-      this.$xmpp.userJID = this.LoginForm.username + '@' + this.LoginForm.domain
-      this.$xmpp.userPassword = this.LoginForm.password
-
-      console.log(this.$xmpp.userJID)
       console.log(this.$xmpp.userPassword)
-      this.$xmpp.conn.connect(this.$xmpp.userJID, this.$xmpp.userPassword, this.connectedCallback)
+      this.$xmpp.conn.connect(this.LoginForm.username + '@' + this.LoginForm.domain, this.LoginForm.password, this.connectedCallback)
     },
     resetForm (formName) {
       this.$refs[formName].resetFields()

@@ -14,8 +14,8 @@ export default new Router({
   routes: [
     {
       path: '/',
-      name: 'CesiumMap1',
-      component: CesiumMap
+      name: 'Login',
+      component: Login
     },
     {
       path: '/CesiumMap',

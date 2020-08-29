@@ -12,7 +12,7 @@ import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 import VueRouter from 'vue-router'
 import VueLoading from 'vue-loading-template'
-import Xmpp from './api/Xmpp.js'
+import XMPP from './api/Xmpp.js'
 import Http from './api/Http'
 import Video from 'video.js'
 import 'video.js/dist/video-js.css'
@@ -38,7 +38,8 @@ Vue.use(VueRouter)
 Vue.use(VueLoading /** options **/)
 // import 'bootstrap/dist/css/bootstrap.min.css'
 Vue.config.productionTip = false
-Vue.prototype.$xmpp = Xmpp.myStropheConn
+Vue.prototype.$xmpp = XMPP.myStropheConn
+// Vue.prototype.$xmppCallBack = XMPP.connectionFun
 Vue.prototype.$http = Http.myHttp
 /* eslint-disable no-new */
 new Vue({
