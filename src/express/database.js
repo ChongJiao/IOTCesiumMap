@@ -2,7 +2,7 @@ const jsORM = require('js-hibernate')
 // const Dateformat = require('dateformat')
 const util = require('util')
 const mysqlConf = {
-  host: 'localhost',
+  host: '192.168.1.121',
   user: 'root',
   password: '311296daifei',
   database: 'iottask',

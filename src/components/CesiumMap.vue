@@ -39,10 +39,14 @@
     <div class="toolBox" v-if="showFlag[3]">
       <el-button id="draw" icon="el-icon-thumb" v-on:click="toggle('handlerPolygon')">绘制</el-button>
 <!--      <el-button type="primary" icon="el-icon-delete" v-on:click="clear">清除</el-button>-->
-      <el-button type="danger" icon="el-icon-search" v-on:click="MakeTask">生成</el-button>
+      <el-button type="warning" icon="el-icon-search" v-on:click="MakeTask">生成</el-button>
+      <el-button type="danger" icon="el-icon-close" v-on:click="closeWindow(3)">关闭</el-button>
     </div>
   </div>
-  <div class="viewer">
+  <div class="viewer"
+       v-loading="fullLoading"
+       element-loading-text="执行中，请稍后"
+       element-loading-spinner="el-icon-loading">
     <vc-viewer ref="viewer" @ready="ready">
 <!--      <vc-layer-imagery :alpha="alpha" :imageryProvider="imageryProvider" :brightness="brightness" :contrast="contrast">-->
 <!--      </vc-layer-imagery>-->
@@ -222,7 +226,11 @@ export default {
       let name = this.$xmpp.getCookie('userCode')
       let password = this.$xmpp.getCookie('password')
       let domain = this.$xmpp.getCookie('domain')
+      let ip = this.$xmpp.getCookie('ip')
       if (name !== null && password !== null && domain !== null) {
+        this.$xmpp.BOSH_SERVER = 'http://' + ip + ':7070/http-bind/'
+        this.$xmpp.httpServer = 'http://' + ip + ':8000/GFData/'
+        this.$xmpp.initial()
         this.$xmpp.conn.connect(name + '@' + domain, password, this.connectedCallback)
       } else {
         this.$router.push({name: 'Login'})
@@ -243,6 +251,7 @@ export default {
   // },
   data () {
     return {
+      fullLoading: false,
       userName: '',
       userDomain: '',
       showFlag: [false, false, false, false],
@@ -254,23 +263,7 @@ export default {
       bmKey: 'AgcbDCAOb9zMfquaT4Z-MdHX4AsHUNvs7xgdHefEA5myMHxZk87NTNgdLbG90IE-',
       Cesium: null,
       viewer: null,
-      resourceItems: [{
-        resourceId: '3',
-        resourceName: '黄石',
-        resourceLevel: '0',
-        fatherCode: '2'
-      }, {
-        resourceId: '4',
-        resourceName: '大冶',
-        resourceLevel: '0',
-        fatherCode: '2'
-      },
-      {
-        resourceId: '5',
-        resourceName: '西安',
-        resourceLevel: '0',
-        fatherCode: '2'
-      }],
+      resourceItems: [],
       tileUrl0: 'http://localhost:8000/GFData/tileData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806-pansharpen-0',
       tileUrl1: 'http://localhost:8000/GFData/tileData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806-pansharpen-0',
       tileUrl2: 'http://localhost:8000/GFData/tileData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806-pansharpen-0',
@@ -449,12 +442,13 @@ export default {
         '"begintime": "{4}", "endtime": "{5}",' +
         '"period": {6}, "capturearea": "{7}"}'
       msgContent = String.format(msgContent,
-        this.$xmpp.userCode, this.taskForm.lat, this.taskForm.lng, this.taskForm.width,
+        this.$xmpp.userCode, this.taskForm.latitude, this.taskForm.longitude, this.taskForm.width,
         beginTime, endTime, this.taskForm.period, JSON.stringify(this.posList))
       console.log(msgContent)
       this.$xmpp.SendMessage(msgContent)
       this.showTaskDetailTable = false
       this.clear()
+      this.fullLoading = true
 
       // http 测试 pass, 需要在消息的handle中添加
       // let date = new Date(this.taskForm.startDate)
@@ -489,7 +483,7 @@ export default {
     },
     // 入网退网请求
     requestInOutNet () {
-      if (this.NetStatus === '入网') {
+      if (this.NetStatus === '申请入网') {
         this.$xmpp.RequestInOrOutToNet(1)
       } else {
         this.$xmpp.RequestInOrOutToNet(0)
@@ -500,7 +494,7 @@ export default {
       if (this.selectSubResource.length > 0) {
         let items = []
         for (let i in this.selectSubResource) {
-          items.push(this.selectSubResource[i].id)
+          items.push(this.selectSubResource[i].resourceId)
         }
         this.$xmpp.ResourceSubUnSub(1, items)
 
@@ -522,7 +516,7 @@ export default {
       if (this.selectUnSubResource.length > 0) {
         let items = []
         for (let i in this.selectUnSubResource) {
-          items.push(this.selectUnSubResource[i].id)
+          items.push(this.selectUnSubResource[i].resourceId)
         }
         this.$xmpp.ResourceSubUnSub(0, items)
 
@@ -685,12 +679,14 @@ export default {
     },
     // 新建处理任务响应  pass
     handleMakeTask (replyJson) {
+      this.fullLoading = false
       let taskId = replyJson['taskid']
       let result = replyJson['result']
       if (result === 1) {
-        alert('创建任务成功')
+        this.$message('创建任务成功')
         // TODO 页面中进行更新任务列表
         // Fixed 完成任务新建测试
+        console.log(this.taskForm)
         let date = new Date(this.taskForm.startDate)
         let time = new Date(this.taskForm.startTime)
         let beginTime = this.getTimeFormat(date, time)
@@ -704,19 +700,20 @@ export default {
         delete data.endTime
         data.beginTime = beginTime
         data.endTime = endTime
-        data.captureArea = 'test test test'
-        data.taskId = '3'
+        data.captureArea = replyJson['capturearea']
+        data.taskId = taskId
         data.status = '0'
+        console.log('taks data is' + JSON.stringify(data))
         this.$http.dealTask(data, this.$xmpp.userCode, 'new').then((result) => {
           this.$message('任务创建成功')
         }).catch((reason) => {
           this.$message('任务创建失败')
         })
-        this.clear()
         this.taskList.push(taskId)
         // TODO 新建任务到数据库中
       } else {
-        alert('创建任务失败')
+        let memo = replyJson['memo']
+        this.$message('创建任务失败:' + memo)
       }
     },
     handleTaskFinished (replyJson) {
@@ -743,7 +740,7 @@ export default {
     handleCheckStatus (replyJson) {
       let result = replyJson['result']
       if (result === 0) {
-        this.NetStatus = '入网'
+        this.NetStatus = '申请入网'
       }
     },
     onMessage (msg) {
@@ -852,6 +849,7 @@ export default {
           this.$xmpp.userCode = name
           this.$xmpp.password = password
           this.$xmpp.domain = domain
+          this.$xmpp.gkName = this.$xmpp.gkName + '@' + domain
           console.log(this.$xmpp.userCode)
           this.init()
           break

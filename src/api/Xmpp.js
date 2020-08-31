@@ -8,14 +8,14 @@ class StropheConn {
   userLatitude='86'
   // domain = 'desktop-98tu7o0'
   // userCode = 'user_001'
-  // userPassword = 'user_001'
+  // userPassword = 'user_001'BOSH_SERVER
   domain = ''
   userCode = ''
   userPassword = ''
-  BOSH_SERVER = 'http://127.0.0.1:7070/http-bind/'
-  httpServer ='http://127.0.0.1:8000/GFData/'
+  BOSH_SERVER = ''
+  httpServer =''
   serverDirPath = ['srcData', 'imgSrcData', 'imgEnData', 'tileData', 'tileDeData']
-  gkName = 'guankong@desktop-98tu7o0'
+  gkName = 'guankong'
   // setUserJid (user) {
   //   this.userJID = user
   // }
@@ -107,9 +107,11 @@ class StropheConn {
   // 入退网申请 pass
   RequestInOrOutToNet (requestType) {
     let msgContent = '{"typeid": 21101, "usercode":"{0}", "requesttype": {1}, "latitude": {2}, "longitude": {3}}'
-    let latitude = this.RandomValue(0, 90)
-    let longitude = this.RandomValue(0, 180)
+    let pos = parseInt(Math.random() * (this.virtualPosition.length - 1), 10)
+    let latitude = this.virtualPosition[pos][1]
+    let longitude = this.virtualPosition[pos][0]
     msgContent = String.format(msgContent, this.userCode, requestType, latitude, longitude)
+    console.log(msgContent)
     this.SendMessage(msgContent) // 从这里发送消息给管控，然后管控回复消息给用户处理
   }
   // 资源订阅查询协议 pass
@@ -122,6 +124,7 @@ class StropheConn {
   ResourceSubUnSub (requestType, itemList) {
     let msgContent = '{"typeid": 21104, "usercode":"{0}", "requesttype": {1}, "resource": {2}}'
     msgContent = String.format(msgContent, this.userCode, requestType, JSON.stringify(itemList))
+    console.log(msgContent)
     this.SendMessage(msgContent)
   }
   // 任务完成信息获取反馈
@@ -237,7 +240,7 @@ let connectionFun = {
   }
 }
 // console.log('run one')
-myStropheConn.initial()
+// myStropheConn.initial()
 export default {
   myStropheConn
 }

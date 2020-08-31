@@ -12,6 +12,9 @@
         <el-form-item label="域名" prop="domain">
           <el-input v-model="LoginForm.domain" placeholder="请输入域名" prefix-icon="el-icon-position"></el-input>
         </el-form-item>
+        <el-form-item label="IP" prop="ip">
+          <el-input v-model="LoginForm.ip" placeholder="请输入ip" prefix-icon="el-icon-position"></el-input>
+        </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="LoginWidget('LoginForm')">登陆</el-button>
           <el-button @click="resetForm('LoginForm')">重置</el-button>
@@ -32,7 +35,8 @@ export default {
       LoginForm: {
         username: '',
         password: '',
-        domain: ''
+        domain: '',
+        ip: ''
       },
       rules: {
         username: [
@@ -92,11 +96,13 @@ export default {
           this.$xmpp.userCode = this.LoginForm.username
           this.$xmpp.password = this.LoginForm.password
           this.$xmpp.domain = this.LoginForm.domain
+          this.$xmpp.gkName = this.$xmpp.gkName + '@' + this.LoginForm.domain
 
           // fixed 记录到cookie中
           this.$xmpp.setCookie('userCode', this.LoginForm.username)
           this.$xmpp.setCookie('password', this.LoginForm.password)
           this.$xmpp.setCookie('domain', this.LoginForm.domain)
+          this.$xmpp.setCookie('ip', this.LoginForm.ip)
 
           this.$router.push({name: 'CesiumMap'})
           break
@@ -112,6 +118,7 @@ export default {
           this.$xmpp.delCookie('userCode')
           this.$xmpp.delCookie('password')
           this.$xmpp.delCookie('domain')
+          this.$xmpp.delCookie('ip')
           location.reload()
           break
         default:
@@ -123,7 +130,12 @@ export default {
     },
     connected () {
       this.fullscreenLoading = true
-      console.log(this.$xmpp.userPassword)
+      this.$xmpp.BOSH_SERVER = 'http://' + this.LoginForm.ip + ':7070/http-bind/'
+      this.$xmpp.httpServer = 'http://' + this.LoginForm.ip + ':8000/GFData/'
+      this.$xmpp.gkName = this.$xmpp.gkName + '@' + this.LoginForm.domain
+      console.log(this.$xmpp.BOSH_SERVER)
+      console.log(this.$xmpp.httpServer)
+      this.$xmpp.initial()
       this.$xmpp.conn.connect(this.LoginForm.username + '@' + this.LoginForm.domain, this.LoginForm.password, this.connectedCallback)
     },
     resetForm (formName) {
