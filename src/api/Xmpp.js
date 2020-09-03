@@ -135,8 +135,9 @@ class StropheConn {
   }
   replyStatus () {
     let msgContent = '{"typeid": 21215, "usercode":"{0}", "latitude": "{1}", "longitude": "{2}"}'
-    let latitude = this.RandomValue(0, 90)
-    let longitude = this.RandomValue(0, 180)
+    let pos = parseInt(Math.random() * (this.virtualPosition.length - 1), 10)
+    let latitude = this.virtualPosition[pos][1]
+    let longitude = this.virtualPosition[pos][0]
     msgContent = String.format(msgContent, this.userCode, latitude, longitude)
     this.SendMessage(msgContent)
   }

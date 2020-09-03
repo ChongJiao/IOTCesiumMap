@@ -50,11 +50,11 @@
     <vc-viewer ref="viewer" @ready="ready">
 <!--      <vc-layer-imagery :alpha="alpha" :imageryProvider="imageryProvider" :brightness="brightness" :contrast="contrast">-->
 <!--      </vc-layer-imagery>-->
-<!--      <vc-layer-imagery :alpha="alpha" :brightness="brightness" :contrast="contrast">-->
-<!--        <vc-provider-imagery-tile-mapservice-->
-<!--          :url="baseMapUrl"-->
-<!--        ></vc-provider-imagery-tile-mapservice>-->
-<!--      </vc-layer-imagery>-->
+      <vc-layer-imagery :alpha="alpha" :brightness="brightness" :contrast="contrast">
+        <vc-provider-imagery-tile-mapservice
+          :url="baseMapUrl"
+        ></vc-provider-imagery-tile-mapservice>
+      </vc-layer-imagery>
       <vc-layer-imagery :alpha="alpha" :brightness="brightness" :contrast="contrast" v-if="showTileMap">
         <vc-provider-imagery-tile-mapservice
           :url="tileUrl0"
@@ -173,7 +173,7 @@
 <!--  任务信息表格-->
   <div class = "info-window" v-if="showTaskDetailTable">
     <el-form ref="taskForm" :model="taskForm" label-width="calc(100px + .5vw)">
-      <el-form-item label="中心经度" class="label-item">
+      <el-form-item label="中心经度">
         <el-input v-model="taskForm.longitude"></el-input>
       </el-form-item>
       <el-form-item label="中心纬度">
@@ -268,7 +268,7 @@ export default {
       tileUrl1: 'http://localhost:8000/GFData/tileData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806-pansharpen-0',
       tileUrl2: 'http://localhost:8000/GFData/tileData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806-pansharpen-0',
       tileUrl3: 'http://localhost:8000/GFData/tileData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806-pansharpen-0',
-      baseMapUrl: 'http://192.168.100.125:8000/BaseMap',
+      baseMapUrl: 'http://192.168.1.122:8000/BaseMap',
       showTileMap: false,
       taskList: [],
       NetStatus: '申请入网',
@@ -331,6 +331,15 @@ export default {
     ViewMapResults (url) {
       // 可视化结果
       console.log(url)
+      let index = url.lastIndexOf('/')
+      let GFName = url.substr(index + 1, url.length - index)
+      console.log(url)
+      console.log(GFName)
+      this.tileUrl0 = url + '/' + GFName + '-tiles-0'
+      this.tileUrl1 = url + '/' + GFName + '-tiles-1'
+      this.tileUrl2 = url + '/' + GFName + '-tiles-2'
+      this.tileUrl3 = url + '/' + GFName + '-tiles-3'
+      this.showTileMap = true
     },
     ready (cesiumInstance) {
       const {Cesium, viewer} = cesiumInstance
@@ -719,8 +728,8 @@ export default {
     handleTaskFinished (replyJson) {
       let taskid = replyJson['taskid']
       let address = replyJson['address']
-      alert('success task is ' + taskid)
-      alert('the address is ' + address)
+      // this.$message('success task is ' + taskid)
+      // this.$message('the address is ' + address)
       this.$xmpp.replyFinished(taskid, address)
       // test passed
       let data = {}
@@ -732,6 +741,7 @@ export default {
       }).catch((reason) => {
         this.$message('任务状态更新失败')
       })
+      this.ViewMapResults(address)
     },
     handleStatus (replyJson) {
       console.log('状态查询')
@@ -942,7 +952,7 @@ export default {
     width: 60vw;
     left: 20vw;
     display: inline-block;
-    background-color: #336699;
+    background-color: #0088ff;
   }
   .close-info-window
   {
@@ -968,9 +978,9 @@ export default {
   }
 </style>
 <style>
-  .label-item,.el-form-item__label {
-    font-size: calc(12px + .5vw);
-    color: #CCCCFF;
-    font-family: Serif;
-  }
+  /*.el-form-item__label {*/
+  /*  font-size: calc(12px + .5vw);*/
+  /*  color: #CCCCFF;*/
+  /*  font-family: Serif;*/
+  /*}*/
 </style>

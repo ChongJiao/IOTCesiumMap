@@ -4,6 +4,7 @@
     <el-table
       :row-style="{width:'100%'}"
       :data="taskContent"
+      height="250"
       border>
       <el-table-column align="center"
                        prop="taskId"
