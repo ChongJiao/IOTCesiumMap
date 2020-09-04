@@ -8,7 +8,7 @@ const iotApi = require('./iotApi')
 const app = express()
 
 app.all('*', function (req, res, next) {
-  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Origin', '*')
   res.header('Access-Control-Allow-Methods', 'GET, POST, PATCH, PUT, DELETE, OPTIONS')
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
   next()
@@ -17,7 +17,8 @@ app.all('*', function (req, res, next) {
 // app.use(cookieParser())
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extend: false}))
-
+app.use(express.static('public'))
+app.use('main', express.static('public/index.html'))
 // 后端api路由
 app.use(iotApi)
 // 监听3000端口

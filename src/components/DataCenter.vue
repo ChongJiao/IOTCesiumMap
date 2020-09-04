@@ -8,14 +8,14 @@
       border
       style="width: 80vw;margin-left: 5vw;font-size: 1vw">
       <el-table-column align="center"
-        prop="id"
-        label="序号"
-        width="100">
+                       prop="id"
+                       label="序号"
+                       width="100">
       </el-table-column>
       <el-table-column align="center"
-        style="border-style:solid;border-width:5px;"
-        label="卫星"
-        width="100">
+                       style="border-style:solid;border-width:5px;"
+                       label="卫星"
+                       width="100">
         <template slot-scope="scope">
           <el-popover trigger="hover" placement="top">
             <p>名称: {{ scope.row.satellite }}</p>
@@ -27,52 +27,52 @@
         </template>
       </el-table-column>
       <el-table-column align="center"
-        prop="position"
-        label="位置"
-        width="160">
+                       prop="position"
+                       label="位置"
+                       width="160">
       </el-table-column>
       <el-table-column align="center"
-        label="角点经纬度"
-        width="180">
+                       label="角点经纬度"
+                       width="180">
         <template slot-scope="scope">
           <div style="font-size: 0.8vw">纬度:{{scope.row.pos1[0]}}</div>
           <div style="font-size: 0.8vw">经度:{{scope.row.pos1[1]}}</div>
         </template>
       </el-table-column>
       <el-table-column align="center"
-        label="角点经纬度"
-        width="180">
+                       label="角点经纬度"
+                       width="180">
         <template slot-scope="scope">
           <div style="font-size: 0.8vw">纬度:{{scope.row.pos2[0]}}</div>
           <div style="font-size: 0.8vw">经度:{{scope.row.pos2[1]}}</div>
         </template>
       </el-table-column>
       <el-table-column align="center"
-        label="角点经纬度"
-        width="180">
+                       label="角点经纬度"
+                       width="180">
         <template slot-scope="scope">
           <div style="font-size: 0.8vw">纬度:{{scope.row.pos3[0]}}</div>
           <div style="font-size: 0.8vw">经度:{{scope.row.pos3[1]}}</div>
         </template>
       </el-table-column>
       <el-table-column align="center"
-        label="角点经纬度"
-        width="180">
+                       label="角点经纬度"
+                       width="180">
         <template slot-scope="scope">
           <div style="font-size: 0.8vw">纬度:{{scope.row.pos4[0]}}</div>
           <div style="font-size: 0.8vw">经度:{{scope.row.pos4[1]}}</div>
         </template>
       </el-table-column>
       <el-table-column align="center"
-        label="源图像"
-        width="150">
+                       label="源图像"
+                       width="150">
         <template slot-scope="scope">
-          <img :src="scope.row.url" style="width: 3vw" @click="toImageDetail(scope.$index, scope.row)"/>
-<!--          <el-link :href=scope.row.url type="primary" style="font-size: 1vw">查看</el-link>-->
+          <img :src="scope.row.url" style="width: 3vw"/>
+          <!--          <el-link :href=scope.row.url type="primary" style="font-size: 1vw">查看</el-link>-->
         </template>
       </el-table-column>
       <el-table-column align="center"
-        label="操作" width="300">
+                       label="操作" width="300">
         <template slot-scope="scope">
           <el-row>
             <el-button type="primary"
@@ -87,100 +87,99 @@
 </template>
 
 <script>
-import myStropheConn from '../api/Xmpp'
-import Strophe from 'strophe.js'
 export default {
   name: 'DataCenter',
   data () {
     return {
-      tableData: []
+      tableData: [
+        {
+          id: '1',
+          satellite: 'GF1',
+          text: '中国高分一号卫星',
+          pos1: [30.6552, 113.672],
+          pos2: [30.5877, 114.045],
+          pos3: [30.2668, 113.966],
+          pos4: [30.3343, 113.594],
+          url: 'http://192.168.1.121:8000/GFData/srcData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806.jpg',
+          position: '武汉'
+        },
+        {
+          id: '1',
+          satellite: 'GF1',
+          text: '中国高分一号卫星',
+          pos1: [30.6552, 113.672],
+          pos2: [30.5877, 114.045],
+          pos3: [30.2668, 113.966],
+          pos4: [30.3343, 113.594],
+          url: 'http://192.168.1.121:8000/GFData/srcData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806.jpg',
+          position: '武汉'
+        },
+        {
+          id: '1',
+          satellite: 'GF1',
+          text: '中国高分一号卫星',
+          pos1: [30.6552, 113.672],
+          pos2: [30.5877, 114.045],
+          pos3: [30.2668, 113.966],
+          pos4: [30.3343, 113.594],
+          url: 'http://192.168.1.121:8000/GFData/srcData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806.jpg',
+          position: '武汉'
+        }, {
+          id: '1',
+          satellite: 'GF1',
+          text: '中国高分一号卫星',
+          pos1: [30.6552, 113.672],
+          pos2: [30.5877, 114.045],
+          pos3: [30.2668, 113.966],
+          pos4: [30.3343, 113.594],
+          url: 'http://192.168.1.121:8000/GFData/srcData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806.jpg',
+          position: '武汉'
+        }, {
+          id: '1',
+          satellite: 'GF1',
+          text: '中国高分一号卫星',
+          pos1: [30.6552, 113.672],
+          pos2: [30.5877, 114.045],
+          pos3: [30.2668, 113.966],
+          pos4: [30.3343, 113.594],
+          url: 'http://192.168.1.121:8000/GFData/srcData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806.jpg',
+          position: '武汉'
+        }
+      ]
     }
   },
   mounted () {
-    let base = this
-    setTimeout(function () {
-      if (!myStropheConn.myStropheConn.connFlag) {
-        console.log('not login')
-        myStropheConn.myStropheConn.connecting()
-        setTimeout(function () {
-          base.initData()
-          base.messageHandler = myStropheConn.myStropheConn.conn.addHandler(base.onMessage, null, 'message', null, null, null)
-        }, 2000)
-      } else {
-        base.initData()
-        base.messageHandler = myStropheConn.myStropheConn.conn.addHandler(base.onMessage, null, 'message', null, null, null)
-      }
-    }, 2000)
-    console.log('dataCenter mounted')
+    // this.$http.getAllSatellite().then(result => {
+    //   for (let i in result) {
+    //     result[i].url = 'http://192.168.1.121:8000/GFData/srcData' + result[i].url + '/' + result[i].url + ',jpg'
+    //     this.tableData.push(result[i])
+    //   }
+    //
+    // }).catch((reason) => {
+    //   console.log(reason)
+    // })
   },
   destroyed () {
     console.log('Task destroyed')
-    myStropheConn.myStropheConn.conn.deleteHandler(this.messageHandler)
   },
   methods: {
     initData () {
-      let msgContent = '{\'type\': \'querySatellite\', \'userJID\': \'{0}\'}'
-      msgContent = String.format(msgContent, myStropheConn.myStropheConn.userJID)
-      myStropheConn.myStropheConn.SendMessage(msgContent)
     },
     onMessage (msg) {
-      // 解析出<message>的from、type属性，以及body子元素
-      // let fromJid = msg.getAttribute('from')
-      // let toJid = msg.getAttribute('to')
-      let type = msg.getAttribute('type')
-      let elems = msg.getElementsByTagName('body')
-
-      if (type === 'chat' && elems.length > 0) {
-        let msgContent = Strophe.Strophe.getText(elems[0])
-        msgContent = msgContent.replace(/&apos;/g, '"')
-        msgContent = msgContent.replace(/&quot;/g, '"')
-        if (myStropheConn.myStropheConn.isJsonStr(msgContent)) {
-          let replyJson = JSON.parse(msgContent)
-          if (replyJson['type'] && replyJson['type'] === 'satellite') {
-            let dataList = replyJson['data']
-            this.tableData = []
-            for (let d in dataList) {
-              let data = dataList[d]
-              let posString = data['pos']
-              posString = posString.slice(1, posString.length - 1)
-              let posArray = posString.split(',')
-              data['pos1'] = posArray.slice(0, 2)
-              data['pos2'] = posArray.slice(2, 4)
-              data['pos3'] = posArray.slice(4, 6)
-              data['pos4'] = posArray.slice(6, 8)
-              let srcData = myStropheConn.myStropheConn.serverDirPath[0]
-              data['urlName'] = data['url']
-              data['url'] = myStropheConn.myStropheConn.httpServer + srcData + '/' + data['url'] + '/' + data['url'] + '.jpg'
-              console.log(data['url'])
-              this.tableData.push(data)
-            }
-          }
-        }
-      }
     },
     jumpToMap (index, row) {
       console.log(index, row)
-    },
-    newTask (index, row) {
-      console.log(index, row)
-      if (myStropheConn.myStropheConn.taskLength === 0) {
-        console.log(row)
-        myStropheConn.myStropheConn.MakeTask(row.urlName, row.id)
-      } else {
-        alert('请等待处理完当前任务')
-      }
     },
     toImageDetail (index, row) {
       console.log(index, row)
       window.open(row['url'])
     }
   }
-
 }
 </script>
 <style scoped>
-.Dbody{
-  margin-left: 10vw;
-  width: 90vw;
-}
+  .Dbody{
+    margin: auto;
+    width: 95vw;
+  }
 </style>

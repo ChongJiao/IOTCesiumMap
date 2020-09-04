@@ -11,34 +11,32 @@
       <el-menu-item index="0">
         <img src="../assets/logo.png" style="height: 80%"/>
       </el-menu-item>
-      <el-submenu index="1">
-        <template slot="title">用户中心</template>
-        <el-menu-item index="1-1">
-          用户名: {{this.userName}}
-        </el-menu-item>
-        <el-menu-item index="1-2">
-          域名: {{this.userDomain}}
-        </el-menu-item>
-        <el-menu-item index="1-3" @click="Logout">
-          登出
-        </el-menu-item>
-      </el-submenu>
-
+      <el-menu-item index="1" v-on:click="requestInOutNet">{{NetStatus}}</el-menu-item>
       <el-submenu index="2">
-        <template slot="title">资源中心</template>
-        <el-menu-item index="2-1" @click="openWindow($event, 0)">资源列表</el-menu-item>
-        <el-menu-item index="2-2" @click="openWindow($event, 1)">订阅列表</el-menu-item>
+        <template slot="title">用户</template>
+        <el-menu-item index="2-1">
+          名称: {{this.userName}}
+        </el-menu-item>
+        <el-menu-item index="2-2">
+          位置: {{this.userDomain}}
+        </el-menu-item>
       </el-submenu>
       <el-submenu index="3">
-        <template slot="title">任务中心</template>
-        <el-menu-item index="3-1" @click="openWindow($event, 2)">任务列表</el-menu-item>
-        <el-menu-item index="3-2" @click="openWindow($event, 3)">任务生成</el-menu-item>
+        <template slot="title">资源中心</template>
+        <el-menu-item index="3-1" @click="openWindow($event, 0)">资源列表</el-menu-item>
+        <el-menu-item index="3-2" @click="openWindow($event, 1)">订阅列表</el-menu-item>
       </el-submenu>
-      <el-menu-item index="4" v-on:click="requestInOutNet">{{NetStatus}}</el-menu-item>
+      <el-submenu index="4">
+        <template slot="title">任务中心</template>
+        <el-menu-item index="4-1" @click="openWindow($event, 2)">任务列表</el-menu-item>
+        <el-menu-item index="4-2" @click="openWindow($event, 3)">任务生成</el-menu-item>
+      </el-submenu>
+      <el-menu-item index="5" @click="Logout" style="float: right">
+        登出
+      </el-menu-item>
     </el-menu>
     <div class="toolBox" v-if="showFlag[3]">
       <el-button id="draw" icon="el-icon-thumb" v-on:click="toggle('handlerPolygon')">绘制</el-button>
-<!--      <el-button type="primary" icon="el-icon-delete" v-on:click="clear">清除</el-button>-->
       <el-button type="warning" icon="el-icon-search" v-on:click="MakeTask">生成</el-button>
       <el-button type="danger" icon="el-icon-close" v-on:click="closeWindow(3)">关闭</el-button>
     </div>
@@ -47,14 +45,14 @@
        v-loading="fullLoading"
        element-loading-text="执行中，请稍后"
        element-loading-spinner="el-icon-loading">
-    <vc-viewer ref="viewer" @ready="ready">
+    <vc-viewer ref="viewer" @ready="ready" :shouldAnimate="true" :orderIndependentTranslucency="false">
 <!--      <vc-layer-imagery :alpha="alpha" :imageryProvider="imageryProvider" :brightness="brightness" :contrast="contrast">-->
 <!--      </vc-layer-imagery>-->
-      <vc-layer-imagery :alpha="alpha" :brightness="brightness" :contrast="contrast">
-        <vc-provider-imagery-tile-mapservice
-          :url="baseMapUrl"
-        ></vc-provider-imagery-tile-mapservice>
-      </vc-layer-imagery>
+<!--      <vc-layer-imagery :alpha="alpha" :brightness="brightness" :contrast="contrast">-->
+<!--        <vc-provider-imagery-tile-mapservice-->
+<!--          :url="baseMapUrl"-->
+<!--        ></vc-provider-imagery-tile-mapservice>-->
+<!--      </vc-layer-imagery>-->
       <vc-layer-imagery :alpha="alpha" :brightness="brightness" :contrast="contrast" v-if="showTileMap">
         <vc-provider-imagery-tile-mapservice
           :url="tileUrl0"
@@ -209,16 +207,17 @@
       </el-form-item>
     </el-form>
   </div>
+
 </div>
 </template>
 <script>
 
 import Strophe from 'strophe.js'
-import RightItem from './RightItem'
 import TaskContent from './TaskContent'
+import czml from './czml'
 export default {
   name: 'CesiumMap',
-  components: {TaskContent, RightItem},
+  components: {TaskContent},
   // 状态信息添加在本地
   mounted () {
     if (!this.$xmpp.connFlag) {
@@ -242,13 +241,6 @@ export default {
       this.init()
     }
   },
-  // destroyed () {
-  //   console.log('Cesium destroyed')
-  //   if (this.$xmpp.conn != null && this.messageHandler !== undefined) {
-  //     this.$xmpp.conn.deleteHandler(this.messageHandler)
-  //     console.log('delete message handler')
-  //   }
-  // },
   data () {
     return {
       fullLoading: false,
@@ -342,17 +334,15 @@ export default {
       this.showTileMap = true
     },
     ready (cesiumInstance) {
+      console.log('ready......')
       const {Cesium, viewer} = cesiumInstance
-      viewer.scene.requestRenderMode = true
-      // viewer.scene.maximumRenderTimeChange = Infinity
       viewer.cesiumWidget.creditContainer.style.display = 'none'
       viewer.scene.globe.depthTestAgainstTerrain = true
-      this.imageryProvider = new Cesium.MapboxImageryProvider({
-        mapId: 'mapbox.streets'
-      })
+
       this.Cesium = Cesium
-      // this.tooltip = new Cesium.createTooltip(viewer.cesiumWidget.container)
       this.viewer = viewer
+
+      czml.init(Cesium, viewer)
     },
     toggle (type) {
       this.$refs[type].drawing = !this.$refs[type].drawing
@@ -492,10 +482,30 @@ export default {
     },
     // 入网退网请求
     requestInOutNet () {
+      let allData = czml.GetAllSatellite()
+      let pos = parseInt(Math.random() * (this.$xmpp.virtualPosition.length - 1), 10)
+      let latitude = this.$xmpp.virtualPosition[pos][1]
+      let longitude = this.$xmpp.virtualPosition[pos][0]
+      let userPos = this.Cesium.Cartesian3.fromDegrees(longitude, latitude, 0)
+
+      console.log(userPos)
+      let minDis = Number.MAX_VALUE
+      let starName = null
+      for (let key in allData) {
+        let data = allData[key]
+        const position = data[0].position.getValue(this.viewer.clock.currentTime)
+
+        const distance = this.Cesium.Cartesian3.distance(position, userPos)
+        if (minDis > distance) {
+          minDis = distance
+          console.log(distance)
+          starName = key
+        }
+      }
       if (this.NetStatus === '申请入网') {
-        this.$xmpp.RequestInOrOutToNet(1)
+        this.$xmpp.RequestInOrOutToNet(1, latitude, longitude, starName)
       } else {
-        this.$xmpp.RequestInOrOutToNet(0)
+        this.$xmpp.RequestInOrOutToNet(0, latitude, longitude, starName)
       }
     },
     // 资源订阅请求
@@ -725,6 +735,7 @@ export default {
         this.$message('创建任务失败:' + memo)
       }
     },
+    // 任务完成响应
     handleTaskFinished (replyJson) {
       let taskid = replyJson['taskid']
       let address = replyJson['address']
@@ -743,15 +754,20 @@ export default {
       })
       this.ViewMapResults(address)
     },
+    // 状态轮询响应
     handleStatus (replyJson) {
       console.log('状态查询')
       this.$xmpp.replyStatus()
     },
+    // 请求接收报文
     handleCheckStatus (replyJson) {
       let result = replyJson['result']
       if (result === 0) {
         this.NetStatus = '申请入网'
       }
+    },
+    handleBroadcast (replyJson) {
+      this.$message(replyJson['data'])
     },
     onMessage (msg) {
       console.log('Cesium Message')
@@ -794,6 +810,9 @@ export default {
               case '1202':
                 this.handleCheckStatus(replyJson)
                 break
+              case '1200':
+                this.handleBroadcast(replyJson)
+                break
               default:
                 break
             }
@@ -802,44 +821,15 @@ export default {
       }
       return true
     },
-    addRegionResults: function (dataJson) {
-      // let addShape = null
-      for (let index in dataJson) {
-        let data = dataJson[index]
-        let pos = data['pos']
-        pos = pos.substr(1, pos.length - 1)
-
-        let tmp = {}
-        tmp['url'] = data['url']
-        tmp['name'] = data['satellite']
-        tmp['pos'] = data['position']
-        this.dataSource.push(tmp)
-        let positionCartesians = []
-        pos = pos.split(',')
-        for (let i = 0; i < pos.length; i += 2) {
-          let lat = parseFloat(pos[i])
-          let lng = parseFloat(pos[i + 1])
-          let pt = this.Cesium.Cartesian3.fromDegrees(lng, lat, 0)
-          positionCartesians.push(pt)
-        }
-        console.log(positionCartesians)
-        this.viewer.entities.add({
-          polygon: {
-            hierarchy: positionCartesians,
-            material: new this.Cesium.ColorMaterialProperty(this.Cesium.Color.YELLOW.withAlpha(0.4))
-          }
-        })
-      }
-      // if (addShape != null) {
-      //   this.viewer.camera.flyTo({addShape})
-      // }
-    },
+    // 表格选择
     handleSubSelectChange (val) {
       this.selectSubResource = val
     },
+    // 表格取消选择
     handleUnSubSelectChange (val) {
       this.selectUnSubResource = val
     },
+    // 连接回调函数
     connectedCallback (status) {
       // 通过cookie缓存登陆
       console.log('connected function')

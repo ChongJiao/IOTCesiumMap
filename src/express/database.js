@@ -46,6 +46,13 @@ class HibernateSqlMap {
       .columnMap('captureArea', 'captureArea')
       .columnMap('address', 'address')
 
+    this.satellitedataset = this.session.tableMap('satellitedataset')
+      .columnMap('id', 'id')
+      .columnMap('satellite', 'satellite')
+      .columnMap('position', 'position')
+      .columnMap('url', 'url')
+      .columnMap('pos', 'pos')
+      .columnMap('text', 'text')
     /***
      这里添加表格的MAP
      ***/
@@ -225,6 +232,20 @@ class HibernateSqlMap {
       }).catch((reason) => {
         reject(new Error('-1'))
         console.log(reason)
+      })
+    })
+    return p
+  }
+
+  selectAllSatelliteData () {
+    let hibernateSql = this
+    let p = new Promise(function (resolve, reject) {
+      let sqlRes = hibernateSql.session.query(hibernateSql.satellitedataset)
+      sqlRes.then(function (result) {
+        resolve(result)
+      }).catch(function (error) {
+        reject(new Error('-1'))
+        console.log(error.stack())
       })
     })
     return p

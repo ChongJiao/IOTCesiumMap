@@ -176,4 +176,16 @@ router.get('/task', function (req, res) {
   })
 })
 
+// 查询所有数据
+router.get('/satelliteData', function (req, res) {
+  console.log('get all Data')
+  // console.log(taskId)
+  hibernateModel.selectAllSatelliteData(function (result) {
+    if (result === 'error' || result === null) {
+      res.send({'status': 0})
+    } else {
+      res.send(result)
+    }
+  })
+})
 module.exports = router

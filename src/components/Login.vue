@@ -8,17 +8,6 @@
       poster="../assets/oceans.png">
         <source src="../assets/New-jumbo.mp4" type="video/mp4" >
       </video>
-
-<!--        <video :style="fixStyle" autoplay loop muted class="fillWidth" v-on:canplay="canplay">-->
-<!--            <source-->
-<!--              src="//vjs.zencdn.net/v/oceans.mp4"-->
-<!--              type="video/mp4"-->
-<!--            >-->
-<!--          <source src="//vjs.zencdn.net/v/oceans.webm" type="video/webm"></source>-->
-<!--          <source src="//vjs.zencdn.net/v/oceans.ogv" type="video/ogg"></source>-->
-<!--              src="http://babylife.qiniudn.com/FtRVyPQHHocjVYjeJSrcwDkApTLQ"-->
-
-<!--          </video>-->
     </div>
   </div>
 </template>

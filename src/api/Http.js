@@ -26,6 +26,15 @@ class HttpPort {
     })
     return p
   }
+  getAllSatellite () {
+    let base = this
+    let p = new Promise(function (resolve, reject) {
+      base.http.get('/satelliteData').then(res => {
+        resolve(res)
+      })
+    })
+    return p
+  }
   // 设定用户状态 pass
   setUserStatus (usercode, status, longitude, latitude) {
     let base = this

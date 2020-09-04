@@ -105,12 +105,9 @@ class StropheConn {
     return Math.random() * (maxVal - minVal) + minVal
   }
   // 入退网申请 pass
-  RequestInOrOutToNet (requestType) {
-    let msgContent = '{"typeid": 21101, "usercode":"{0}", "requesttype": {1}, "latitude": {2}, "longitude": {3}}'
-    let pos = parseInt(Math.random() * (this.virtualPosition.length - 1), 10)
-    let latitude = this.virtualPosition[pos][1]
-    let longitude = this.virtualPosition[pos][0]
-    msgContent = String.format(msgContent, this.userCode, requestType, latitude, longitude)
+  RequestInOrOutToNet (requestType, latitude, longitude, accssnode) {
+    let msgContent = '{"typeid": 21101, "usercode":"{0}", "requesttype": {1}, "latitude": {2}, "longitude": {3}, "accessnode": "{4}"}'
+    msgContent = String.format(msgContent, this.userCode, requestType, latitude, longitude, accssnode)
     console.log(msgContent)
     this.SendMessage(msgContent) // 从这里发送消息给管控，然后管控回复消息给用户处理
   }
