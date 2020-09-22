@@ -5,8 +5,8 @@
       <!--    <Login></Login>-->
       <div :style="fixStyle" class="filter"></div>
       <video :style="fixStyle" autoplay loop muted class="fillWidth" v-on:canplay="canplay"
-      poster="../assets/oceans.png">
-        <source src="../assets/New-jumbo.mp4" type="video/mp4" >
+      poster="../../assets/oceans.png">
+        <source src="../../assets/New-jumbo.mp4" type="video/mp4" >
       </video>
     </div>
   </div>
@@ -17,14 +17,14 @@ export default {
   name: 'Login',
   data () {
     return {
-      vedioCanPlay: false,
+      videoCanPlay: false,
       fixStyle: ''
     }
   },
   components: {LoginWidget},
   methods: {
     canplay () {
-      this.vedioCanPlay = true
+      this.videoCanPlay = true
     }
   },
   mounted: function () {

@@ -1,10 +1,9 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import CesiumMap from '../components/CesiumMap'
+import CesiumMap from '../components/User/CesiumMap'
 import UrlNotFound from '../components/UrlNotFound'
-import DataCenter from '../components/DataCenter'
-// import LoginWidget from '../components/LoginWidget'
-import Login from '../components/Login'
+import DataCenter from '../components/DataCenter/DataCenter'
+import Login from '../components/User/Login'
 Vue.use(Router)
 
 export default new Router({

@@ -83,12 +83,17 @@
         </template>
       </el-table-column>
     </el-table>
+
+    <el-button icon="el-icon-error" class="cesiumClose"></el-button>
+    <DataCesium></DataCesium>
   </div>
 </template>
 
 <script>
+import DataCesium from './DataCesium'
 export default {
   name: 'DataCenter',
+  components: {DataCesium},
   data () {
     return {
       tableData: [
@@ -181,5 +186,12 @@ export default {
   .Dbody{
     margin: auto;
     width: 95vw;
+    position: relative;
+  }
+  .cesiumClose{
+    position: absolute;
+    top: 10vh;
+    left: 90vw;
+    z-index: 13;
   }
 </style>

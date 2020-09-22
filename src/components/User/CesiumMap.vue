@@ -9,7 +9,7 @@
       text-color="#fff"
       active-text-color="#ffd04b">
       <el-menu-item index="0">
-        <img src="../assets/logo.png" style="height: 80%"/>
+        <img src="../../assets/logo.png" style="height: 80%"/>
       </el-menu-item>
       <el-menu-item index="1" v-on:click="requestInOutNet">{{NetStatus}}</el-menu-item>
       <el-submenu index="2">
@@ -48,32 +48,32 @@
     <vc-viewer ref="viewer" @ready="ready" :shouldAnimate="true" :orderIndependentTranslucency="false">
 <!--      <vc-layer-imagery :alpha="alpha" :imageryProvider="imageryProvider" :brightness="brightness" :contrast="contrast">-->
 <!--      </vc-layer-imagery>-->
-<!--      <vc-layer-imagery :alpha="alpha" :brightness="brightness" :contrast="contrast">-->
-<!--        <vc-provider-imagery-tile-mapservice-->
-<!--          :url="baseMapUrl"-->
-<!--        ></vc-provider-imagery-tile-mapservice>-->
-<!--      </vc-layer-imagery>-->
+      <vc-layer-imagery :alpha="alpha" :brightness="brightness" :contrast="contrast">
+        <vc-provider-imagery-tile-mapservice
+          :url="baseMapUrl"
+        ></vc-provider-imagery-tile-mapservice>
+      </vc-layer-imagery>
       <vc-layer-imagery :alpha="alpha" :brightness="brightness" :contrast="contrast" v-if="showTileMap">
         <vc-provider-imagery-tile-mapservice
-          :url="tileUrl0"
+          :url="tileUrl"
           @readyPromise="imageryReady"
         ></vc-provider-imagery-tile-mapservice>
       </vc-layer-imagery>
-      <vc-layer-imagery :alpha="alpha" :brightness="brightness" :contrast="contrast" v-if="showTileMap">
-        <vc-provider-imagery-tile-mapservice
-          :url="tileUrl1"
-        ></vc-provider-imagery-tile-mapservice>
-      </vc-layer-imagery>
-      <vc-layer-imagery :alpha="alpha" :brightness="brightness" :contrast="contrast" v-if="showTileMap">
-        <vc-provider-imagery-tile-mapservice
-          :url="tileUrl2"
-        ></vc-provider-imagery-tile-mapservice>
-      </vc-layer-imagery>
-      <vc-layer-imagery :alpha="alpha" :brightness="brightness" :contrast="contrast" v-if="showTileMap">
-        <vc-provider-imagery-tile-mapservice
-          :url="tileUrl3"
-        ></vc-provider-imagery-tile-mapservice>
-      </vc-layer-imagery>
+<!--      <vc-layer-imagery :alpha="alpha" :brightness="brightness" :contrast="contrast" v-if="showTileMap">-->
+<!--        <vc-provider-imagery-tile-mapservice-->
+<!--          :url="tileUrl1"-->
+<!--        ></vc-provider-imagery-tile-mapservice>-->
+<!--      </vc-layer-imagery>-->
+<!--      <vc-layer-imagery :alpha="alpha" :brightness="brightness" :contrast="contrast" v-if="showTileMap">-->
+<!--        <vc-provider-imagery-tile-mapservice-->
+<!--          :url="tileUrl2"-->
+<!--        ></vc-provider-imagery-tile-mapservice>-->
+<!--      </vc-layer-imagery>-->
+<!--      <vc-layer-imagery :alpha="alpha" :brightness="brightness" :contrast="contrast" v-if="showTileMap">-->
+<!--        <vc-provider-imagery-tile-mapservice-->
+<!--          :url="tileUrl3"-->
+<!--        ></vc-provider-imagery-tile-mapservice>-->
+<!--      </vc-layer-imagery>-->
       <vc-handler-draw-polygon
         :clampToGround="true"
         ref="handlerPolygon"
@@ -207,7 +207,9 @@
       </el-form-item>
     </el-form>
   </div>
-
+<!--  资源统计栏-->
+  <Statistics class="resourceS" describe-text="资源" status-text="订阅" finished-number="3" total-number="10" :content=resourceData></Statistics>
+  <Statistics class="taskS" describe-text="任务" status-text="完成" finished-number="5" total-number="9" :content=taskData></Statistics>
 </div>
 </template>
 <script>
@@ -215,34 +217,37 @@
 import Strophe from 'strophe.js'
 import TaskContent from './TaskContent'
 import czml from './czml'
+import Statistics from './Statistics'
 export default {
   name: 'CesiumMap',
-  components: {TaskContent},
+  components: {Statistics, TaskContent},
   // 状态信息添加在本地
   mounted () {
-    if (!this.$xmpp.connFlag) {
-      console.log('not login')
-      let name = this.$xmpp.getCookie('userCode')
-      let password = this.$xmpp.getCookie('password')
-      let domain = this.$xmpp.getCookie('domain')
-      let ip = this.$xmpp.getCookie('ip')
-      if (name !== null && password !== null && domain !== null) {
-        this.$xmpp.BOSH_SERVER = 'http://' + ip + ':7070/http-bind/'
-        this.$xmpp.httpServer = 'http://' + ip + ':8000/GFData/'
-        this.$xmpp.initial()
-        this.$xmpp.conn.connect(name + '@' + domain, password, this.connectedCallback)
-      } else {
-        this.$router.push({name: 'Login'})
-      }
-    } else {
-      this.userName = this.$xmpp.userCode
-      this.userDomain = this.$xmpp.domain
-      console.log('has login')
-      this.init()
-    }
+    // if (!this.$xmpp.connFlag) {
+    //   console.log('not login')
+    //   let name = this.$xmpp.getCookie('userCode')
+    //   let password = this.$xmpp.getCookie('password')
+    //   let domain = this.$xmpp.getCookie('domain')
+    //   let ip = this.$xmpp.getCookie('ip')
+    //   if (name !== null && password !== null && domain !== null) {
+    //     this.$xmpp.BOSH_SERVER = 'http://' + ip + ':7070/http-bind/'
+    //     this.$xmpp.httpServer = 'http://' + ip + ':8000/GFData/'
+    //     this.$xmpp.initial()
+    //     this.$xmpp.conn.connect(name + '@' + domain, password, this.connectedCallback)
+    //   } else {
+    //     this.$router.push({name: 'Login'})
+    //   }
+    // } else {
+    //   this.userName = this.$xmpp.userCode
+    //   this.userDomain = this.$xmpp.domain
+    //   console.log('has login')
+    //   this.init()
+    // }
   },
   data () {
     return {
+      resourceData: [{}],
+      taskData: [{}],
       fullLoading: false,
       userName: '',
       userDomain: '',
@@ -256,12 +261,9 @@ export default {
       Cesium: null,
       viewer: null,
       resourceItems: [],
-      tileUrl0: 'http://localhost:8000/GFData/tileData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806-pansharpen-0',
-      tileUrl1: 'http://localhost:8000/GFData/tileData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806-pansharpen-0',
-      tileUrl2: 'http://localhost:8000/GFData/tileData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806-pansharpen-0',
-      tileUrl3: 'http://localhost:8000/GFData/tileData/GF1_PMS2_E113.8_N30.5_20190524_L1A0004018806-pansharpen-0',
-      baseMapUrl: 'http://192.168.1.122:8000/BaseMap',
-      showTileMap: false,
+      tileUrl: 'http://localhost:8000/NTiles/Ctile',
+      baseMapUrl: 'http://localhost:8000/BaseMap',
+      showTileMap: true,
       taskList: [],
       NetStatus: '申请入网',
       subResource: [],
@@ -345,6 +347,7 @@ export default {
       czml.init(Cesium, viewer)
     },
     toggle (type) {
+      this.$message('drawing')
       this.$refs[type].drawing = !this.$refs[type].drawing
 
       let div = document.getElementById('draw')
@@ -966,6 +969,47 @@ export default {
   .deselect{
     background-color: #999999;
   }
+  .resourceS{
+    background-color: #9fd5f1;
+    opacity: 0.6;
+    z-index: 16;
+    position: absolute;
+    padding: 1vw;
+    top:10vh;
+    left:2vw;
+    width: 25vw;
+    height: 90vh;
+    display: inline-block;
+    border-radius: 1rem;
+    border: 0.3rem solid rgba(74, 136, 168, 255);
+
+    color: #000000;
+    font-family: 'Righteous', cursive;
+    font-size: 2rem;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+  .taskS{
+    background-color: #9fd5f1;
+    opacity: 0.6;
+    z-index: 16;
+    position: absolute;
+    padding: 1vw;
+    top:10vh;
+    right:2vw;
+    width: 25vw;
+    height: 90vh;
+    display: inline-block;
+    border-radius: 1rem;
+    border: 0.3rem solid rgba(74, 136, 168, 255);
+
+    color: #000000;
+    font-family: 'Righteous', cursive;
+    font-size: 2rem;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+
 </style>
 <style>
   /*.el-form-item__label {*/

@@ -26,6 +26,7 @@ class HttpPort {
     })
     return p
   }
+  // 获取所有卫星数据内容
   getAllSatellite () {
     let base = this
     let p = new Promise(function (resolve, reject) {

@@ -18,7 +18,6 @@ app.all('*', function (req, res, next) {
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extend: false}))
 app.use(express.static('public'))
-app.use('main', express.static('public/index.html'))
 // 后端api路由
 app.use(iotApi)
 // 监听3000端口
