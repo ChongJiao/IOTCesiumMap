@@ -5,11 +5,11 @@
       <el-col :span="16"><div class="grid-content bg-purple">{{describeText}} 总 数</div></el-col>
       <el-col :span="8"><div class="grid-content bg-purple number">{{totalNumber}}</div></el-col>
     </el-row>
-    <el-row :gutter="20" style="margin-bottom: 3vh; text-align: left">
+    <el-row :gutter="20" style="margin-bottom: 2vh; text-align: left">
       <el-col :span="16"><div class="grid-content bg-purple">已 {{statusText}}</div></el-col>
       <el-col :span="8"><div class="grid-content bg-purple number">{{finishedNumber}}</div></el-col>
     </el-row>
-    <el-row :gutter="20" style="margin-bottom: 3vh; text-align: left">
+    <el-row :gutter="20" style="text-align: left">
       <el-col :span="16"><div class="grid-content bg-purple">未 {{statusText}}</div></el-col>
       <el-col :span="8"><div class="grid-content bg-purple number">{{totalNumber - finishedNumber}}</div></el-col>
     </el-row>
@@ -210,9 +210,11 @@ export default {
   text-shadow: 2px 2px 4px #082b34;
 }
 .myEchart{
-  width: 20vw;
-  height: 20vw;
+  width: 30vh;
+  height: 30vh;
   opacity: 1;
-  margin: auto;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 2vh;
 }
 </style>

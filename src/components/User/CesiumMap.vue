@@ -208,8 +208,10 @@
     </el-form>
   </div>
 <!--  资源统计栏-->
-  <Statistics class="resourceS" describe-text="资源" status-text="订阅" finished-number="3" total-number="10" :content=resourceData></Statistics>
-  <Statistics class="taskS" describe-text="任务" status-text="完成" finished-number="5" total-number="9" :content=taskData></Statistics>
+  <Statistics v-if="true" class="resourceS" describe-text="资源" status-text="订阅" finished-number="3" total-number="10" :content=resourceData></Statistics>
+  <Statistics v-if="true" class="taskS" describe-text="任务" status-text="完成" finished-number="5" total-number="9" :content=taskData></Statistics>
+  <!--  日志窗口-->
+  <Log ref="log"></Log>
 </div>
 </template>
 <script>
@@ -218,9 +220,10 @@ import Strophe from 'strophe.js'
 import TaskContent from './TaskContent'
 import czml from './czml'
 import Statistics from './Statistics'
+import Log from './Log'
 export default {
   name: 'CesiumMap',
-  components: {Statistics, TaskContent},
+  components: {Statistics, TaskContent, Log},
   // 状态信息添加在本地
   mounted () {
     // if (!this.$xmpp.connFlag) {
@@ -243,9 +246,16 @@ export default {
     //   console.log('has login')
     //   this.init()
     // }
+    //
+
+    // this.$refs.log.addLogInfo('test')
+    // this.$refs.log.addLogInfo('test')
+    // this.$refs.log.addLogInfo('test')
+    setInterval(this.$refs.log.addLogInfo, 2000)
   },
   data () {
     return {
+      logInfo: '',
       resourceData: [{}],
       taskData: [{}],
       fullLoading: false,
@@ -977,7 +987,7 @@ export default {
     padding: 1vw;
     top:10vh;
     left:2vw;
-    width: 25vw;
+    width: 40vh;
     height: 90vh;
     display: inline-block;
     border-radius: 1rem;
@@ -997,7 +1007,7 @@ export default {
     padding: 1vw;
     top:10vh;
     right:2vw;
-    width: 25vw;
+    width: 40vh;
     height: 90vh;
     display: inline-block;
     border-radius: 1rem;

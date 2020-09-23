@@ -35,6 +35,7 @@
     "vue-cesium": "^2.0.5",
     "vue-echarts": "^5.0.0-beta.0",
     "vue-loading-template": "^1.3.2",
+    "vue-logger": "0.0.4",
     "vue-router": "^3.0.1"
   },
   "devDependencies": {

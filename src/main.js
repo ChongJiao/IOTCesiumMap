@@ -16,7 +16,14 @@ import XMPP from './api/Xmpp.js'
 import Http from './api/Http'
 import Video from 'video.js'
 import 'video.js/dist/video-js.css'
-
+import vueLogger from 'vue-logger'
+Vue.use(vueLogger, {
+  prefix: () => new Date(),
+  dev: true,
+  shortname: true,
+  levels: ['log', 'warn', 'debug', 'error', 'dir'],
+  forceLevels: []
+})
 Vue.prototype.$video = Video
 Vue.use(VueCesium, {
   // cesiumPath 是指引用的Cesium.js路径，如
