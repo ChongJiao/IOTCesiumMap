@@ -1,6 +1,6 @@
 import axios from 'axios' // 本文件从数据库获取相关信息
 axios.defaults.timeout = 80000
-axios.defaults.baseURL = 'http://127.0.0.1:3000'
+axios.defaults.baseURL = 'http://192.168.1.121:3000'
 axios.defaults.withCredentials = false
 
 class HttpPort {
@@ -116,6 +116,16 @@ class HttpPort {
             reject(new Error('error'))
           }
         })
+    })
+    return p
+  }
+  // 查询某个数据是否在执行任务
+  getAllTaskflow () {
+    let base = this
+    let p = new Promise(function (resolve, reject) {
+      base.http.get('/taskflow').then(res => {
+        resolve(res)
+      })
     })
     return p
   }

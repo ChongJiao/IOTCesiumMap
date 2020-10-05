@@ -28,7 +28,7 @@ Vue.prototype.$video = Video
 Vue.use(VueCesium, {
   // cesiumPath 是指引用的Cesium.js路径，如
   // 项目本地的Cesium Build包，vue项目需要将Cesium Build包放static目录：
-  cesiumPath: 'http://localhost:8000/Cesium/Cesium.js'
+  cesiumPath: 'http://192.168.1.121:3000/static/Cesium/Cesium.js'
   // 个人在线Cesium Build包：
   // cesiumPath: 'https://zouyaoji.top/vue-cesium/statics/Cesium/Cesium.js'
   // 个人在线SuperMap Cesium Build包（在官方基础上二次开发出来的）：

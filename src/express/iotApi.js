@@ -161,7 +161,7 @@ router.post('/task', function (req, res) {
   }
 })
 
-// 查询任务信息，接口为/task?taskId=1
+// TODO 查询任务信息，接口为/task?taskId=1
 router.get('/task', function (req, res) {
   console.log('get task')
   let taskId = req.query['taskId']
@@ -176,16 +176,25 @@ router.get('/task', function (req, res) {
   })
 })
 
-// 查询所有数据
+// 查询所有卫星数据
 router.get('/satelliteData', function (req, res) {
   console.log('get all Data')
   // console.log(taskId)
-  hibernateModel.selectAllSatelliteData(function (result) {
-    if (result === 'error' || result === null) {
-      res.send({'status': 0})
-    } else {
-      res.send(result)
-    }
+  hibernateModel.selectAllSatelliteData().then((result) => {
+    res.send(result)
+  }).catch((reason) => {
+    console.log(reason)
+    res.send({'type': 'error'})
   })
 })
+
+// 查询所有正在运行的任务-卫星数据
+router.get('/taskflow', function (req, res) {
+  hibernateModel.selectAllTaskflow().then((result) => {
+    res.send(result)
+  }).catch((reason) => {
+    res.send({'type': 'error'})
+  })
+})
+
 module.exports = router

@@ -59,9 +59,6 @@
           <vue-loading v-if="scope.row.status === 0" type="spiningDubbles" color="#d9544e" :size="{ width: '50%' }" >
             执行中
           </vue-loading>
-<!--          <div v-if="scope.row.status === 0" v-loading="true">-->
-<!--            正在执行-->
-<!--          </div>-->
         </template>
       </el-table-column>
     </el-table>
@@ -91,8 +88,6 @@ export default {
   mounted () {
     // 获取所有已经创建的任务信息
     this.$http.dealTask({}, this.$xmpp.userCode, 'all').then((result) => {
-      console.log('task all')
-      console.log(result.data)
       this.taskContent = result.data
     }).catch((reason) => {
       this.$message('获取任务列表失败')

@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import CesiumMap from '../components/User/CesiumMap'
 import UrlNotFound from '../components/UrlNotFound'
-import DataCenter from '../components/DataCenter/DataCenter'
+import DataMain from '../components/DataCenter/DataMain'
 import Login from '../components/User/Login'
 Vue.use(Router)
 
@@ -26,7 +26,7 @@ export default new Router({
     {
       path: '/DataCenter',
       name: 'DataCenter',
-      component: DataCenter
+      component: DataMain
     },
     {
       path: '*',

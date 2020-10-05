@@ -2,7 +2,7 @@ const jsORM = require('js-hibernate')
 // const Dateformat = require('dateformat')
 const util = require('util')
 const mysqlConf = {
-  host: '192.168.1.121',
+  host: '127.0.0.1',
   user: 'root',
   password: '311296daifei',
   database: 'iottask',
@@ -45,6 +45,7 @@ class HibernateSqlMap {
       .columnMap('period', 'period')
       .columnMap('captureArea', 'captureArea')
       .columnMap('address', 'address')
+      .columnMap('updateTime', 'updateTime')
 
     this.satellitedataset = this.session.tableMap('satellitedataset')
       .columnMap('id', 'id')
@@ -53,6 +54,11 @@ class HibernateSqlMap {
       .columnMap('url', 'url')
       .columnMap('pos', 'pos')
       .columnMap('text', 'text')
+
+    this.taskflow = this.session.tableMap('taskflow')
+      .columnMap('id', 'id')
+      .columnMap('satelliteId', 'satelliteId')
+      .columnMap('status', 'status')
     /***
      这里添加表格的MAP
      ***/
@@ -222,6 +228,7 @@ class HibernateSqlMap {
     return p
   }
 
+  // 查询用户任务信息
   queryTask (userCode) {
     let hibernateSql = this
     let p = new Promise(function (resolve, reject) {
@@ -231,21 +238,37 @@ class HibernateSqlMap {
         resolve(results)
       }).catch((reason) => {
         reject(new Error('-1'))
-        console.log(reason)
       })
     })
     return p
   }
 
+  // 查询所有卫星数据源内容：satelliteData
   selectAllSatelliteData () {
     let hibernateSql = this
     let p = new Promise(function (resolve, reject) {
-      let sqlRes = hibernateSql.session.query(hibernateSql.satellitedataset)
-      sqlRes.then(function (result) {
+      var sql = 'select * from `satellitedataset`'
+      var query = hibernateSql.session.executeSql(sql)
+      query.then(function (result) {
         resolve(result)
       }).catch(function (error) {
         reject(new Error('-1'))
         console.log(error.stack())
+      })
+    })
+    return p
+  }
+
+  // 查询当前在执行的任务信息：taskflow
+  selectAllTaskflow () {
+    let hibernateSql = this
+    let p = new Promise(function (resolve, reject) {
+      hibernateSql.session.query(hibernateSql.taskflow).where(
+        hibernateSql.taskflow.status.Equal(0)
+      ).then((results) => {
+        resolve(results)
+      }).catch((reason) => {
+        reject(new Error('-1'))
       })
     })
     return p

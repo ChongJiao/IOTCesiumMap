@@ -62,10 +62,33 @@ export default {
   data () {
     return {
       orgOptions: {},
-      trHisOptions: {}
+      trHisOptions: {},
+      numberValList: [],
+      timeValList: []
     }
   },
   mounted () {
+    let timeCount = {}
+    for (let i in this.content) {
+      let date = new Date(this.content[i].updateTime)
+      let year = date.getFullYear()
+      let nowDate = new Date()
+      let nowYear = nowDate.getFullYear()
+      if (nowYear > year) { continue }
+      let month = date.getMonth() + 1
+      let day = date.getDate()
+      let timeStr = month + '-' + day
+      if (timeCount[timeStr] === undefined) {
+        timeCount[timeStr] = 1
+      } else {
+        timeCount[timeStr] += 1
+      }
+    }
+    for (const [key, val] of Object.entries(timeCount)) {
+      this.timeValList.push(key)
+      this.numberValList.push(val)
+    }
+
     this.orgOptions = {
       title: {
         show: true,
@@ -81,45 +104,17 @@ export default {
       xAxis: [
         {
           type: 'category',
+          name: '时间',
           boundaryGap: true,
-          data: (function () {
-            var now = new Date()
-            var res = []
-            var len = 10
-            while (len--) {
-              res.unshift(now.toLocaleTimeString().replace(/^\D*/, ''))
-              now = new Date(now - 2000)
-            }
-            return res
-          })()
-        },
-        {
-          type: 'category',
-          boundaryGap: true,
-          data: (function () {
-            var res = []
-            var len = 10
-            while (len--) {
-              res.push(10 - len - 1)
-            }
-            return res
-          })()
+          data: this.timeValList
         }
       ],
       yAxis: [
         {
           type: 'value',
           scale: true,
-          name: '价格',
-          max: 30,
-          min: 0,
-          boundaryGap: [0.2, 0.2]
-        },
-        {
-          type: 'value',
-          scale: true,
-          name: '预购量',
-          max: 1200,
+          name: '个数',
+          max: 15,
           min: 0,
           boundaryGap: [0.2, 0.2]
         }
@@ -129,35 +124,13 @@ export default {
         axisPointer: { // 坐标轴指示器，坐标轴触发有效
           type: 'shadow' // 默认为直线，可选为：'line' | 'shadow'
         },
-        formatter: '{a} {b} : {c}'
+        formatter: '{b} 日 {a} : {c}'
       },
       series: [
         {
-          name: '预购队列',
-          type: 'bar',
-          xAxisIndex: 1,
-          yAxisIndex: 1,
-          data: (function () {
-            var res = []
-            var len = 10
-            while (len--) {
-              res.push(Math.round(Math.random() * 1000))
-            }
-            return res
-          })()
-        },
-        {
-          name: '最新成交价',
+          name: this.describeText + '数 量',
           type: 'line',
-          data: (function () {
-            var res = []
-            var len = 0
-            while (len < 10) {
-              res.push((Math.random() * 10 + 5).toFixed(1) - 0)
-              len++
-            }
-            return res
-          })()
+          data: this.numberValList
         }
       ]
     }

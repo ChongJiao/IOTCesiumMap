@@ -11,7 +11,7 @@
       <el-menu-item index="0">
         <img src="../../assets/logo.png" style="height: 80%"/>
       </el-menu-item>
-      <el-menu-item index="1" v-on:click="requestInOutNet">{{NetStatus}}</el-menu-item>
+      <el-menu-item index="1" v-on:click="dealAllRequest('21101')">{{NetStatus}}</el-menu-item>
       <el-submenu index="2">
         <template slot="title">用户</template>
         <el-menu-item index="2-1">
@@ -31,7 +31,12 @@
         <el-menu-item index="4-1" @click="openWindow($event, 2)">任务列表</el-menu-item>
         <el-menu-item index="4-2" @click="openWindow($event, 3)">任务生成</el-menu-item>
       </el-submenu>
-      <el-menu-item index="5" @click="Logout" style="float: right">
+      <el-submenu index="5">
+        <template slot="title">信息展示</template>
+        <el-menu-item index="5-1" @click="logFlag = !logFlag">日志窗口</el-menu-item>
+        <el-menu-item index="5-2" @click="statisticFlag = !statisticFlag">信息统计</el-menu-item>
+      </el-submenu>
+      <el-menu-item index="6" @click="Logout" style="float: right">
         登出
       </el-menu-item>
     </el-menu>
@@ -59,21 +64,6 @@
           @readyPromise="imageryReady"
         ></vc-provider-imagery-tile-mapservice>
       </vc-layer-imagery>
-<!--      <vc-layer-imagery :alpha="alpha" :brightness="brightness" :contrast="contrast" v-if="showTileMap">-->
-<!--        <vc-provider-imagery-tile-mapservice-->
-<!--          :url="tileUrl1"-->
-<!--        ></vc-provider-imagery-tile-mapservice>-->
-<!--      </vc-layer-imagery>-->
-<!--      <vc-layer-imagery :alpha="alpha" :brightness="brightness" :contrast="contrast" v-if="showTileMap">-->
-<!--        <vc-provider-imagery-tile-mapservice-->
-<!--          :url="tileUrl2"-->
-<!--        ></vc-provider-imagery-tile-mapservice>-->
-<!--      </vc-layer-imagery>-->
-<!--      <vc-layer-imagery :alpha="alpha" :brightness="brightness" :contrast="contrast" v-if="showTileMap">-->
-<!--        <vc-provider-imagery-tile-mapservice-->
-<!--          :url="tileUrl3"-->
-<!--        ></vc-provider-imagery-tile-mapservice>-->
-<!--      </vc-layer-imagery>-->
       <vc-handler-draw-polygon
         :clampToGround="true"
         ref="handlerPolygon"
@@ -120,8 +110,8 @@
                        min-width="30%">
       </el-table-column>
     </el-table>
-    <el-button style="margin-top: 1vh" :class="this.selectSubResource.length > 0 ? 'select' : 'deselect'" v-on:click="requestSub">订阅</el-button>
-    <el-button style="margin-top: 1vh" type="success" v-on:click="requestSource">资源获取</el-button>
+    <el-button style="margin-top: 1vh" :class="this.selectSubResource.length > 0 ? 'select' : 'deselect'" v-on:click="dealAllRequest('21104', 1)">订阅</el-button>
+    <el-button style="margin-top: 1vh" type="success" v-on:click="dealAllRequest('21103')">资源获取</el-button>
   </div>
 <!--订阅列表-->
   <div class = "info-window" v-if="showFlag[1]">
@@ -160,7 +150,7 @@
                        min-width="30%">
       </el-table-column>
     </el-table>
-    <el-button style="margin-top: 1vh" :class="this.selectUnSubResource.length > 0 ? 'select' : 'deselect'" v-on:click="requestUnSub">取消订阅</el-button>
+    <el-button style="margin-top: 1vh" :class="this.selectUnSubResource.length > 0 ? 'select' : 'deselect'" v-on:click="dealAllRequest('21104', 0)">取消订阅</el-button>
   </div>
 <!--任务列表-->
   <div class = "info-window" v-if="showFlag[2]">
@@ -170,18 +160,28 @@
   </div>
 <!--  任务信息表格-->
   <div class = "info-window" v-if="showTaskDetailTable">
-    <el-form ref="taskForm" :model="taskForm" label-width="calc(100px + .5vw)">
+    <el-form :model="taskForm" label-width="calc(100px + .5vw)">
+      <el-form-item label="采集名称">
+        <el-input v-model="taskForm.title"></el-input>
+      </el-form-item>
       <el-form-item label="中心经度">
         <el-input v-model="taskForm.longitude"></el-input>
       </el-form-item>
       <el-form-item label="中心纬度">
         <el-input v-model="taskForm.latitude"></el-input>
       </el-form-item>
-      <el-form-item label="采集幅宽">
-        <el-input v-model="taskForm.width"></el-input>
-      </el-form-item>
-      <el-form-item label="采集周期">
-        <el-input v-model="taskForm.period"></el-input>
+      <el-form-item label="任务类型">
+        <el-select v-model="taskForm.type" placeholder="请选择" style="float: left;width: 30%">
+          <el-option
+                v-for="item in taskTypeOption"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value">
+              </el-option>
+        </el-select>
+        <el-form-item label="采集幅宽" style="float:right; width: 60%">
+          <el-input v-model="taskForm.width"></el-input>
+        </el-form-item>
       </el-form-item>
       <el-form-item label="开始时间">
         <el-col :span="11">
@@ -202,16 +202,18 @@
         </el-col>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" @click="regionTaskMake">立即创建</el-button>
+        <el-button type="primary" @click="dealAllRequest('21106')">立即创建</el-button>
         <el-button @click="closeTaskTable">取消</el-button>
       </el-form-item>
     </el-form>
   </div>
 <!--  资源统计栏-->
-  <Statistics v-if="true" class="resourceS" describe-text="资源" status-text="订阅" finished-number="3" total-number="10" :content=resourceData></Statistics>
-  <Statistics v-if="true" class="taskS" describe-text="任务" status-text="完成" finished-number="5" total-number="9" :content=taskData></Statistics>
+  <Statistics v-if="statisticFlag" class="resourceS" describe-text="资 源 " status-text="订 阅 " :finished-number = subResource.length
+              :total-number = "resourceItems.length + subResource.length" :content=subResource></Statistics>
+  <Statistics v-if="statisticFlag" class="taskS" describe-text="任 务 " status-text="完 成 " :finished-number = taskStatistic.finishedNumber
+              :total-number = taskStatistic.totalNumber :content=taskStatistic.data></Statistics>
   <!--  日志窗口-->
-  <Log ref="log"></Log>
+  <Log ref="log" v-if="logFlag"></Log>
 </div>
 </template>
 <script>
@@ -226,38 +228,31 @@ export default {
   components: {Statistics, TaskContent, Log},
   // 状态信息添加在本地
   mounted () {
-    // if (!this.$xmpp.connFlag) {
-    //   console.log('not login')
-    //   let name = this.$xmpp.getCookie('userCode')
-    //   let password = this.$xmpp.getCookie('password')
-    //   let domain = this.$xmpp.getCookie('domain')
-    //   let ip = this.$xmpp.getCookie('ip')
-    //   if (name !== null && password !== null && domain !== null) {
-    //     this.$xmpp.BOSH_SERVER = 'http://' + ip + ':7070/http-bind/'
-    //     this.$xmpp.httpServer = 'http://' + ip + ':8000/GFData/'
-    //     this.$xmpp.initial()
-    //     this.$xmpp.conn.connect(name + '@' + domain, password, this.connectedCallback)
-    //   } else {
-    //     this.$router.push({name: 'Login'})
-    //   }
-    // } else {
-    //   this.userName = this.$xmpp.userCode
-    //   this.userDomain = this.$xmpp.domain
-    //   console.log('has login')
-    //   this.init()
-    // }
-    //
-
-    // this.$refs.log.addLogInfo('test')
-    // this.$refs.log.addLogInfo('test')
-    // this.$refs.log.addLogInfo('test')
-    setInterval(this.$refs.log.addLogInfo, 2000)
+    if (!this.$xmpp.connFlag) {
+      console.log('not login')
+      let name = this.$xmpp.getCookie('userCode')
+      let password = this.$xmpp.getCookie('password')
+      let domain = this.$xmpp.getCookie('domain')
+      let ip = this.$xmpp.getCookie('ip')
+      if (name !== null && password !== null && domain !== null) {
+        this.$xmpp.BOSH_SERVER = 'http://' + ip + ':7070/http-bind/'
+        this.$xmpp.httpServer = 'http://' + ip + ':8000/GFData/'
+        this.$xmpp.initial()
+        this.$xmpp.conn.connect(name + '@' + domain, password, this.connectedCallback)
+      } else {
+        this.$router.push({name: 'Login'})
+      }
+    } else {
+      this.userName = this.$xmpp.userCode
+      this.userDomain = this.$xmpp.domain
+      console.log('has login')
+      this.init()
+    }
   },
   data () {
     return {
-      logInfo: '',
-      resourceData: [{}],
-      taskData: [{}],
+      logFlag: true,
+      statisticFlag: false,
       fullLoading: false,
       userName: '',
       userDomain: '',
@@ -271,24 +266,43 @@ export default {
       Cesium: null,
       viewer: null,
       resourceItems: [],
-      tileUrl: 'http://localhost:8000/NTiles/Ctile',
-      baseMapUrl: 'http://localhost:8000/BaseMap',
-      showTileMap: true,
+      tileUrl: 'http://192.168.1.121:8000/GFData/tileData/GF1_PMS1_E120.5_N22.7_20200205_L1A0004599309',
+      baseMapUrl: 'http://192.168.1.121:8000/BaseMap',
+      showTileMap: false,
       taskList: [],
       NetStatus: '申请入网',
       subResource: [],
       selectSubResource: [],
       selectUnSubResource: [],
       taskForm: {
+        title: '',
         latitude: '',
         longitude: '',
-        width: '',
+        type: '',
         startDate: '',
         startTime: '',
         endDate: '',
         endTime: '',
-        period: '',
+        width: '',
         desc: ''
+      },
+      taskTypeOption: [{
+        value: '1',
+        label: '用户初级任务'
+      }, {
+        value: '2',
+        label: '用户高级任务'
+      }, {
+        value: '3',
+        label: '系统初级任务'
+      }, {
+        value: '4',
+        label: '系统高级任务'
+      }],
+      taskStatistic: {
+        totalNumber: 9,
+        finishedNumber: 5,
+        data: []
       }
     }
   },
@@ -304,13 +318,22 @@ export default {
         } else {
           base.NetStatus = '申请入网'
         }
+
+        console.log('check user status')
+        console.log(base.NetStatus)
+        console.log(base.NetStatus === '申请退网')
+        if (base.NetStatus === '申请退网') {
+          // 如果用户状态是在网的话，应该主动首先向管控发送请求，判断是否在线，而不是等管控广播。。。。。，
+          console.log('init request resource')
+          this.$xmpp.RequestReSource()
+        }
       }).catch((reason) => {
         base.NetStatus = '用户异常'
         console.log(reason)
+        return false
       })
       // 获取订阅资源列表 pass
       this.$http.getUserSubResourceList(this.$xmpp.userCode).then((result) => {
-        console.log(result)
         this.subResource = result
       }).catch((reason) => {
         console.log(reason)
@@ -318,19 +341,15 @@ export default {
       base.messageHandler = base.$xmpp.conn.addHandler(base.onMessage, null, 'message', null, null, null)
 
       // 获取路由参数
-      console.log('路由参数为')
       let type = this.$route.params.type
       if (type === 'result') {
         // 在地图中显示结果
         let url = this.$route.params.url
-        let tileData = this.$xmpp.serverDirPath[3]
-        this.tileUrl0 = this.$xmpp.httpServer + tileData + '/' + url + '/' + url + '-tiles-' + '0'
-        this.tileUrl1 = this.$xmpp.httpServer + tileData + '/' + url + '/' + url + '-tiles-' + '1'
-        this.tileUrl2 = this.$xmpp.httpServer + tileData + '/' + url + '/' + url + '-tiles-' + '2'
-        this.tileUrl3 = this.$xmpp.httpServer + tileData + '/' + url + '/' + url + '-tiles-' + '3'
-        console.log('展示瓦片地图为' + this.tileUrl0 + ' ' + this.tileUrl1 + ' ' + this.tileUrl2 + ' ' + this.tileUrl3)
+        this.tileUrl = this.$xmpp.httpServer + 'tileData' + '/' + url
+        console.log('展示瓦片地图为' + this.tileUrl)
         this.showTileMap = true
       }
+      this.queryAllTask()
     },
     ViewMapResults (url) {
       // 可视化结果
@@ -339,10 +358,8 @@ export default {
       let GFName = url.substr(index + 1, url.length - index)
       console.log(url)
       console.log(GFName)
-      this.tileUrl0 = url + '/' + GFName + '-tiles-0'
-      this.tileUrl1 = url + '/' + GFName + '-tiles-1'
-      this.tileUrl2 = url + '/' + GFName + '-tiles-2'
-      this.tileUrl3 = url + '/' + GFName + '-tiles-3'
+      this.tileUrl = url
+      this.showTileMap = false
       this.showTileMap = true
     },
     ready (cesiumInstance) {
@@ -420,10 +437,6 @@ export default {
       }
       centerLat /= positions.length
       centerLng /= positions.length
-      // console.log('max lng ' + maxLng)
-      // console.log('min lng ' + minLng)
-      // console.log('centerLat ' + Math.abs(centerLat))
-      // console.log('centerLat ' + Math.abs(centerLat))
       let width = (maxLng - minLng) * 110 * 1000 * Math.cos((Math.abs(centerLat) / 180) * Math.PI)
       width = parseInt(width)
       // console.log(width)
@@ -448,50 +461,56 @@ export default {
       date = new Date(this.taskForm.endDate)
       time = new Date(this.taskForm.endTime)
       let endTime = this.getTimeFormat(date, time)
-      let msgContent = '{"typeid": 21106, "usercode":"{0}", ' +
-        '"latitude": "{1}", "longitude": "{2}", ' +
-        '"width": "{3}", ' +
-        '"begintime": "{4}", "endtime": "{5}",' +
-        '"period": {6}, "capturearea": "{7}"}'
+      let msgContent = '{"typeid": 21106, "usercode":"{0}", "title":"{1}", ' +
+        '"latitude": "{2}", "longitude": "{3}", ' +
+        '"width": "{4}", ' +
+        '"begintime": "{5}", "endtime": "{6}",' +
+        '"type": {7}, "capturearea": "{8}"}'
       msgContent = String.format(msgContent,
-        this.$xmpp.userCode, this.taskForm.latitude, this.taskForm.longitude, this.taskForm.width,
-        beginTime, endTime, this.taskForm.period, JSON.stringify(this.posList))
+        this.$xmpp.userCode, this.taskForm.title, this.taskForm.latitude, this.taskForm.longitude, this.taskForm.width,
+        beginTime, endTime, this.taskForm.type, JSON.stringify(this.posList))
       console.log(msgContent)
       this.$xmpp.SendMessage(msgContent)
       this.showTaskDetailTable = false
       this.clear()
       this.fullLoading = true
-
-      // http 测试 pass, 需要在消息的handle中添加
-      // let date = new Date(this.taskForm.startDate)
-      // let time = new Date(this.taskForm.startTime)
-      // let beginTime = this.getTimeFormat(date, time)
-      // date = new Date(this.taskForm.endDate)
-      // time = new Date(this.taskForm.endTime)
-      // let endTime = this.getTimeFormat(date, time)
-      // let data = JSON.parse(JSON.stringify(this.taskForm))
-      // delete data.startDate
-      // delete data.startTime
-      // delete data.endDate
-      // delete data.endTime
-      // data.beginTime = beginTime
-      // data.endTime = endTime
-      // data.captureArea = 'test test test'
-      // data.taskId = '3'
-      // data.status = '0'
-      // this.$http.dealTask(data, this.$xmpp.userCode, 'new').then((result) => {
-      //   this.$message('任务创建成功')
-      // }).catch((reason) => {
-      //   this.$message('任务创建失败')
-      // })
     },
     // cesium加载瓦片触发函数
     imageryReady (imageryProvider) {
       this.viewer.camera.flyTo({destination: imageryProvider.rectangle})
     },
+    makeLogInfo (content) {
+      if (this.$refs.log !== undefined) {
+        this.$refs.log.addLogInfo(content)
+      }
+    },
     // 资源请求
-    requestSource () {
-      this.$xmpp.RequestReSource()
+    // 所有跟管控请求相关的入口信息
+    dealAllRequest (typeid, val) {
+      if (this.$xmpp.gkStatus === false) {
+        this.$message('管控中心不在线，无法操作')
+      } else {
+        switch (typeid) {
+          case '21103':
+            this.makeLogInfo('用户' + this.$xmpp.userCode + '查询所有资源')
+            this.$xmpp.RequestReSource()
+            break
+          case '21101':
+            this.makeLogInfo('用户' + this.$xmpp.userCode + '入、退网请求')
+            this.requestInOutNet()
+            break
+          case '21104':
+            this.makeLogInfo('用户' + this.$xmpp.userCode + '资源操作')
+            if (val === 1) { this.requestSub() } else { this.requestUnSub() }
+            break
+          case '21106':
+            this.makeLogInfo('用户' + this.$xmpp.userCode + '新建任务')
+            this.regionTaskMake()
+            break
+          default:
+            break
+        }
+      }
     },
     // 入网退网请求
     requestInOutNet () {
@@ -529,18 +548,6 @@ export default {
           items.push(this.selectSubResource[i].resourceId)
         }
         this.$xmpp.ResourceSubUnSub(1, items)
-
-        // let base = this
-        // this.$http.setResourceSubscribe(this.selectSubResource, this.$xmpp.userCode, 'new').then((result) => {
-        //   this.$message('订阅成功')
-        //   // 更新页面订阅内容
-        //   base.subResource = base.subResource.concat(base.selectSubResource)
-        //   console.log(base.subResource)
-        //   console.log(result)
-        // }).catch((reason) => {
-        //   this.$message('订阅失败')
-        //   console.log(reason)
-        // })
       }
     },
     // 资源退订请求
@@ -551,26 +558,6 @@ export default {
           items.push(this.selectUnSubResource[i].resourceId)
         }
         this.$xmpp.ResourceSubUnSub(0, items)
-
-        // let base = this
-        // this.$http.setResourceSubscribe(this.selectUnSubResource, this.$xmpp.userCode, 'delete').then((result) => {
-        //   base.$message('退订成功')
-        //   for (let i in base.selectUnSubResource) {
-        //     let resourceId = base.selectUnSubResource[i].resourceId
-        //     console.log(resourceId)
-        //     for (let j in base.subResource) {
-        //       console.log(base.subResource[j].resourceId)
-        //       if (resourceId === base.subResource[j].resourceId) {
-        //         console.log('remove')
-        //         base.subResource.splice(j, 1)
-        //         break
-        //       }
-        //     }
-        //   }
-        // }).catch((reason) => {
-        //   // TODO 数据库中需要删除，这里是管控退订成功，但是数据库删除失败
-        //   base.$message('退订失败')
-        // })
       }
     },
     // 显示变量；0 为资源列表，1表示订阅列表，2表示任务列表，3表示任务工具
@@ -601,6 +588,7 @@ export default {
           this.$http.setUserStatus(this.$xmpp.userCode, 1, this.$xmpp.userLongitude, this.$xmpp.userLatitude).then(result => {
             if (result === 'success') {
               this.$message('入网成功')
+              this.makeLogInfo('管控响应用户入网消息，用户入网成功')
             }
             console.log(result)
           }).catch((reason) => {
@@ -616,6 +604,7 @@ export default {
           this.$http.setUserStatus(this.$xmpp.userCode, 0, this.$xmpp.userLongitude, this.$xmpp.userLatitude).then(result => {
             if (result === 'success') {
               this.$message('退网成功')
+              this.makeLogInfo('管控响应用户退网消息，用户退网成功')
             }
             console.log(result)
           }).catch((reason) => {
@@ -634,22 +623,26 @@ export default {
       let result = replyJson['result']
       if (requesttype === 1) {
         if (result === 1) {
-          this.$message('订阅成功')
-          this.resourceTableShow = false
-          console.log('sub resource is')
-          console.log(this.subResource)
           // Fixed 在数据库中插入订阅的资源信息 selectSubResource pass
-          let base = this
-          this.$http.setResourceSubscribe(this.selectSubResource, this.$xmpp.userCode, 'new').then((result) => {
-            this.$message('订阅成功')
-            // 更新页面订阅内容
-            base.subResource = base.subResource.concat(base.selectSubResource)
-            console.log(base.subResource)
-            console.log(result)
-          }).catch((reason) => {
-            this.$message('订阅失败')
-            console.log(reason)
-          })
+          if (this.selectSubResource.length > 0) {
+            let base = this
+            this.$http.setResourceSubscribe(this.selectSubResource, this.$xmpp.userCode, 'new').then((result) => {
+              this.$message('订阅成功')
+              this.makeLogInfo('管控响应用户订阅资源，用户资源订阅成功')
+              // 更新页面订阅内容
+              base.subResource = base.subResource.concat(base.selectSubResource)
+              let resource = []
+              base.resourceItems.forEach((a) => {
+                let c = base.selectSubResource.findIndex(b => a === b)
+                if (c <= -1) resource.push(a)
+              })
+              base.resourceItems = resource
+              this.selectSubResource = []
+            }).catch((reason) => {
+              this.$message('订阅失败')
+              console.log(reason)
+            })
+          }
         } else {
           // TODO 数据库中需要添加订阅，这里是管控订阅成功，但是数据库新增失败
           this.$message('订阅失败')
@@ -658,31 +651,37 @@ export default {
         if (result === 1) {
           // Fixed 在数据库中删除相应的 selectUnSubResource
           let base = this
-          this.$http.setResourceSubscribe(this.selectUnSubResource, this.$xmpp.userCode, 'delete').then((result) => {
-            base.$message('退订成功')
-            for (let i in base.selectUnSubResource) {
-              let resourceId = base.selectUnSubResource[i].resourceId
-              console.log(resourceId)
-              for (let j in base.subResource) {
-                console.log(base.subResource[j].resourceId)
-                if (resourceId === base.subResource[j].resourceId) {
-                  console.log('remove')
-                  base.subResource.splice(j, 1)
-                  break
+          if (this.selectUnSubResource.length > 0) {
+            this.$http.setResourceSubscribe(this.selectUnSubResource, this.$xmpp.userCode, 'delete').then((result) => {
+              base.$message('退订成功')
+              this.makeLogInfo('管控响应用户退订资源，用户资源退订成功')
+              for (let i in base.selectUnSubResource) {
+                let resourceId = base.selectUnSubResource[i].resourceId
+                console.log(resourceId)
+                for (let j in base.subResource) {
+                  console.log(base.subResource[j].resourceId)
+                  if (resourceId === base.subResource[j].resourceId) {
+                    console.log('remove')
+                    base.subResource.splice(j, 1)
+                    break
+                  }
                 }
               }
-            }
-          }).catch((reason) => {
-            // TODO 数据库中需要删除，这里是管控退订成功，但是数据库删除失败
-            base.$message('退订失败')
-          })
+              this.selectUnSubResource = []
+            }).catch((reason) => {
+              // TODO 数据库中需要删除，这里是管控退订成功，但是数据库删除失败
+              base.$message('退订失败')
+            })
+          }
         } else { alert('退订失败') }
       }
     },
     // 资源查询协议 pass
     handleRequestResource (replyJson) {
-      // let usercode = replyJson['usercode']
-      console.log(replyJson)
+      if (this.$xmpp.gkStatus === false) {
+        this.$xmpp.gkStatus = true
+      }
+      this.makeLogInfo('管控响应用户查询资源，用户资源查询成功')
       let type = replyJson['type']
       this.items = []
       if (type === 'result') {
@@ -695,10 +694,9 @@ export default {
           obj.resourceName = data[1]
           obj.resourceLevel = data[2]
           obj.fatherCode = data[3]
-          console.log(obj)
           let find = false
           for (let i in this.subResource) {
-            if (this.subResource[i].resourceId === data[0]) {
+            if (this.subResource[i].resourceId === parseInt(data[0])) {
               find = true
               break
             }
@@ -712,6 +710,7 @@ export default {
     // 新建处理任务响应  pass
     handleMakeTask (replyJson) {
       this.fullLoading = false
+      this.makeLogInfo('管控响应用户新建任务，用户新建任务成功')
       let taskId = replyJson['taskid']
       let result = replyJson['result']
       if (result === 1) {
@@ -750,6 +749,7 @@ export default {
     },
     // 任务完成响应
     handleTaskFinished (replyJson) {
+      this.makeLogInfo('管控响应用户任务完成，用户任务执行完毕')
       let taskid = replyJson['taskid']
       let address = replyJson['address']
       // this.$message('success task is ' + taskid)
@@ -771,23 +771,25 @@ export default {
     handleStatus (replyJson) {
       console.log('状态查询')
       this.$xmpp.replyStatus()
+      this.makeLogInfo('管控查询用户状态，用户状态上传更新')
     },
-    // 请求接收报文
+    // 请求接收确认报文
     handleCheckStatus (replyJson) {
       let result = replyJson['result']
       if (result === 0) {
-        this.NetStatus = '申请入网'
+        this.$message(replyJson['error'])
       }
+      this.fullLoading = false
     },
     handleBroadcast (replyJson) {
-      this.$message(replyJson['data'])
+      if (this.$xmpp.gkStatus === false) { this.$message(replyJson['data'] + ' 管控上线') }
+      this.$xmpp.gkStatus = true
+      this.makeLogInfo('管控状态广播')
     },
     onMessage (msg) {
-      console.log('Cesium Message')
       let fromJid = msg.getAttribute('from')
       let index = fromJid.indexOf('/')
       fromJid = fromJid.substr(0, index)
-      console.log(fromJid)
       if (fromJid !== this.$xmpp.gkName) {
         console.log('发送方非管控中心，无法读取数据')
       } else {
@@ -815,6 +817,7 @@ export default {
                 this.handleMakeTask(replyJson)
                 break
               case '12211':
+                console.log('Finished Task')
                 this.handleTaskFinished(replyJson)
                 break
               case '12114':
@@ -862,7 +865,7 @@ export default {
           this.$xmpp.userCode = name
           this.$xmpp.password = password
           this.$xmpp.domain = domain
-          this.$xmpp.gkName = this.$xmpp.gkName + '@' + domain
+          this.$xmpp.gkName = this.$xmpp.gkBaseName + '@' + domain
           console.log(this.$xmpp.userCode)
           this.init()
           break
@@ -889,6 +892,23 @@ export default {
     },
     Logout () {
       this.$xmpp.disconnect('user disconnect')
+    },
+    queryAllTask () {
+      // 获取所有已经创建的任务信息
+      this.$http.dealTask({}, this.$xmpp.userCode, 'all').then((result) => {
+        this.taskStatistic.data = result.data
+        this.taskStatistic.totalNumber = result.data.length
+        let finishedNumber = 0
+        for (let index in this.taskStatistic.data) {
+          if (this.taskStatistic.data[index].status === 1) {
+            finishedNumber += 1
+          }
+        }
+        this.taskStatistic.finishedNumber = finishedNumber
+      }).catch((reason) => {
+        this.$message('获取任务列表失败')
+        console.log(reason)
+      })
     }
   }
 }
@@ -910,10 +930,9 @@ export default {
   }
   .toolBox {
     padding: 0.2vw;
-    float: right;
     border-radius: 0.5vh;
     display: inline-block;
-    background-color: #2f2f2f;
+    background-color: transparent;
   }
   .toolSelect{
     float:left;
@@ -980,8 +999,8 @@ export default {
     background-color: #999999;
   }
   .resourceS{
-    background-color: #9fd5f1;
-    opacity: 0.6;
+    background-color: white;
+    opacity: 0.8;
     z-index: 16;
     position: absolute;
     padding: 1vw;
@@ -991,7 +1010,7 @@ export default {
     height: 90vh;
     display: inline-block;
     border-radius: 1rem;
-    border: 0.3rem solid rgba(74, 136, 168, 255);
+    border: 0.3rem solid rgba(116, 116, 116, 255);
 
     color: #000000;
     font-family: 'Righteous', cursive;
@@ -1000,8 +1019,8 @@ export default {
     text-transform: uppercase;
   }
   .taskS{
-    background-color: #9fd5f1;
-    opacity: 0.6;
+    background-color: white;
+    opacity: 0.8;
     z-index: 16;
     position: absolute;
     padding: 1vw;
@@ -1011,7 +1030,7 @@ export default {
     height: 90vh;
     display: inline-block;
     border-radius: 1rem;
-    border: 0.3rem solid rgba(74, 136, 168, 255);
+    border: 0.3rem solid rgba(116, 116, 116, 255);
 
     color: #000000;
     font-family: 'Righteous', cursive;

@@ -15,7 +15,9 @@ class StropheConn {
   BOSH_SERVER = ''
   httpServer =''
   serverDirPath = ['srcData', 'imgSrcData', 'imgEnData', 'tileData', 'tileDeData']
-  gkName = 'guankong'
+  gkName = ''
+  gkBaseName = 'guankong'
+  gkStatus = false
   // setUserJid (user) {
   //   this.userJID = user
   // }
@@ -35,7 +37,6 @@ class StropheConn {
     [142.719302, 46.686747]
   ]
   initial () {
-    console.log('initial')
     this.conn = new Strophe.Strophe.Connection(this.BOSH_SERVER)
   }
   // TODO 断线是否重连

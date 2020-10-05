@@ -13,7 +13,7 @@
           <el-input v-model="LoginForm.domain" placeholder="请输入域名" prefix-icon="el-icon-position"></el-input>
         </el-form-item>
         <el-form-item label="IP" prop="ip">
-          <el-input v-model="LoginForm.ip" placeholder="请输入ip" prefix-icon="el-icon-position"></el-input>
+          <el-input v-model="LoginForm.ip" placeholder="请输入ip" prefix-icon="el-icon-coordinate"></el-input>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="LoginWidget('LoginForm')">登陆</el-button>
@@ -93,10 +93,11 @@ export default {
           this.fullscreenLoading = true
           // 首先要发送一个<presence>给服务器（initial presence）
           this.$xmpp.conn.send(Strophe.$pres().tree())
+          let index = this.LoginForm.username.indexOf('@')
+          if (index !== -1) this.LoginForm.username = this.LoginForm.username.substr(0, index)
           this.$xmpp.userCode = this.LoginForm.username
           this.$xmpp.password = this.LoginForm.password
           this.$xmpp.domain = this.LoginForm.domain
-          this.$xmpp.gkName = this.$xmpp.gkName + '@' + this.LoginForm.domain
 
           // fixed 记录到cookie中
           this.$xmpp.setCookie('userCode', this.LoginForm.username)
@@ -132,7 +133,8 @@ export default {
       this.fullscreenLoading = true
       this.$xmpp.BOSH_SERVER = 'http://' + this.LoginForm.ip + ':7070/http-bind/'
       this.$xmpp.httpServer = 'http://' + this.LoginForm.ip + ':8000/GFData/'
-      this.$xmpp.gkName = this.$xmpp.gkName + '@' + this.LoginForm.domain
+      this.$xmpp.gkName = this.$xmpp.gkBaseName + '@' + this.LoginForm.domain
+      console.log('login the gkname is ' + this.$xmpp.gkName)
       console.log(this.$xmpp.BOSH_SERVER)
       console.log(this.$xmpp.httpServer)
       this.$xmpp.initial()

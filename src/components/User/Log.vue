@@ -23,8 +23,7 @@ export default {
   mounted () {
   },
   methods: {
-    addLogInfo () {
-      let content = '管控发送任务结束信息，任务1处理结束'
+    addLogInfo (content) {
       let date = new Date()
       var dateStr = date.getFullYear() + '-' + date.getMonth() + '-' + date.getDay() + ' ' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds()
       var obj = {}
