@@ -103,7 +103,7 @@ export default {
           return
         }
         for (let index in data) {
-          data[index].url = 'http://192.168.1.121:8000/GFData/srcData/' + data[index].url + '/' + data[index].url + '.jpg'
+          data[index].url = 'http://192.168.1.120:8000/GFData/srcData/' + data[index].url + '/' + data[index].url + '.jpg'
           let pos = JSON.parse(data[index].pos)
           data[index].pos = pos
           data[index].runningContent = '物联端未执行'

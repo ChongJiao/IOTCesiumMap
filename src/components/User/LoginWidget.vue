@@ -111,10 +111,8 @@ export default {
           console.log('正在登陆')
           break
         case Strophe.Strophe.Status.DISCONNECTING:
-          this.$message('1111')
           break
         case Strophe.Strophe.Status.DISCONNECTED:
-          this.$message('2222')
           this.$xmpp.connFlag = false
           this.$xmpp.delCookie('userCode')
           this.$xmpp.delCookie('password')

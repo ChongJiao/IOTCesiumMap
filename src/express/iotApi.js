@@ -42,7 +42,7 @@ router.get('/getStatus', function (req, res) {
   // console.log(userId)
   hibernateModel.selectUserStatus(usercode).then((result) => {
     if (result.length > 0) {
-      res.send({'status': result[0]['status']})
+      res.send(result[0])
     } else {
       res.send({'type': 'error'})
     }

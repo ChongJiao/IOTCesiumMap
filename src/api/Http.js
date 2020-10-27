@@ -1,6 +1,6 @@
 import axios from 'axios' // 本文件从数据库获取相关信息
 axios.defaults.timeout = 80000
-axios.defaults.baseURL = 'http://192.168.1.121:3000'
+axios.defaults.baseURL = 'http://192.168.1.120:3000'
 axios.defaults.withCredentials = false
 
 class HttpPort {
@@ -19,8 +19,7 @@ class HttpPort {
         if (type === 'error') {
           reject(new Error('null'))
         } else {
-          let status = res.data['status']
-          resolve(status)
+          resolve(res.data)
         }
       })
     })

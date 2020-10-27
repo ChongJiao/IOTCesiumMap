@@ -18,7 +18,7 @@
           名称: {{this.userName}}
         </el-menu-item>
         <el-menu-item index="2-2">
-          位置: {{this.userDomain}}
+          位置: {{this.posName}}
         </el-menu-item>
       </el-submenu>
       <el-submenu index="3">
@@ -55,7 +55,7 @@
 <!--      </vc-layer-imagery>-->
       <vc-layer-imagery :alpha="alpha" :brightness="brightness" :contrast="contrast">
         <vc-provider-imagery-tile-mapservice
-          :url="baseMapUrl"
+          :url="baseMapUrl" :flipXY="false"
         ></vc-provider-imagery-tile-mapservice>
       </vc-layer-imagery>
       <vc-layer-imagery :alpha="alpha" :brightness="brightness" :contrast="contrast" v-if="showTileMap">
@@ -148,6 +148,20 @@
                        style="border-style:solid;border-width:5px;"
                        label="父编号"
                        min-width="30%">
+      </el-table-column>
+      <el-table-column align="center"
+                       prop="url"
+                       style="border-style:solid;border-width:5px;"
+                       label="资源结果"
+                       min-width="30%">
+        <template slot-scope="scope">
+          <div v-if="scope.row.url === null">
+            <el-button type="text" size="small">暂无结果</el-button>
+          </div>
+          <div v-else>
+            <a :href="scope.row.url + '?download=true'">下载结果</a>
+          </div>
+        </template>
       </el-table-column>
     </el-table>
     <el-button style="margin-top: 1vh" :class="this.selectUnSubResource.length > 0 ? 'select' : 'deselect'" v-on:click="dealAllRequest('21104', 0)">取消订阅</el-button>
@@ -266,8 +280,8 @@ export default {
       Cesium: null,
       viewer: null,
       resourceItems: [],
-      tileUrl: 'http://192.168.1.121:8000/GFData/tileData/GF1_PMS1_E120.5_N22.7_20200205_L1A0004599309',
-      baseMapUrl: 'http://192.168.1.121:8000/BaseMap',
+      tileUrl: 'http://192.168.1.6:7000/GFData/tileData/GF1_PMS1_E120.5_N22.7_20200205_L1A0004599309',
+      baseMapUrl: 'http://192.168.1.120:3000/BaseMap',
       showTileMap: false,
       taskList: [],
       NetStatus: '申请入网',
@@ -275,16 +289,15 @@ export default {
       selectSubResource: [],
       selectUnSubResource: [],
       taskForm: {
-        title: '',
-        latitude: '',
-        longitude: '',
-        type: '',
-        startDate: '',
-        startTime: '',
-        endDate: '',
-        endTime: '',
-        width: '',
-        desc: ''
+        title: '台海任务',
+        latitude: '45.1',
+        longitude: '145.4',
+        type: '1',
+        startDate: '2019-10-1 10:56',
+        startTime: '2020-10-1 10:45',
+        endDate: '2020-10-1 10:45',
+        endTime: '2020-10-1 10:45',
+        width: '45678'
       },
       taskTypeOption: [{
         value: '1',
@@ -303,30 +316,38 @@ export default {
         totalNumber: 9,
         finishedNumber: 5,
         data: []
-      }
+      },
+      posName: ''
     }
   },
   methods: {
+    getNowDate () {
+      let a = new Date()
+      let year = a.getFullYear()
+      let month = a.getMonth() + 1
+      let date = a.getDate()
+      let hour = a.getHours()
+      let minutes = a.getMinutes()
+      let second = a.getSeconds()
+      let timeString = year + '-' + month + '-' + date + ' ' + hour + ':' + minutes + ':' + second
+      return timeString
+    },
     init () {
       // 初始化相关内容
       // TODO 从数据库中获取订阅的资源列表到 变量 subResource（list）
       let base = this
       // 获取用户入网状态 passed
       this.$http.getUserNetStatus(this.$xmpp.userCode).then(result => {
-        if (result === 1) {
+        let status = result['status']
+        if (status === 1) {
           base.NetStatus = '申请退网'
         } else {
           base.NetStatus = '申请入网'
         }
-
-        console.log('check user status')
-        console.log(base.NetStatus)
-        console.log(base.NetStatus === '申请退网')
-        if (base.NetStatus === '申请退网') {
-          // 如果用户状态是在网的话，应该主动首先向管控发送请求，判断是否在线，而不是等管控广播。。。。。，
-          console.log('init request resource')
-          this.$xmpp.RequestReSource()
-        }
+        this.$xmpp.virtualPosLng = result['longitude']
+        this.$xmpp.virtualPosLat = result['latitude']
+        this.posName = result['position']
+        console.log('用户信息初始化结束')
       }).catch((reason) => {
         base.NetStatus = '用户异常'
         console.log(reason)
@@ -351,13 +372,9 @@ export default {
       }
       this.queryAllTask()
     },
-    ViewMapResults (url) {
+    ViewMapResults (url, type) {
       // 可视化结果
       console.log(url)
-      let index = url.lastIndexOf('/')
-      let GFName = url.substr(index + 1, url.length - index)
-      console.log(url)
-      console.log(GFName)
       this.tileUrl = url
       this.showTileMap = false
       this.showTileMap = true
@@ -365,6 +382,9 @@ export default {
     ready (cesiumInstance) {
       console.log('ready......')
       const {Cesium, viewer} = cesiumInstance
+      this.imageryProvider = new Cesium.MapboxImageryProvider({
+        mapId: 'mapbox.streets'
+      })
       viewer.cesiumWidget.creditContainer.style.display = 'none'
       viewer.scene.globe.depthTestAgainstTerrain = true
 
@@ -372,9 +392,17 @@ export default {
       this.viewer = viewer
 
       czml.init(Cesium, viewer)
+
+      let base = this
+      setTimeout(function () {
+        if (base.NetStatus === '申请退网') {
+          // 如果用户状态是在网的话，应该主动首先向管控发送请求，判断是否在线，而不是等管控广播。。。。。，
+          let starName = base.getNeareastStar()
+          base.$xmpp.RequestReSource(starName)
+        }
+      }, 2000)
     },
     toggle (type) {
-      this.$message('drawing')
       this.$refs[type].drawing = !this.$refs[type].drawing
 
       let div = document.getElementById('draw')
@@ -493,7 +521,8 @@ export default {
         switch (typeid) {
           case '21103':
             this.makeLogInfo('用户' + this.$xmpp.userCode + '查询所有资源')
-            this.$xmpp.RequestReSource()
+            let starName = this.getNeareastStar()
+            this.$xmpp.RequestReSource(starName)
             break
           case '21101':
             this.makeLogInfo('用户' + this.$xmpp.userCode + '入、退网请求')
@@ -512,32 +541,56 @@ export default {
         }
       }
     },
-    // 入网退网请求
-    requestInOutNet () {
+    // 获取当前CZML最近卫星，用于入网
+    getNeareastStar () {
       let allData = czml.GetAllSatellite()
-      let pos = parseInt(Math.random() * (this.$xmpp.virtualPosition.length - 1), 10)
-      let latitude = this.$xmpp.virtualPosition[pos][1]
-      let longitude = this.$xmpp.virtualPosition[pos][0]
-      let userPos = this.Cesium.Cartesian3.fromDegrees(longitude, latitude, 0)
+      // let pos = parseInt(Math.random() * (this.$xmpp.virtualPosition.length - 1), 10)
 
-      console.log(userPos)
+      console.log(this.$xmpp.virtualPosLng)
+      console.log(this.$xmpp.virtualPosLat)
+      let userPos = this.Cesium.Cartesian3.fromDegrees(this.$xmpp.virtualPosLng, this.$xmpp.virtualPosLat, 0)
+
       let minDis = Number.MAX_VALUE
       let starName = null
       for (let key in allData) {
+        if (key === 'G1' || key === 'G2' || key === 'G3' || key === 'G4' || key === 'G5') {
+          continue
+        }
         let data = allData[key]
         const position = data[0].position.getValue(this.viewer.clock.currentTime)
-
         const distance = this.Cesium.Cartesian3.distance(position, userPos)
         if (minDis > distance) {
           minDis = distance
-          console.log(distance)
           starName = key
         }
       }
+      console.log('min distance is')
+      console.log(minDis)
+      if (minDis / 1000 > 3000) {
+        let s1 = allData['G3']
+        let s2 = allData['G5']
+        const p1 = s1[0].position.getValue(this.viewer.clock.currentTime)
+        const p2 = s2[0].position.getValue(this.viewer.clock.currentTime)
+        const d1 = this.Cesium.Cartesian3.distance(p1, userPos)
+        const d2 = this.Cesium.Cartesian3.distance(p2, userPos)
+        if (d1 < d2) {
+          starName = 'G3'
+        } else {
+          starName = 'G5'
+        }
+      }
+      console.log(starName)
+      return starName
+    },
+    // 入网退网请求
+    requestInOutNet () {
+      let starName = this.getNeareastStar()
+      // let latitude = this.$xmpp.virtualPosition[this.$xmpp.virtualIndex][1]
+      // let longitude = this.$xmpp.virtualPosition[this.$xmpp.virtualIndex][0]
       if (this.NetStatus === '申请入网') {
-        this.$xmpp.RequestInOrOutToNet(1, latitude, longitude, starName)
+        this.$xmpp.RequestInOrOutToNet(1, this.$xmpp.virtualPosLat, this.$xmpp.virtualPosLng, starName)
       } else {
-        this.$xmpp.RequestInOrOutToNet(0, latitude, longitude, starName)
+        this.$xmpp.RequestInOrOutToNet(0, this.$xmpp.virtualPosLat, this.$xmpp.virtualPosLng, starName)
       }
     },
     // 资源订阅请求
@@ -547,7 +600,8 @@ export default {
         for (let i in this.selectSubResource) {
           items.push(this.selectSubResource[i].resourceId)
         }
-        this.$xmpp.ResourceSubUnSub(1, items)
+        let starName = this.getNeareastStar()
+        this.$xmpp.ResourceSubUnSub(1, items, starName)
       }
     },
     // 资源退订请求
@@ -557,7 +611,8 @@ export default {
         for (let i in this.selectUnSubResource) {
           items.push(this.selectUnSubResource[i].resourceId)
         }
-        this.$xmpp.ResourceSubUnSub(0, items)
+        let starName = this.getNeareastStar()
+        this.$xmpp.ResourceSubUnSub(0, items, starName)
       }
     },
     // 显示变量；0 为资源列表，1表示订阅列表，2表示任务列表，3表示任务工具
@@ -576,6 +631,11 @@ export default {
     },
     // 关闭所有列表窗口
     closeWindow (index) {
+      if (index === 3) {
+        this.$refs.handlerPolygon.clear()
+        this.viewer.entities.removeAll()
+        this.viewer.scene.requestRender()
+      }
       this.$set(this.showFlag, index, false)
     },
     // 入网退网协议 pass
@@ -678,6 +738,7 @@ export default {
     },
     // 资源查询协议 pass
     handleRequestResource (replyJson) {
+      this.resourceItems = []
       if (this.$xmpp.gkStatus === false) {
         this.$xmpp.gkStatus = true
       }
@@ -694,6 +755,8 @@ export default {
           obj.resourceName = data[1]
           obj.resourceLevel = data[2]
           obj.fatherCode = data[3]
+          // TODO add updateTime
+          obj.updateTime = this.getNowDate()
           let find = false
           for (let i in this.subResource) {
             if (this.subResource[i].resourceId === parseInt(data[0])) {
@@ -734,6 +797,8 @@ export default {
         data.captureArea = replyJson['capturearea']
         data.taskId = taskId
         data.status = '0'
+        // TODO add Time
+        data.updateTime = this.getNowDate()
         console.log('taks data is' + JSON.stringify(data))
         this.$http.dealTask(data, this.$xmpp.userCode, 'new').then((result) => {
           this.$message('任务创建成功')
@@ -754,7 +819,8 @@ export default {
       let address = replyJson['address']
       // this.$message('success task is ' + taskid)
       // this.$message('the address is ' + address)
-      this.$xmpp.replyFinished(taskid, address)
+      let starName = this.getNeareastStar()
+      this.$xmpp.replyFinished(taskid, address, starName)
       // test passed
       let data = {}
       data.taskId = taskid
@@ -770,7 +836,8 @@ export default {
     // 状态轮询响应
     handleStatus (replyJson) {
       console.log('状态查询')
-      this.$xmpp.replyStatus()
+      let starName = this.getNeareastStar()
+      this.$xmpp.replyStatus(starName)
       this.makeLogInfo('管控查询用户状态，用户状态上传更新')
     },
     // 请求接收确认报文
@@ -784,7 +851,9 @@ export default {
     handleBroadcast (replyJson) {
       if (this.$xmpp.gkStatus === false) { this.$message(replyJson['data'] + ' 管控上线') }
       this.$xmpp.gkStatus = true
-      this.makeLogInfo('管控状态广播')
+      this.makeLogInfo('接收系统广播')
+      let speed = parseInt(replyJson['speed'])
+      czml.changeSpeed(speed)
     },
     onMessage (msg) {
       let fromJid = msg.getAttribute('from')
@@ -829,6 +898,7 @@ export default {
               case '1200':
                 this.handleBroadcast(replyJson)
                 break
+              // TODO 订阅资源任务,运行结果推送
               default:
                 break
             }
@@ -891,7 +961,15 @@ export default {
       }
     },
     Logout () {
-      this.$xmpp.disconnect('user disconnect')
+      // Fixed 退网
+      if (this.NetStatus === '申请退网') {
+        this.dealAllRequest('21101')
+      }
+      // Set TimeOut in disconnect
+      let base = this
+      setTimeout(function () {
+        base.$xmpp.disconnect('user disconnect')
+      }, 1000)
     },
     queryAllTask () {
       // 获取所有已经创建的任务信息

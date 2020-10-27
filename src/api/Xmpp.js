@@ -21,21 +21,25 @@ class StropheConn {
   // setUserJid (user) {
   //   this.userJID = user
   // }
-  virtualPosition = [
-    [86.055628, 44.25367],
-    [89.146374, 37.034304],
-    [99.007325, 28.336779],
-    [103.128319, 16.529145],
-    [110.487238, 20.668235],
-    [121.010492, 23.751459],
-    [118.066924, 33.041056],
-    [125.131486, 41.438542],
-    [126.897627, 38.668078],
-    [127.412751, 36.144125],
-    [135.433973, 35.001779],
-    [139.628556, 38.955969],
-    [142.719302, 46.686747]
-  ]
+  // virtualPosition = [
+  //   [87.68, 43.77],
+  //   [118.066924, 33.041056],
+  //   [89.146374, 37.034304],
+  //   [99.007325, 28.336779],
+  //   [103.128319, 16.529145],
+  //   [110.487238, 20.668235],
+  //   [121.010492, 23.751459],
+  //   [118.066924, 33.041056],
+  //   [125.131486, 41.438542],
+  //   [126.897627, 38.668078],
+  //   [127.412751, 36.144125],
+  //   [135.433973, 35.001779],
+  //   [139.628556, 38.955969],
+  //   [142.719302, 46.686747]
+  // ]
+  // virtualIndex = 1
+  virtualPosLng = 0
+  virtualPosLat = 0
   initial () {
     this.conn = new Strophe.Strophe.Connection(this.BOSH_SERVER)
   }
@@ -80,7 +84,7 @@ class StropheConn {
     let msgContent = '{\'type\': \'queryTask\'}'
     this.SendMessage(msgContent)
   }
-  // TODO 查询当前任务的状态，这个功能需不需要呢？
+  // TODO 查询当前任务的状态
   ObtainTaskStatus (taskID) {
     if (this.taskSendFlag) {
       console.log('obtain task id')
@@ -113,30 +117,30 @@ class StropheConn {
     this.SendMessage(msgContent) // 从这里发送消息给管控，然后管控回复消息给用户处理
   }
   // 资源订阅查询协议 pass
-  RequestReSource () {
-    let msgContent = '{"typeid": 21103, "usercode":"{0}", "type": "query", "key": ""}'
-    msgContent = String.format(msgContent, this.userCode)
+  RequestReSource (accessnode) {
+    let msgContent = '{"typeid": 21103, "usercode":"{0}", "type": "query", "key": "", "accessnode": "{1}"}'
+    msgContent = String.format(msgContent, this.userCode, accessnode)
     this.SendMessage(msgContent)
   }
   // 资源订阅/退订请求 pass
-  ResourceSubUnSub (requestType, itemList) {
-    let msgContent = '{"typeid": 21104, "usercode":"{0}", "requesttype": {1}, "resource": {2}}'
-    msgContent = String.format(msgContent, this.userCode, requestType, JSON.stringify(itemList))
+  ResourceSubUnSub (requestType, itemList, accessnode) {
+    let msgContent = '{"typeid": 21104, "usercode":"{0}", "requesttype": {1}, "resource": {2}, "accessnode": "{3}"}'
+    msgContent = String.format(msgContent, this.userCode, requestType, JSON.stringify(itemList), accessnode)
     console.log(msgContent)
     this.SendMessage(msgContent)
   }
   // 任务完成信息获取反馈
-  replyFinished (taskid, address) {
-    let msgContent = '{"typeid": 21107, "nodecode":"{0}", "taskid": {1}, "date": "{2}", "result": {3}, "address": "{4}"}'
-    msgContent = String.format(msgContent, this.userCode, taskid, this.getDate(), 1, address)
+  replyFinished (taskid, address, accessnode) {
+    let msgContent = '{"typeid": 21107, "nodecode":"{0}", "taskid": {1}, "date": "{2}", "result": {3}, "address": "{4}", "accessnode": "{5}"}'
+    msgContent = String.format(msgContent, this.userCode, taskid, this.getDate(), 1, address, accessnode)
     this.SendMessage(msgContent)
   }
-  replyStatus () {
-    let msgContent = '{"typeid": 21215, "usercode":"{0}", "latitude": "{1}", "longitude": "{2}"}'
-    let pos = parseInt(Math.random() * (this.virtualPosition.length - 1), 10)
-    let latitude = this.virtualPosition[pos][1]
-    let longitude = this.virtualPosition[pos][0]
-    msgContent = String.format(msgContent, this.userCode, latitude, longitude)
+  replyStatus (accessnode) {
+    let msgContent = '{"typeid": 21215, "usercode":"{0}", "latitude": "{1}", "longitude": "{2}", "accessnode": "{3}"}'
+    // let pos = parseInt(Math.random() * (this.virtualPosition.length - 1), 10)
+    // let latitude = this.virtualPosLat
+    // let longitude = this.virtualPosition[this.virtualIndex][0]
+    msgContent = String.format(msgContent, this.userCode, this.virtualPosLat, this.virtualPosLng, accessnode)
     this.SendMessage(msgContent)
   }
   getDate () {

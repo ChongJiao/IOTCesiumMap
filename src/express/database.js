@@ -23,6 +23,7 @@ class HibernateSqlMap {
       .columnMap('status', 'status')
       .columnMap('longitude', 'longitude')
       .columnMap('latitude', 'latitude')
+      .columnMap('position', 'position')
 
     this.resourceMap = this.session.tableMap('resource')
       .columnMap('resourceId', 'resourceId')
@@ -32,10 +33,13 @@ class HibernateSqlMap {
       .columnMap('status', 'status')
       .columnMap('userCode', 'userCode')
       .columnMap('updateTime', 'updateTime')
+      .columnMap('url', 'url')
 
     this.taskMap = this.session.tableMap('task')
       .columnMap('taskId', 'taskId')
       .columnMap('userCode', 'userCode')
+      .columnMap('title', 'title')
+      .columnMap('type', 'type')
       .columnMap('status', 'status')
       .columnMap('latitude', 'latitude')
       .columnMap('longitude', 'longitude')
@@ -131,21 +135,24 @@ class HibernateSqlMap {
   insertUserResource (data, userCode) {
     data = JSON.parse(data)
     let hibernateSql = this
+
     let table = hibernateSql.resourceMap.table
-    let sql = 'insert into %s (%s, %s, %s, %s, %s, %s) values'
+    let sql = 'insert into %s (%s, %s, %s, %s, %s, %s, %s) values'
     sql = util.format(sql, table,
       hibernateSql.resourceMap.resourceId.columnName,
       hibernateSql.resourceMap.resourceName.columnName,
       hibernateSql.resourceMap.resourceLevel.columnName,
       hibernateSql.resourceMap.fatherCode.columnName,
       hibernateSql.resourceMap.status.columnName,
-      hibernateSql.resourceMap.userCode.columnName)
+      hibernateSql.resourceMap.userCode.columnName,
+      hibernateSql.resourceMap.updateTime.columnName)
     let p = new Promise(function (resolve, reject) {
       for (let i in data) {
         data[i].userCode = userCode
         data[i].status = 1
-        let tmp = "(%d, '%s', %d, %d, %d, '%s'),"
-        tmp = util.format(tmp, data[i].resourceId, data[i].resourceName, data[i].resourceLevel, data[i].fatherCode, data[i].status, data[i].userCode)
+        let tmp = "(%d, '%s', %d, %d, %d, '%s', '%s'),"
+        tmp = util.format(tmp, data[i].resourceId, data[i].resourceName, data[i].resourceLevel,
+          data[i].fatherCode, data[i].status, data[i].userCode, data[i].updateTime)
         sql += tmp
       }
       sql = sql.substr(0, sql.length - 1)
