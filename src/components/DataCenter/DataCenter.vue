@@ -72,7 +72,7 @@ export default {
   },
   mounted () {
     this.getAllSatellite()
-    this.getAllRunningData()
+    setTimeout(this.getAllRunningData(), 2000)
   },
   destroyed () {
     console.log('Task destroyed')
@@ -120,15 +120,16 @@ export default {
           this.$message('数据库错误')
           return
         }
+        console.log(data)
         this.runningIndexList = {}
         for (let index in data) {
           this.runningIndexList[data[index].satelliteId] = 1
+          this.tableData[data[index].satelliteId - 1].runningContent = data[index].iot
         }
-
-        let base = this
-        Object.keys(this.runningIndexList).forEach(function (key) {
-          base.tableData[key - 1].runningContent = 'iot_001;iot_002;iot_003;iot_004'
-        })
+        console.log('tableData is')
+        console.log(this.tableData)
+        console.log('runIndex')
+        console.log(this.runningIndexList)
       })
     }
   }

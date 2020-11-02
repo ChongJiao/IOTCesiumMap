@@ -63,6 +63,7 @@ class HibernateSqlMap {
       .columnMap('id', 'id')
       .columnMap('satelliteId', 'satelliteId')
       .columnMap('status', 'status')
+      .columnMap('iot', 'iot')
     /***
      这里添加表格的MAP
      ***/
@@ -72,11 +73,9 @@ class HibernateSqlMap {
   setUserStatus (data) {
     let hibernateSql = this
     let table = hibernateSql.userMap.table
-    let sql = "update %s set %s = %d, %s = '%s', %s = '%s' where %s = '%s'"
+    let sql = "update %s set %s = %d where %s = '%s'"
     sql = util.format(sql, table,
       hibernateSql.userMap.status.columnName, data['status'],
-      hibernateSql.userMap.latitude.columnName, data['latitude'][0],
-      hibernateSql.userMap.longitude.columnName, data['longitude'][0],
       hibernateSql.userMap.userCode.columnName, data['userCode'][0])
     console.log(sql)
     let p = new Promise(function (resolve, reject) {

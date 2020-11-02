@@ -129,6 +129,18 @@ class StropheConn {
     console.log(msgContent)
     this.SendMessage(msgContent)
   }
+  // 任务采集需求下发
+  RequestTask (title, latitude, longitude, width, beginTime, endTime, type, capturearea, accessnode, nearNodeList) {
+    let msgContent = '{"typeid": 21106, "usercode":"{0}", "title":"{1}", ' +
+      '"latitude": "{2}", "longitude": "{3}", ' +
+      '"width": "{4}", ' +
+      '"begintime": "{5}", "endtime": "{6}",' +
+      '"type": {7}, "capturearea": "{8}", "accessnode": "{9}", "nearnodelist" : [{10}]}'
+    msgContent = String.format(msgContent,
+      this.userCode, title, latitude, longitude, width, beginTime, endTime, type, capturearea, accessnode, nearNodeList)
+    console.log(msgContent)
+    // this.SendMessage(msgContent)
+  }
   // 任务完成信息获取反馈
   replyFinished (taskid, address, accessnode) {
     let msgContent = '{"typeid": 21107, "nodecode":"{0}", "taskid": {1}, "date": "{2}", "result": {3}, "address": "{4}", "accessnode": "{5}"}'
@@ -141,6 +153,8 @@ class StropheConn {
     // let latitude = this.virtualPosLat
     // let longitude = this.virtualPosition[this.virtualIndex][0]
     msgContent = String.format(msgContent, this.userCode, this.virtualPosLat, this.virtualPosLng, accessnode)
+    console.log('用户位置状态')
+    console.log(msgContent)
     this.SendMessage(msgContent)
   }
   getDate () {

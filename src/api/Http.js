@@ -36,13 +36,11 @@ class HttpPort {
     return p
   }
   // 设定用户状态 pass
-  setUserStatus (usercode, status, longitude, latitude) {
+  setUserStatus (usercode, status) {
     let base = this
     var formData = new FormData()
     formData.append('userCode', usercode)
     formData.append('status', status)
-    formData.append('latitude', latitude)
-    formData.append('longitude', longitude)
 
     let p = new Promise(function (resolve, reject) {
       base.http.post('/setStatus', formData).then(res => {

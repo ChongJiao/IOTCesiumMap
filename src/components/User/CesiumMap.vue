@@ -36,10 +36,14 @@
         <el-menu-item index="5-1" @click="logFlag = !logFlag">日志窗口</el-menu-item>
         <el-menu-item index="5-2" @click="statisticFlag = !statisticFlag">信息统计</el-menu-item>
       </el-submenu>
+      <el-menu-item index="7" @click="test">
+        测试
+      </el-menu-item>
       <el-menu-item index="6" @click="Logout" style="float: right">
         登出
       </el-menu-item>
     </el-menu>
+<!--      <div class="title">中国航天技术研究院-天基用户端</div>-->
     <div class="toolBox" v-if="showFlag[3]">
       <el-button id="draw" icon="el-icon-thumb" v-on:click="toggle('handlerPolygon')">绘制</el-button>
       <el-button type="warning" icon="el-icon-search" v-on:click="MakeTask">生成</el-button>
@@ -50,7 +54,7 @@
        v-loading="fullLoading"
        element-loading-text="执行中，请稍后"
        element-loading-spinner="el-icon-loading">
-    <vc-viewer ref="viewer" @ready="ready" :shouldAnimate="true" :orderIndependentTranslucency="false">
+    <vc-viewer ref="viewer" @ready="ready" :shouldAnimate="true" :orderIndependentTranslucency="false" :timeline="true" :animation="true">
 <!--      <vc-layer-imagery :alpha="alpha" :imageryProvider="imageryProvider" :brightness="brightness" :contrast="contrast">-->
 <!--      </vc-layer-imagery>-->
       <vc-layer-imagery :alpha="alpha" :brightness="brightness" :contrast="contrast">
@@ -265,7 +269,7 @@ export default {
   },
   data () {
     return {
-      logFlag: true,
+      logFlag: false,
       statisticFlag: false,
       fullLoading: false,
       userName: '',
@@ -289,15 +293,15 @@ export default {
       selectSubResource: [],
       selectUnSubResource: [],
       taskForm: {
-        title: '台海任务',
-        latitude: '45.1',
-        longitude: '145.4',
-        type: '1',
-        startDate: '2019-10-1 10:56',
-        startTime: '2020-10-1 10:45',
-        endDate: '2020-10-1 10:45',
-        endTime: '2020-10-1 10:45',
-        width: '45678'
+        title: '',
+        latitude: '',
+        longitude: '',
+        type: '',
+        startDate: '',
+        startTime: '',
+        endDate: '',
+        endTime: '',
+        width: ''
       },
       taskTypeOption: [{
         value: '1',
@@ -361,16 +365,23 @@ export default {
       })
       base.messageHandler = base.$xmpp.conn.addHandler(base.onMessage, null, 'message', null, null, null)
 
-      // 获取路由参数
-      let type = this.$route.params.type
-      if (type === 'result') {
-        // 在地图中显示结果
-        let url = this.$route.params.url
-        this.tileUrl = this.$xmpp.httpServer + 'tileData' + '/' + url
-        console.log('展示瓦片地图为' + this.tileUrl)
-        this.showTileMap = true
-      }
       this.queryAllTask()
+
+      // 初始化任务表格信息
+      let nowDate = new Date()
+      let year = nowDate.getFullYear()
+      let month = nowDate.getMonth() + 1
+      let date = nowDate.getDate()
+
+      this.taskForm.startDate = year + '-' + month + '-' + date
+      this.taskForm.startTime = nowDate
+
+      let endDate = new Date(nowDate.getTime() + 60 * 60 * 1000)
+      year = endDate.getFullYear()
+      month = endDate.getMonth() + 1
+      date = endDate.getDate()
+      this.taskForm.endDate = year + '-' + month + '-' + date
+      this.taskForm.endTime = endDate
     },
     ViewMapResults (url, type) {
       // 可视化结果
@@ -382,18 +393,29 @@ export default {
     ready (cesiumInstance) {
       console.log('ready......')
       const {Cesium, viewer} = cesiumInstance
-      this.imageryProvider = new Cesium.MapboxImageryProvider({
-        mapId: 'mapbox.streets'
-      })
+      // this.imageryProvider = new Cesium.MapboxImageryProvider({
+      //   mapId: 'mapbox.streets'
+      // })
       viewer.cesiumWidget.creditContainer.style.display = 'none'
       viewer.scene.globe.depthTestAgainstTerrain = true
-
       this.Cesium = Cesium
       this.viewer = viewer
+      let userPos = this.Cesium.Cartesian3.fromDegrees(121.30, 25.03, 0)
+      console.log(userPos, '22222222222222')
+      let base = this
+      // setTimeout(function () {
+      //   const date = new Date()
+      //   console.log(date.toLocaleDateString(), 'lllll')
+      //   base.viewer.clock.currentTime = Cesium.JulianDate.fromDate(date).clone()
+      //
+      //   console.log(new Date(base.viewer.clock.currentTime).toLocaleDateString(), 'Viewer.clock.currentTime')
+      // }, 10000)
+
+      // let userPos = this.Cesium.Cartesian3.fromDegrees(121.30, 25.03, 0)
+      // console.log(userPos)
 
       czml.init(Cesium, viewer)
 
-      let base = this
       setTimeout(function () {
         if (base.NetStatus === '申请退网') {
           // 如果用户状态是在网的话，应该主动首先向管控发送请求，判断是否在线，而不是等管控广播。。。。。，
@@ -474,6 +496,7 @@ export default {
       this.showTaskDetailTable = true
     },
     closeTaskTable () {
+      console.log(this.taskForm)
       this.showTaskDetailTable = false
     },
     getTimeFormat (date, time) {
@@ -489,23 +512,27 @@ export default {
       date = new Date(this.taskForm.endDate)
       time = new Date(this.taskForm.endTime)
       let endTime = this.getTimeFormat(date, time)
-      let msgContent = '{"typeid": 21106, "usercode":"{0}", "title":"{1}", ' +
-        '"latitude": "{2}", "longitude": "{3}", ' +
-        '"width": "{4}", ' +
-        '"begintime": "{5}", "endtime": "{6}",' +
-        '"type": {7}, "capturearea": "{8}"}'
-      msgContent = String.format(msgContent,
-        this.$xmpp.userCode, this.taskForm.title, this.taskForm.latitude, this.taskForm.longitude, this.taskForm.width,
-        beginTime, endTime, this.taskForm.type, JSON.stringify(this.posList))
-      console.log(msgContent)
-      this.$xmpp.SendMessage(msgContent)
-      this.showTaskDetailTable = false
-      this.clear()
-      this.fullLoading = true
+      let startName = this.getNeareastStar()
+
+      czml.GetNearestStarList(beginTime, endTime, this.taskForm.latitude, this.taskForm.longitude).then((startList) => {
+        let nearNodeListStr = JSON.stringify(startList)
+        if (nearNodeListStr.length > 0) {
+          nearNodeListStr = nearNodeListStr.substr(1, nearNodeListStr.length - 2)
+        }
+        console.log(nearNodeListStr, 'nodeListStr')
+        this.$xmpp.RequestTask(this.taskForm.title, this.taskForm.latitude, this.taskForm.longitude, this.taskForm.width,
+          beginTime, endTime, this.taskForm.type, JSON.stringify(this.posList), startName, nearNodeListStr)
+        this.showTaskDetailTable = false
+        this.clear()
+        this.fullLoading = true
+      }).catch((reason) => {
+        console.log(reason)
+        this.$message('任务创建失败')
+      })
     },
     // cesium加载瓦片触发函数
     imageryReady (imageryProvider) {
-      this.viewer.camera.flyTo({destination: imageryProvider.rectangle})
+      // this.viewer.camera.flyTo({destination: imageryProvider.rectangle})
     },
     makeLogInfo (content) {
       if (this.$refs.log !== undefined) {
@@ -645,7 +672,7 @@ export default {
       let result = replyJson['result']
       if (requestType === 1) {
         if (result === 1) {
-          this.$http.setUserStatus(this.$xmpp.userCode, 1, this.$xmpp.userLongitude, this.$xmpp.userLatitude).then(result => {
+          this.$http.setUserStatus(this.$xmpp.userCode, 1).then(result => {
             if (result === 'success') {
               this.$message('入网成功')
               this.makeLogInfo('管控响应用户入网消息，用户入网成功')
@@ -959,6 +986,74 @@ export default {
           this.$router.push({name: 'Login'})
           break
       }
+    },
+    getDealStarNodeList (startDateStr, endDateStr, posLat, posLng) {
+      // const startDate = new Date(startDateStr)
+      // const endDate = new Date(endDateStr)
+      // console.log(startDate, 'startDate')
+      // console.log(endDate, 'endDate')
+      // var timeSecondDiff = (endDate.getTime() - startDate.getTime()) / 1000
+      // let allData = czml.GetAllSatellite()
+      // allData = Object.values(allData)
+      // // console.log(allData, 'satellite name')
+      // let userPos = this.Cesium.Cartesian3.fromDegrees(posLng, posLat, 0)
+      // console.log(userPos, 'userPos')
+      // const DISTANCE = 800 * 1000
+      // const nearPos = []
+      // var minDis = Number.MAX_VALUE
+      // timeSecondDiff = parseInt((timeSecondDiff / 60)) * 60
+      // // for (var i = 0; i < timeSecondDiff; i += 60) {
+      // // const tmpDate = new Date(startDate.getTime() + 720 * 1000)
+      // // const setDate = new Date(2020, 5, 27, tmpDate.getHours(), tmpDate.getMinutes(), tmpDate.getSeconds())
+      // const setDate = new Date(2020, 5, 27, 13, 32, 50)
+      // console.log(setDate, 'setDate')
+      // this.viewer.clock.currentTime = this.Cesium.JulianDate.fromDate(setDate).clone()
+      //
+      // setTimeout(() => {
+      //   for (let satellite of allData) {
+      //     // console.log(satellite[0].id, 'star id')
+      //     if (satellite[0].id === 'Satellite/jinG1' || satellite[0].id === 'Satellite/jinG2' || satellite[0].id === 'Satellite/jinG3' || satellite[0].id === 'Satellite/jinG4' || satellite[0].id === 'Satellite/jinG5') {
+      //       continue
+      //     }
+      //     const starPos = satellite[0].position.getValue(this.viewer.clock.currentTime)
+      //     if (satellite[0].id === 'Satellite/jinA311') {
+      //       console.log(starPos, 'starPos')
+      //     }
+      //     const distance = this.Cesium.Cartesian3.distance(starPos, userPos)
+      //     console.log(distance, distance < DISTANCE, 'distance')
+      //     if (distance < minDis) {
+      //       minDis = distance
+      //       console.log(minDis, 'push minDis')
+      //     }
+      //     if (distance < DISTANCE) {
+      //       nearPos.push(satellite[0].id)
+      //       console.log(nearPos, 'push')
+      //     }
+      //   }
+      // }, 400)
+      // // }
+      // return nearPos
+    },
+    test () {
+      // const date = new Date()
+      // const nowDate = new Date(2020, 5, 30, 8, 0, 0)
+      // // console.log(date.toLocaleDateString(), 'lllll')
+      // this.viewer.clock.currentTime = this.Cesium.JulianDate.fromDate(nowDate).clone()
+      // console.log(new Date(this.viewer.clock.currentTime).toLocaleDateString(), 'Viewer.clock.currentTime')
+
+      // let allData = czml.GetAllSatellite()
+      // let data = allData['A11']
+      //
+      // const nowDate = new Date(2020, 5, 27, 10, 0, 0)
+      // // const positionA11 = data[0].position.getValue(this.Cesium.JulianDate.fromDate(nowDate))
+      //
+      // this.viewer.clock.currentTime = this.Cesium.JulianDate.fromDate(nowDate).clone()
+      // setTimeout(() => {
+      //   const positionA11 = data[0].position.getValue(this.viewer.clock.currentTime)
+      //   console.log(positionA11, 'positionA11')
+      // }, 0)
+      // this.getDealStarNodeList('2020-11-2 11:40:00', '2020-11-2 12:40:00', '30', '121.30')
+      // czml.GetNearestStarList('2020-11-2 00:00:00', '2020-11-2 2:00:00', '25', '121.30')
     },
     Logout () {
       // Fixed 退网

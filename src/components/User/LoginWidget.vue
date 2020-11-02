@@ -12,10 +12,10 @@
         <el-form-item label="域名" prop="domain">
           <el-input v-model="LoginForm.domain" placeholder="请输入域名" prefix-icon="el-icon-position"></el-input>
         </el-form-item>
-        <el-form-item label="IP" prop="ip">
-          <el-input v-model="LoginForm.ip" placeholder="请输入ip" prefix-icon="el-icon-coordinate"></el-input>
-        </el-form-item>
-        <el-form-item>
+<!--        <el-form-item label="IP" prop="ip">-->
+<!--          <el-input v-model="LoginForm.ip" placeholder="请输入ip" prefix-icon="el-icon-coordinate"></el-input>-->
+<!--        </el-form-item>-->
+        <el-form-item style="margin-top: 3rem">
           <el-button type="primary" @click="LoginWidget('LoginForm')">登陆</el-button>
           <el-button @click="resetForm('LoginForm')">重置</el-button>
         </el-form-item>
@@ -36,7 +36,7 @@ export default {
         username: '',
         password: '',
         domain: '',
-        ip: ''
+        ip: '192.168.1.120'
       },
       rules: {
         username: [
