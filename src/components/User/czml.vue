@@ -115,8 +115,10 @@ export default {
             const satellite = dataSource.entities.values
             // console.log(satellite)
             satellite[0].show = false
+            satellite[0].info = it
             // console.log(satellite)
             // 设置时钟倍数
+            //
             if (!loadWithTask) {
               Viewer.clock.multiplier = runSpeed
             }
@@ -167,15 +169,18 @@ export default {
         let resultList = []
         for (let satellite of starData) {
           const starPos = satellite[0].position.getValue(Viewer.clock.currentTime)
+          if (starPos === undefined) {
+            resolve(resultList)
+          }
           const distance = Cesium.Cartesian3.distance(starPos, userPos)
 
           if (distance < DISTANCE && !startSet.has(satellite[0].id)) {
-            resultList.push(satellite[0].id)
+            resultList.push(satellite[0].info)
           }
         }
         resolve(resultList)
         // }
-      }, 0)
+      }, 40)
     })
   },
   // 计算某个时间段下的卫星和绘制坐标的最近距离
@@ -205,7 +210,6 @@ export default {
             }
           }
         }
-        // console.log(nearStarDict, 'nearStarDict')
         resolve(nearStarDict)
         initCzmlFileNum()
         this.loadSateData(true)

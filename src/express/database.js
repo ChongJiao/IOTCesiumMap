@@ -34,6 +34,7 @@ class HibernateSqlMap {
       .columnMap('userCode', 'userCode')
       .columnMap('updateTime', 'updateTime')
       .columnMap('url', 'url')
+      .columnMap('taskId', 'taskId')
 
     this.taskMap = this.session.tableMap('task')
       .columnMap('taskId', 'taskId')
@@ -136,7 +137,7 @@ class HibernateSqlMap {
     let hibernateSql = this
 
     let table = hibernateSql.resourceMap.table
-    let sql = 'insert into %s (%s, %s, %s, %s, %s, %s, %s) values'
+    let sql = 'insert into %s (%s, %s, %s, %s, %s, %s, %s, %s, %s) values'
     sql = util.format(sql, table,
       hibernateSql.resourceMap.resourceId.columnName,
       hibernateSql.resourceMap.resourceName.columnName,
@@ -144,14 +145,16 @@ class HibernateSqlMap {
       hibernateSql.resourceMap.fatherCode.columnName,
       hibernateSql.resourceMap.status.columnName,
       hibernateSql.resourceMap.userCode.columnName,
-      hibernateSql.resourceMap.updateTime.columnName)
+      hibernateSql.resourceMap.updateTime.columnName,
+      hibernateSql.resourceMap.url.columnName,
+      hibernateSql.resourceMap.taskId.columnName)
     let p = new Promise(function (resolve, reject) {
       for (let i in data) {
         data[i].userCode = userCode
         data[i].status = 1
-        let tmp = "(%d, '%s', %d, %d, %d, '%s', '%s'),"
+        let tmp = "(%d, '%s', %d, %d, %d, '%s', '%s', '%s', '%d'),"
         tmp = util.format(tmp, data[i].resourceId, data[i].resourceName, data[i].resourceLevel,
-          data[i].fatherCode, data[i].status, data[i].userCode, data[i].updateTime)
+          data[i].fatherCode, data[i].status, data[i].userCode, data[i].updateTime, data[i].url, data[i].taskId)
         sql += tmp
       }
       sql = sql.substr(0, sql.length - 1)

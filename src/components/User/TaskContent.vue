@@ -72,7 +72,7 @@
               <el-button @click="handleLinkDownload(scope.row)" type="text" size="small">下载结果</el-button>
             </div>
             <div v-else>
-              <a :href="scope.row.address + '?download=true'">下载结果图像</a>
+              <el-button @click="handleLinkDownload(scope.row)" type="text" size="small">下载图像</el-button>
             </div>
           </div>
           <vue-loading v-if="scope.row.status === 0" type="spiningDubbles" color="#d9544e" :size="{ width: '50%' }" >
@@ -127,14 +127,23 @@ export default {
     },
     handleLinkDownload (row) {
       // TODO downloadImageFromLowStar
-      let a = document.createElement('a')
-      let address = row.address
-      let index = address.indexOf('/GFData')
-      let mainUrl = address.substr(0, index)
-      let subUrl = address.substr(index, address.length)
-      let newUrl = mainUrl + '/-/zip' + subUrl
-      a.href = newUrl
-      a.click()
+      this.$emit('sendDownloadImage', row.taskId, row.address)
+      if (row.type === 1 || row.type === 3) {
+        let a = document.createElement('a')
+        let address = row.address
+        let newUrl = address + '?download=true'
+        a.href = newUrl
+        a.click()
+      } else {
+        let a = document.createElement('a')
+        let address = row.address
+        let index = address.indexOf('/GFData')
+        let mainUrl = address.substr(0, index)
+        let subUrl = address.substr(index, address.length)
+        let newUrl = mainUrl + '/-/zip' + subUrl
+        a.href = newUrl
+        a.click()
+      }
     }
   }
 }

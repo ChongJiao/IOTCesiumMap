@@ -72,7 +72,6 @@ export default {
   },
   mounted () {
     this.getAllSatellite()
-    setTimeout(this.getAllRunningData(), 2000)
   },
   destroyed () {
     console.log('Task destroyed')
@@ -87,7 +86,7 @@ export default {
       window.open(row['url'])
     },
     tableRowStyle ({row, rowIndex}) {
-      if (this.runningIndexList[rowIndex + 1] === 1) {
+      if (this.runningIndexList[rowIndex] === 1) {
         return 'runningTask-row'
       }
       if (rowIndex === this.clickIndex) {
@@ -103,12 +102,13 @@ export default {
           return
         }
         for (let index in data) {
-          data[index].url = 'http://192.168.1.120:8000/GFData/srcData/' + data[index].url + '/' + data[index].url + '.jpg'
+          data[index].url = 'http://192.168.10.120:8000/GFData/srcData/' + data[index].url + '/' + data[index].url + '.jpg'
           let pos = JSON.parse(data[index].pos)
           data[index].pos = pos
           data[index].runningContent = '物联端未执行'
           this.tableData.push(data[index])
         }
+        this.getAllRunningData()
       }).catch((reason) => {
         console.log(reason)
       })
@@ -120,16 +120,25 @@ export default {
           this.$message('数据库错误')
           return
         }
+        console.log('running data')
         console.log(data)
         this.runningIndexList = {}
         for (let index in data) {
-          this.runningIndexList[data[index].satelliteId] = 1
-          this.tableData[data[index].satelliteId - 1].runningContent = data[index].iot
+          let i = 0
+          for (let tData of this.tableData) {
+            // let tData = this.tableData[tIndex]
+            if (tData.id === data[index].satelliteId) {
+              this.runningIndexList[i] = 1
+              this.tableData[i].runningContent = data[index].iot
+              break
+            }
+            i += 1
+          }
         }
-        console.log('tableData is')
-        console.log(this.tableData)
-        console.log('runIndex')
-        console.log(this.runningIndexList)
+        // console.log('tableData is')
+        // console.log(this.tableData)
+        // console.log('runIndex')
+        // console.log(this.runningIndexList)
       })
     }
   }

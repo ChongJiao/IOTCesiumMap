@@ -36,7 +36,7 @@ export default {
         username: '',
         password: '',
         domain: '',
-        ip: '192.168.1.120'
+        ip: '192.168.10.120'
       },
       rules: {
         username: [

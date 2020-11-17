@@ -29,7 +29,7 @@ export default {
       show: false,
       polygon: {},
       material: 'red',
-      baseMapUrl: 'http://192.168.1.120:3000/BaseMap'
+      baseMapUrl: 'http://192.168.10.120:3000/BaseMap'
     }
   },
   watch: {

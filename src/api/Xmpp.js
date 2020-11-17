@@ -139,12 +139,13 @@ class StropheConn {
     msgContent = String.format(msgContent,
       this.userCode, title, latitude, longitude, width, beginTime, endTime, type, capturearea, accessnode, nearNodeList)
     console.log(msgContent)
-    // this.SendMessage(msgContent)
+    this.SendMessage(msgContent)
   }
-  // 任务完成信息获取反馈
+  // 任务下载信息反馈
   replyFinished (taskid, address, accessnode) {
     let msgContent = '{"typeid": 21107, "nodecode":"{0}", "taskid": {1}, "date": "{2}", "result": {3}, "address": "{4}", "accessnode": "{5}"}'
     msgContent = String.format(msgContent, this.userCode, taskid, this.getDate(), 1, address, accessnode)
+    console.log(msgContent)
     this.SendMessage(msgContent)
   }
   replyStatus (accessnode) {
@@ -160,7 +161,7 @@ class StropheConn {
   getDate () {
     let date = new Date()
     let year = date.getFullYear()
-    let month = date.getMonth()
+    let month = date.getMonth() + 1
     let day = date.getDate()
     return String(year) + '-' + String(month) + '-' + String(day)
   }

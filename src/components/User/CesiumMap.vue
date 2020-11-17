@@ -31,19 +31,15 @@
         <el-menu-item index="4-1" @click="openWindow($event, 2)">任务列表</el-menu-item>
         <el-menu-item index="4-2" @click="openWindow($event, 3)">任务生成</el-menu-item>
       </el-submenu>
-      <el-submenu index="5">
-        <template slot="title">信息展示</template>
-        <el-menu-item index="5-1" @click="logFlag = !logFlag">日志窗口</el-menu-item>
-        <el-menu-item index="5-2" @click="statisticFlag = !statisticFlag">信息统计</el-menu-item>
-      </el-submenu>
-      <el-menu-item index="7" @click="test">
-        测试
-      </el-menu-item>
+      <el-menu-item index="5" @click="statisticFlag = !statisticFlag">信息统计</el-menu-item>
+<!--      <el-menu-item index="7" @click="test">-->
+<!--        测试-->
+<!--      </el-menu-item>-->
       <el-menu-item index="6" @click="Logout" style="float: right">
         登出
       </el-menu-item>
     </el-menu>
-<!--      <div class="title">中国航天技术研究院-天基用户端</div>-->
+<!--      <div class="title">中国航天技术研究院-模拟用户端</div>-->
     <div class="toolBox" v-if="showFlag[3]">
       <el-button id="draw" icon="el-icon-thumb" v-on:click="toggle('handlerPolygon')">绘制</el-button>
       <el-button type="warning" icon="el-icon-search" v-on:click="MakeTask">生成</el-button>
@@ -54,7 +50,7 @@
        v-loading="fullLoading"
        element-loading-text="执行中，请稍后"
        element-loading-spinner="el-icon-loading">
-    <vc-viewer ref="viewer" @ready="ready" :shouldAnimate="true" :orderIndependentTranslucency="false" :timeline="true" :animation="true">
+    <vc-viewer ref="viewer" @ready="ready" :shouldAnimate="true" :orderIndependentTranslucency="false" :timeline="false" :animation="false">
 <!--      <vc-layer-imagery :alpha="alpha" :imageryProvider="imageryProvider" :brightness="brightness" :contrast="contrast">-->
 <!--      </vc-layer-imagery>-->
       <vc-layer-imagery :alpha="alpha" :brightness="brightness" :contrast="contrast">
@@ -102,6 +98,12 @@
                        min-width="30%">
       </el-table-column>
       <el-table-column align="center"
+                       prop="taskId"
+                       style="border-style:solid;border-width:5px;"
+                       label="关联任务"
+                       min-width="30%">
+      </el-table-column>
+      <el-table-column align="center"
                        prop="resourceLevel"
                        style="border-style:solid;border-width:5px;"
                        label="级别"
@@ -112,6 +114,15 @@
                        style="border-style:solid;border-width:5px;"
                        label="父编号"
                        min-width="30%">
+      </el-table-column>
+      <el-table-column align="center"
+                       prop="url"
+                       style="border-style:solid;border-width:5px;"
+                       label="资源结果"
+                       min-width="30%">
+        <template>
+            <el-button type="text" size="small">不可下载</el-button>
+        </template>
       </el-table-column>
     </el-table>
     <el-button style="margin-top: 1vh" :class="this.selectSubResource.length > 0 ? 'select' : 'deselect'" v-on:click="dealAllRequest('21104', 1)">订阅</el-button>
@@ -163,7 +174,7 @@
             <el-button type="text" size="small">暂无结果</el-button>
           </div>
           <div v-else>
-            <a :href="scope.row.url + '?download=true'">下载结果</a>
+            <el-button type="text" size="small" @click="sendDownloadResourceImage(scope.row.taskId, scope.row.url)">下载结果</el-button>
           </div>
         </template>
       </el-table-column>
@@ -173,7 +184,7 @@
 <!--任务列表-->
   <div class = "info-window" v-if="showFlag[2]">
     <el-button icon="el-icon-error" size ="small" type="danger" class="close-info-window" @click="closeWindow(2)">关闭</el-button>
-    <TaskContent v-on:workOnMap="ViewMapResults">
+    <TaskContent v-on:workOnMap="ViewMapResults" v-on:sendDownloadImage="sendDownloadImage">
     </TaskContent>
   </div>
 <!--  任务信息表格-->
@@ -263,14 +274,14 @@ export default {
     } else {
       this.userName = this.$xmpp.userCode
       this.userDomain = this.$xmpp.domain
-      console.log('has login')
+      // console.log('has login')
       this.init()
     }
   },
   data () {
     return {
-      logFlag: false,
-      statisticFlag: false,
+      logFlag: true,
+      statisticFlag: true,
       fullLoading: false,
       userName: '',
       userDomain: '',
@@ -285,7 +296,7 @@ export default {
       viewer: null,
       resourceItems: [],
       tileUrl: 'http://192.168.1.6:7000/GFData/tileData/GF1_PMS1_E120.5_N22.7_20200205_L1A0004599309',
-      baseMapUrl: 'http://192.168.1.120:3000/BaseMap',
+      baseMapUrl: 'http://192.168.10.120:3000/BaseMap',
       showTileMap: false,
       taskList: [],
       NetStatus: '申请入网',
@@ -308,13 +319,17 @@ export default {
         label: '用户初级任务'
       }, {
         value: '2',
-        label: '用户高级任务'
+        label: '用户高级任务一'
+      },
+      {
+        value: '5',
+        label: '用户高级任务二'
       }, {
         value: '3',
-        label: '系统初级任务'
+        label: '演示初级任务'
       }, {
         value: '4',
-        label: '系统高级任务'
+        label: '演示高级任务'
       }],
       taskStatistic: {
         totalNumber: 9,
@@ -366,22 +381,6 @@ export default {
       base.messageHandler = base.$xmpp.conn.addHandler(base.onMessage, null, 'message', null, null, null)
 
       this.queryAllTask()
-
-      // 初始化任务表格信息
-      let nowDate = new Date()
-      let year = nowDate.getFullYear()
-      let month = nowDate.getMonth() + 1
-      let date = nowDate.getDate()
-
-      this.taskForm.startDate = year + '-' + month + '-' + date
-      this.taskForm.startTime = nowDate
-
-      let endDate = new Date(nowDate.getTime() + 60 * 60 * 1000)
-      year = endDate.getFullYear()
-      month = endDate.getMonth() + 1
-      date = endDate.getDate()
-      this.taskForm.endDate = year + '-' + month + '-' + date
-      this.taskForm.endTime = endDate
     },
     ViewMapResults (url, type) {
       // 可视化结果
@@ -389,6 +388,18 @@ export default {
       this.tileUrl = url
       this.showTileMap = false
       this.showTileMap = true
+    },
+    sendDownloadImage (taskId, address) {
+      this.makeLogInfo('用户下载地区内容')
+      let starName = this.getNeareastStar()
+      this.$xmpp.replyFinished(taskId, address, starName)
+    },
+    sendDownloadResourceImage (taskId, address) {
+      this.sendDownloadImage(taskId, address)
+      let a = document.createElement('a')
+      let newUrl = address + '?download=true'
+      a.href = newUrl
+      a.click()
     },
     ready (cesiumInstance) {
       console.log('ready......')
@@ -400,8 +411,8 @@ export default {
       viewer.scene.globe.depthTestAgainstTerrain = true
       this.Cesium = Cesium
       this.viewer = viewer
-      let userPos = this.Cesium.Cartesian3.fromDegrees(121.30, 25.03, 0)
-      console.log(userPos, '22222222222222')
+      // let userPos = this.Cesium.Cartesian3.fromDegrees(121.30, 25.03, 0)
+      // console.log(userPos, '22222222222222')
       let base = this
       // setTimeout(function () {
       //   const date = new Date()
@@ -461,14 +472,32 @@ export default {
     },
     MakeTask () {
       // TODO 获得中心经纬度以及幅宽
+      // 初始化任务表格信息
+      let nowDate = new Date()
+      let year = nowDate.getFullYear()
+      let month = nowDate.getMonth() + 1
+      let date = nowDate.getDate()
+
+      this.taskForm.startDate = year + '-' + month + '-' + date
+      this.taskForm.startTime = nowDate
+
+      let endDate = new Date(nowDate.getTime() + 60 * 60 * 1000)
+      year = endDate.getFullYear()
+      month = endDate.getMonth() + 1
+      date = endDate.getDate()
+      this.taskForm.endDate = year + '-' + month + '-' + date
+      this.taskForm.endTime = endDate
+
       let t = this.$refs.handlerPolygon.polylines[0].positions
       let positions = JSON.parse(JSON.stringify(t))
-      positions = positions.splice(0, positions.length - 1)
-      if (positions.length <= 2) {
+      // positions = positions.splice(0, positions.length - 1)
+      if (positions.length <= 3) {
         this.$message('请绘制正确矩形')
+        this.makeLogInfo('用户' + this.$xmpp.userCode + '绘制区域不合规范')
         return
       }
-      console.log('position length ' + positions.length)
+      console.log('position length ', positions.length)
+      console.log('position', positions)
       let centerLng = 0
       let centerLat = 0
       this.posList = []
@@ -482,8 +511,8 @@ export default {
         minLng = minLng < lng ? minLng : lng
         centerLat += lat
         centerLng += lng
-        this.posList.push(lat)
         this.posList.push(lng)
+        this.posList.push(lat)
       }
       centerLat /= positions.length
       centerLng /= positions.length
@@ -515,6 +544,11 @@ export default {
       let startName = this.getNeareastStar()
 
       czml.GetNearestStarList(beginTime, endTime, this.taskForm.latitude, this.taskForm.longitude).then((startList) => {
+        if (startList.length === 0) {
+          this.$message('所选时间未找到合适卫星！！！')
+          this.makeLogInfo('用户所选区域在规定时间内无可用卫星')
+          return
+        }
         let nearNodeListStr = JSON.stringify(startList)
         if (nearNodeListStr.length > 0) {
           nearNodeListStr = nearNodeListStr.substr(1, nearNodeListStr.length - 2)
@@ -528,11 +562,13 @@ export default {
       }).catch((reason) => {
         console.log(reason)
         this.$message('任务创建失败')
+        this.makeLogInfo('用户' + this.$xmpp.userCode + '任务创建失败')
       })
     },
     // cesium加载瓦片触发函数
     imageryReady (imageryProvider) {
-      // this.viewer.camera.flyTo({destination: imageryProvider.rectangle})
+      console.log(imageryProvider.rectangle)
+      this.viewer.camera.flyTo({destination: imageryProvider.rectangle})
     },
     makeLogInfo (content) {
       if (this.$refs.log !== undefined) {
@@ -544,6 +580,7 @@ export default {
     dealAllRequest (typeid, val) {
       if (this.$xmpp.gkStatus === false) {
         this.$message('管控中心不在线，无法操作')
+        this.makeLogInfo('管控中心不在线、用户无法进行操作')
       } else {
         switch (typeid) {
           case '21103':
@@ -593,6 +630,7 @@ export default {
       }
       console.log('min distance is')
       console.log(minDis)
+      // console.log(this.viewer.clock.currentTime.toLocaleDateString(), 'data')
       if (minDis / 1000 > 3000) {
         let s1 = allData['G3']
         let s2 = allData['G5']
@@ -680,11 +718,13 @@ export default {
             console.log(result)
           }).catch((reason) => {
             this.$message('本地入网记录失败！！！')
+            this.makeLogInfo('数据库操作失败')
             console.log(reason)
           })
           this.NetStatus = '申请退网'
         } else {
           this.$message('管控入网失败，请重新入网')
+          this.makeLogInfo('用户' + this.$xmpp.userCode + '入网失败，请重新入网')
         }
       } else {
         if (result === 1) {
@@ -701,6 +741,7 @@ export default {
           this.NetStatus = '申请入网'
         } else {
           this.$message('管控退网失败，请重新退网')
+          this.makeLogInfo('用户' + this.$xmpp.userCode + '退网失败，请重新退网')
         }
       }
     },
@@ -715,7 +756,7 @@ export default {
             let base = this
             this.$http.setResourceSubscribe(this.selectSubResource, this.$xmpp.userCode, 'new').then((result) => {
               this.$message('订阅成功')
-              this.makeLogInfo('管控响应用户订阅资源，用户资源订阅成功')
+              this.makeLogInfo('管控响应订阅资源，资源订阅成功')
               // 更新页面订阅内容
               base.subResource = base.subResource.concat(base.selectSubResource)
               let resource = []
@@ -727,12 +768,14 @@ export default {
               this.selectSubResource = []
             }).catch((reason) => {
               this.$message('订阅失败')
+              this.makeLogInfo('用户' + this.$xmpp.userCode + '订阅资源失败')
               console.log(reason)
             })
           }
         } else {
           // TODO 数据库中需要添加订阅，这里是管控订阅成功，但是数据库新增失败
           this.$message('订阅失败')
+          this.makeLogInfo('用户' + this.$xmpp.userCode + '订阅资源失败')
         }
       } else {
         if (result === 1) {
@@ -741,7 +784,7 @@ export default {
           if (this.selectUnSubResource.length > 0) {
             this.$http.setResourceSubscribe(this.selectUnSubResource, this.$xmpp.userCode, 'delete').then((result) => {
               base.$message('退订成功')
-              this.makeLogInfo('管控响应用户退订资源，用户资源退订成功')
+              this.makeLogInfo('管控响应退订资源，资源退订成功')
               for (let i in base.selectUnSubResource) {
                 let resourceId = base.selectUnSubResource[i].resourceId
                 console.log(resourceId)
@@ -760,7 +803,10 @@ export default {
               base.$message('退订失败')
             })
           }
-        } else { alert('退订失败') }
+        } else {
+          this.$message('退订失败')
+          this.makeLogInfo('用户' + this.$xmpp.userCode + '资源退订失败')
+        }
       }
     },
     // 资源查询协议 pass
@@ -769,7 +815,7 @@ export default {
       if (this.$xmpp.gkStatus === false) {
         this.$xmpp.gkStatus = true
       }
-      this.makeLogInfo('管控响应用户查询资源，用户资源查询成功')
+      this.makeLogInfo('管控响应用户查询资源，资源查询成功')
       let type = replyJson['type']
       this.items = []
       if (type === 'result') {
@@ -782,6 +828,8 @@ export default {
           obj.resourceName = data[1]
           obj.resourceLevel = data[2]
           obj.fatherCode = data[3]
+          obj.url = data[4]
+          obj.taskId = data[5]
           // TODO add updateTime
           obj.updateTime = this.getNowDate()
           let find = false
@@ -837,18 +885,18 @@ export default {
       } else {
         let memo = replyJson['memo']
         this.$message('创建任务失败:' + memo)
+        this.makeLogInfo('创建任务失败:' + memo)
       }
     },
     // 任务完成响应
     handleTaskFinished (replyJson) {
-      this.makeLogInfo('管控响应用户任务完成，用户任务执行完毕')
+      this.makeLogInfo('管控响应用户任务完成，任务执行完毕')
       let taskid = replyJson['taskid']
       let address = replyJson['address']
+      let taskType = replyJson['type']
       // this.$message('success task is ' + taskid)
       // this.$message('the address is ' + address)
-      let starName = this.getNeareastStar()
-      this.$xmpp.replyFinished(taskid, address, starName)
-      // test passed
+
       let data = {}
       data.taskId = taskid
       data.status = '1'
@@ -858,7 +906,9 @@ export default {
       }).catch((reason) => {
         this.$message('任务状态更新失败')
       })
-      this.ViewMapResults(address)
+      if (taskType === 2 || taskType === 4 || taskType === 5) {
+        this.ViewMapResults(address)
+      }
     },
     // 状态轮询响应
     handleStatus (replyJson) {
@@ -872,6 +922,7 @@ export default {
       let result = replyJson['result']
       if (result === 0) {
         this.$message(replyJson['error'])
+        this.makeLogInfo(replyJson['error'])
       }
       this.fullLoading = false
     },
@@ -913,11 +964,13 @@ export default {
                 this.handleMakeTask(replyJson)
                 break
               case '12211':
-                console.log('Finished Task')
                 this.handleTaskFinished(replyJson)
                 break
               case '12114':
-                this.handleStatus()
+                console.log('状态轮询', msgContent)
+                if (this.NetStatus === '申请退网') {
+                  this.handleStatus()
+                }
                 break
               case '1202':
                 this.handleCheckStatus(replyJson)
@@ -936,6 +989,7 @@ export default {
     },
     // 表格选择
     handleSubSelectChange (val) {
+      console.log('select val ' + JSON.stringify(val))
       this.selectSubResource = val
     },
     // 表格取消选择
@@ -1053,7 +1107,9 @@ export default {
       //   console.log(positionA11, 'positionA11')
       // }, 0)
       // this.getDealStarNodeList('2020-11-2 11:40:00', '2020-11-2 12:40:00', '30', '121.30')
-      // czml.GetNearestStarList('2020-11-2 00:00:00', '2020-11-2 2:00:00', '25', '121.30')
+      // czml.GetNearestStarList('2020-11-2 02:20:00', '2020-11-2 04:20:00', '25', '121.30').then((result) => {
+      //   console.log(result, 'result')
+      // })
     },
     Logout () {
       // Fixed 退网
