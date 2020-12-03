@@ -107,6 +107,20 @@ router.post('/resourceOp', function (req, res) {
       })
     })
   }
+  if (type === 'update') {
+    let form = new multiparty.Form()
+    form.parse(req, function (err, postJson) {
+      if (err) {
+        console.log(err.stack())
+      }
+      hibernateModel.updateResource(postJson.resourceId[0], postJson.taskId[0], postJson.url[0]).then((result) => {
+        res.send({'type': 'success'})
+      }).catch((reason) => {
+        console.log(reason)
+        res.send({'type': 'error'})
+      })
+    })
+  }
 })
 
 // 添加任务，接口为/task?type=new

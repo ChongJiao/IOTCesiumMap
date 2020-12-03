@@ -33,7 +33,7 @@
       </el-submenu>
       <el-menu-item index="5" @click="statisticFlag = !statisticFlag">信息统计</el-menu-item>
 <!--      <el-menu-item index="7" @click="test">-->
-<!--        测试-->
+<!--        开启卫星-->
 <!--      </el-menu-item>-->
       <el-menu-item index="6" @click="Logout" style="float: right">
         登出
@@ -98,12 +98,6 @@
                        min-width="30%">
       </el-table-column>
       <el-table-column align="center"
-                       prop="taskId"
-                       style="border-style:solid;border-width:5px;"
-                       label="关联任务"
-                       min-width="30%">
-      </el-table-column>
-      <el-table-column align="center"
                        prop="resourceLevel"
                        style="border-style:solid;border-width:5px;"
                        label="级别"
@@ -165,12 +159,26 @@
                        min-width="30%">
       </el-table-column>
       <el-table-column align="center"
+                       prop="taskid"
+                       style="border-style:solid;border-width:5px;"
+                       label="关联任务ID"
+                       min-width="30%">
+        <template slot-scope="scope">
+          <div v-if="scope.row.taskid === -1">
+            <el-button type="text" size="small">暂无关联</el-button>
+          </div>
+          <div v-else>
+            <el-button type="text" size="small">{{scope.row.taskid}}</el-button>
+          </div>
+        </template>
+      </el-table-column>
+      <el-table-column align="center"
                        prop="url"
                        style="border-style:solid;border-width:5px;"
                        label="资源结果"
                        min-width="30%">
         <template slot-scope="scope">
-          <div v-if="scope.row.url === null">
+          <div v-if="scope.row.url.trim() === ''">
             <el-button type="text" size="small">暂无结果</el-button>
           </div>
           <div v-else>
@@ -180,6 +188,7 @@
       </el-table-column>
     </el-table>
     <el-button style="margin-top: 1vh" :class="this.selectUnSubResource.length > 0 ? 'select' : 'deselect'" v-on:click="dealAllRequest('21104', 0)">取消订阅</el-button>
+    <el-button style="margin-top: 1vh" type="success" v-on:click="dealAllRequest('21103')">更新订阅</el-button>
   </div>
 <!--任务列表-->
   <div class = "info-window" v-if="showFlag[2]">
@@ -261,30 +270,45 @@ export default {
       console.log('not login')
       let name = this.$xmpp.getCookie('userCode')
       let password = this.$xmpp.getCookie('password')
-      let domain = this.$xmpp.getCookie('domain')
-      let ip = this.$xmpp.getCookie('ip')
+      let domain = this.$xmpp.domain
+      let ip = this.$xmpp.ip
       if (name !== null && password !== null && domain !== null) {
         this.$xmpp.BOSH_SERVER = 'http://' + ip + ':7070/http-bind/'
         this.$xmpp.httpServer = 'http://' + ip + ':8000/GFData/'
         this.$xmpp.initial()
+        console.log(name)
+        console.log(domain)
+        console.log(password)
         this.$xmpp.conn.connect(name + '@' + domain, password, this.connectedCallback)
       } else {
         this.$router.push({name: 'Login'})
       }
     } else {
-      this.userName = this.$xmpp.userCode
-      this.userDomain = this.$xmpp.domain
-      // console.log('has login')
+      this.userCode = this.$xmpp.getCookie('userCode')
+      this.userName = this.$xmpp.getCookie('userCode')
       this.init()
+    }
+    // this.init()
+    // } else {
+    //   this.userName = this.$xmpp.userCode
+    //   // console.log('has login')
+    //   this.init()
+    // }
+  },
+  beforeDestroy () {
+    console.log('destory')
+    if (this.$xmpp.conn != null) {
+      this.$xmpp.connFlag = false
+      this.$xmpp.conn.deleteHandler(this.messageHandler)
+      this.$xmpp.disconnect('user disconnect')
     }
   },
   data () {
     return {
       logFlag: true,
-      statisticFlag: true,
+      statisticFlag: false,
       fullLoading: false,
       userName: '',
-      userDomain: '',
       showFlag: [false, false, false, false],
       showTaskDetailTable: false,
       alpha: 1,
@@ -336,7 +360,9 @@ export default {
         finishedNumber: 5,
         data: []
       },
-      posName: ''
+      posName: '',
+      requestTimeStamp: null,
+      receiveTimeStamp: null
     }
   },
   methods: {
@@ -353,7 +379,7 @@ export default {
     },
     init () {
       // 初始化相关内容
-      // TODO 从数据库中获取订阅的资源列表到 变量 subResource（list）
+      // FIXED 从数据库中获取订阅的资源列表到 变量 subResource（list）
       let base = this
       // 获取用户入网状态 passed
       this.$http.getUserNetStatus(this.$xmpp.userCode).then(result => {
@@ -373,14 +399,18 @@ export default {
         return false
       })
       // 获取订阅资源列表 pass
+      this.getSubResouce()
+      this.messageHandler = this.$xmpp.conn.addHandler(base.onMessage, null, 'message', null, null, null)
+
+      this.queryAllTask()
+    },
+    getSubResouce () {
       this.$http.getUserSubResourceList(this.$xmpp.userCode).then((result) => {
         this.subResource = result
+        console.log('subResource', this.subResource)
       }).catch((reason) => {
         console.log(reason)
       })
-      base.messageHandler = base.$xmpp.conn.addHandler(base.onMessage, null, 'message', null, null, null)
-
-      this.queryAllTask()
     },
     ViewMapResults (url, type) {
       // 可视化结果
@@ -413,7 +443,6 @@ export default {
       this.viewer = viewer
       // let userPos = this.Cesium.Cartesian3.fromDegrees(121.30, 25.03, 0)
       // console.log(userPos, '22222222222222')
-      let base = this
       // setTimeout(function () {
       //   const date = new Date()
       //   console.log(date.toLocaleDateString(), 'lllll')
@@ -427,11 +456,12 @@ export default {
 
       czml.init(Cesium, viewer)
 
-      setTimeout(function () {
-        if (base.NetStatus === '申请退网') {
+      setTimeout(async () => {
+        if (this.NetStatus === '申请退网') {
           // 如果用户状态是在网的话，应该主动首先向管控发送请求，判断是否在线，而不是等管控广播。。。。。，
-          let starName = base.getNeareastStar()
-          base.$xmpp.RequestReSource(starName)
+          let starName = this.getNeareastStar()
+          await this.sleep(starName)
+          this.$xmpp.RequestReSource(starName)
         }
       }, 2000)
     },
@@ -471,7 +501,7 @@ export default {
       // console.log(result)
     },
     MakeTask () {
-      // TODO 获得中心经纬度以及幅宽
+      // Fixed 获得中心经纬度以及幅宽
       // 初始化任务表格信息
       let nowDate = new Date()
       let year = nowDate.getFullYear()
@@ -496,8 +526,8 @@ export default {
         this.makeLogInfo('用户' + this.$xmpp.userCode + '绘制区域不合规范')
         return
       }
-      console.log('position length ', positions.length)
-      console.log('position', positions)
+      // console.log('position length ', positions.length)
+      // console.log('position', positions)
       let centerLng = 0
       let centerLat = 0
       this.posList = []
@@ -533,7 +563,7 @@ export default {
       let timeString = String.format(timeFormat, date.getFullYear(), date.getMonth() + 1, date.getDate(), time.getHours(), time.getMinutes(), time.getSeconds())
       return timeString
     },
-    regionTaskMake () {
+    regionTaskMake (starName) {
       // 采集需求 XMPP部分
       let date = new Date(this.taskForm.startDate)
       let time = new Date(this.taskForm.startTime)
@@ -541,12 +571,13 @@ export default {
       date = new Date(this.taskForm.endDate)
       time = new Date(this.taskForm.endTime)
       let endTime = this.getTimeFormat(date, time)
-      let startName = this.getNeareastStar()
-
+      this.showTaskDetailTable = false
+      this.fullLoading = true
       czml.GetNearestStarList(beginTime, endTime, this.taskForm.latitude, this.taskForm.longitude).then((startList) => {
         if (startList.length === 0) {
           this.$message('所选时间未找到合适卫星！！！')
           this.makeLogInfo('用户所选区域在规定时间内无可用卫星')
+          this.fullLoading = false
           return
         }
         let nearNodeListStr = JSON.stringify(startList)
@@ -555,10 +586,9 @@ export default {
         }
         console.log(nearNodeListStr, 'nodeListStr')
         this.$xmpp.RequestTask(this.taskForm.title, this.taskForm.latitude, this.taskForm.longitude, this.taskForm.width,
-          beginTime, endTime, this.taskForm.type, JSON.stringify(this.posList), startName, nearNodeListStr)
+          beginTime, endTime, this.taskForm.type, JSON.stringify(this.posList), starName, nearNodeListStr)
         this.showTaskDetailTable = false
         this.clear()
-        this.fullLoading = true
       }).catch((reason) => {
         console.log(reason)
         this.$message('任务创建失败')
@@ -577,7 +607,7 @@ export default {
     },
     // 资源请求
     // 所有跟管控请求相关的入口信息
-    dealAllRequest (typeid, val) {
+    async dealAllRequest (typeid, val) {
       if (this.$xmpp.gkStatus === false) {
         this.$message('管控中心不在线，无法操作')
         this.makeLogInfo('管控中心不在线、用户无法进行操作')
@@ -586,32 +616,51 @@ export default {
           case '21103':
             this.makeLogInfo('用户' + this.$xmpp.userCode + '查询所有资源')
             let starName = this.getNeareastStar()
+            await this.sleep(starName)
             this.$xmpp.RequestReSource(starName)
             break
           case '21101':
             this.makeLogInfo('用户' + this.$xmpp.userCode + '入、退网请求')
-            this.requestInOutNet()
+            starName = this.getNeareastStar()
+            await this.sleep(starName)
+            this.requestInOutNet(starName)
             break
           case '21104':
             this.makeLogInfo('用户' + this.$xmpp.userCode + '资源操作')
-            if (val === 1) { this.requestSub() } else { this.requestUnSub() }
+            starName = this.getNeareastStar()
+            await this.sleep(starName)
+            if (val === 1) { this.requestSub(starName) } else { this.requestUnSub(starName) }
             break
           case '21106':
+            starName = this.getNeareastStar()
+            await this.sleep(starName)
             this.makeLogInfo('用户' + this.$xmpp.userCode + '新建任务')
-            this.regionTaskMake()
+            this.regionTaskMake(starName)
             break
           default:
             break
         }
       }
     },
+    sleep (starName) {
+      console.log(starName)
+      if (starName.substring(0, 1) === 'G') {
+        console.log('sleep', 1000)
+        var time = 1000
+      } else {
+        console.log('sleep', 500)
+        time = 500
+      }
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve()
+        }, time)
+      })
+    },
     // 获取当前CZML最近卫星，用于入网
     getNeareastStar () {
       let allData = czml.GetAllSatellite()
       // let pos = parseInt(Math.random() * (this.$xmpp.virtualPosition.length - 1), 10)
-
-      console.log(this.$xmpp.virtualPosLng)
-      console.log(this.$xmpp.virtualPosLat)
       let userPos = this.Cesium.Cartesian3.fromDegrees(this.$xmpp.virtualPosLng, this.$xmpp.virtualPosLat, 0)
 
       let minDis = Number.MAX_VALUE
@@ -622,6 +671,11 @@ export default {
         }
         let data = allData[key]
         const position = data[0].position.getValue(this.viewer.clock.currentTime)
+        if (position === undefined) {
+          console.log('position', 'GetNearestStar error')
+          this.requestTimeStamp = Date.now()
+          return starName
+        }
         const distance = this.Cesium.Cartesian3.distance(position, userPos)
         if (minDis > distance) {
           minDis = distance
@@ -631,27 +685,31 @@ export default {
       console.log('min distance is')
       console.log(minDis)
       // console.log(this.viewer.clock.currentTime.toLocaleDateString(), 'data')
-      if (minDis / 1000 > 3000) {
-        let s1 = allData['G3']
-        let s2 = allData['G5']
-        const p1 = s1[0].position.getValue(this.viewer.clock.currentTime)
-        const p2 = s2[0].position.getValue(this.viewer.clock.currentTime)
-        const d1 = this.Cesium.Cartesian3.distance(p1, userPos)
-        const d2 = this.Cesium.Cartesian3.distance(p2, userPos)
-        if (d1 < d2) {
-          starName = 'G3'
-        } else {
-          starName = 'G5'
+      // 8400 * 1000
+      if (minDis / 1000 > 1166) {
+        var GKeyList = ['G1', 'G2', 'G3', 'G4', 'G5']
+        minDis = Number.MAX_VALUE
+        for (let key of GKeyList) {
+          let data = allData[key]
+          const position = data[0].position.getValue(this.viewer.clock.currentTime)
+          const distance = this.Cesium.Cartesian3.distance(position, userPos)
+          if (minDis > distance) {
+            minDis = distance
+            starName = key
+          }
+        }
+        if (minDis > 8400 * 1000) {
+          setTimeout(() => {
+            this.$message('当前卫星波束未覆盖，用户入网失败')
+          }, 2000)
+          starName = ''
         }
       }
-      console.log(starName)
+      this.requestTimeStamp = Date.now()
       return starName
     },
     // 入网退网请求
-    requestInOutNet () {
-      let starName = this.getNeareastStar()
-      // let latitude = this.$xmpp.virtualPosition[this.$xmpp.virtualIndex][1]
-      // let longitude = this.$xmpp.virtualPosition[this.$xmpp.virtualIndex][0]
+    requestInOutNet (starName) {
       if (this.NetStatus === '申请入网') {
         this.$xmpp.RequestInOrOutToNet(1, this.$xmpp.virtualPosLat, this.$xmpp.virtualPosLng, starName)
       } else {
@@ -659,40 +717,49 @@ export default {
       }
     },
     // 资源订阅请求
-    requestSub () {
+    requestSub (starName) {
       if (this.selectSubResource.length > 0) {
         let items = []
         for (let i in this.selectSubResource) {
           items.push(this.selectSubResource[i].resourceId)
         }
-        let starName = this.getNeareastStar()
         this.$xmpp.ResourceSubUnSub(1, items, starName)
       }
     },
     // 资源退订请求
-    requestUnSub () {
+    requestUnSub (starName) {
       if (this.selectUnSubResource.length > 0) {
         let items = []
         for (let i in this.selectUnSubResource) {
           items.push(this.selectUnSubResource[i].resourceId)
         }
-        let starName = this.getNeareastStar()
         this.$xmpp.ResourceSubUnSub(0, items, starName)
       }
     },
     // 显示变量；0 为资源列表，1表示订阅列表，2表示任务列表，3表示任务工具
     openWindow (dom, index) {
-      console.log(dom.$el)
+      if (index === 0 || index === 1) {
+        this.dealAllRequest('21103')
+      }
+      console.log('index', index)
       for (let i in this.showFlag) {
-        if (this.showFlag[i] && i !== index.toString()) {
-          console.log(dom.$el.classList)
-          dom.$el.classList.remove('active')
-          console.log(dom.$el.classList)
-          this.$message('请先关闭当前窗口')
-          return
+        console.log('i', i)
+        if (parseInt(i) === index) {
+          console.log('open index')
+          this.$set(this.showFlag, index, true)
+        } else {
+          this.$set(this.showFlag, i, false)
         }
       }
-      this.$set(this.showFlag, index, true)
+      // for (let i in this.showFlag) {
+      //   if (this.showFlag[i] && i !== index.toString()) {
+      //     console.log(dom.$el.classList)
+      //     dom.$el.classList.remove('active')
+      //     console.log(dom.$el.classList)
+      //     this.$message('请先关闭当前窗口')
+      //     return
+      //   }
+      // }
     },
     // 关闭所有列表窗口
     closeWindow (index) {
@@ -710,10 +777,12 @@ export default {
       let result = replyJson['result']
       if (requestType === 1) {
         if (result === 1) {
+          this.receiveTimeStamp = Date.now()
+          var second = (this.receiveTimeStamp - this.requestTimeStamp) / 1000.0
+          this.makeLogInfo('管控响应用户入网消息，用户入网成功 ( 时延' + second.toString() + 's)')
           this.$http.setUserStatus(this.$xmpp.userCode, 1).then(result => {
             if (result === 'success') {
               this.$message('入网成功')
-              this.makeLogInfo('管控响应用户入网消息，用户入网成功')
             }
             console.log(result)
           }).catch((reason) => {
@@ -723,15 +792,19 @@ export default {
           })
           this.NetStatus = '申请退网'
         } else {
-          this.$message('管控入网失败，请重新入网')
-          this.makeLogInfo('用户' + this.$xmpp.userCode + '入网失败，请重新入网')
+          this.$message('入网失败，请重新入网')
+          this.receiveTimeStamp = Date.now()
+          second = (this.receiveTimeStamp - this.requestTimeStamp) / 1000.0
+          this.makeLogInfo('用户' + this.$xmpp.userCode + '入网失败，请重新入网 ( 时延' + second.toString() + 's)')
         }
       } else {
         if (result === 1) {
+          this.receiveTimeStamp = Date.now()
+          second = (this.receiveTimeStamp - this.requestTimeStamp) / 1000.0
+          this.makeLogInfo('管控响应用户退网消息，用户退网成功 ( 时延' + second.toString() + 's)')
           this.$http.setUserStatus(this.$xmpp.userCode, 0, this.$xmpp.userLongitude, this.$xmpp.userLatitude).then(result => {
             if (result === 'success') {
               this.$message('退网成功')
-              this.makeLogInfo('管控响应用户退网消息，用户退网成功')
             }
             console.log(result)
           }).catch((reason) => {
@@ -754,11 +827,14 @@ export default {
           // Fixed 在数据库中插入订阅的资源信息 selectSubResource pass
           if (this.selectSubResource.length > 0) {
             let base = this
+            this.receiveTimeStamp = Date.now()
+            var second = (this.receiveTimeStamp - this.requestTimeStamp) / 1000.0
+            this.makeLogInfo('管控响应订阅资源，资源订阅成功( 时延' + second.toString() + 's)')
             this.$http.setResourceSubscribe(this.selectSubResource, this.$xmpp.userCode, 'new').then((result) => {
               this.$message('订阅成功')
-              this.makeLogInfo('管控响应订阅资源，资源订阅成功')
               // 更新页面订阅内容
-              base.subResource = base.subResource.concat(base.selectSubResource)
+              this.getSubResouce()
+              // base.subResource = base.subResource.concat(base.selectSubResource)
               let resource = []
               base.resourceItems.forEach((a) => {
                 let c = base.selectSubResource.findIndex(b => a === b)
@@ -782,9 +858,11 @@ export default {
           // Fixed 在数据库中删除相应的 selectUnSubResource
           let base = this
           if (this.selectUnSubResource.length > 0) {
+            this.receiveTimeStamp = Date.now()
+            second = (this.receiveTimeStamp - this.requestTimeStamp) / 1000.0
+            this.makeLogInfo('管控响应退订资源，资源退订成功( 时延' + second.toString() + 's)')
             this.$http.setResourceSubscribe(this.selectUnSubResource, this.$xmpp.userCode, 'delete').then((result) => {
               base.$message('退订成功')
-              this.makeLogInfo('管控响应退订资源，资源退订成功')
               for (let i in base.selectUnSubResource) {
                 let resourceId = base.selectUnSubResource[i].resourceId
                 console.log(resourceId)
@@ -809,13 +887,16 @@ export default {
         }
       }
     },
+
     // 资源查询协议 pass
     handleRequestResource (replyJson) {
       this.resourceItems = []
       if (this.$xmpp.gkStatus === false) {
         this.$xmpp.gkStatus = true
       }
-      this.makeLogInfo('管控响应用户查询资源，资源查询成功')
+      this.receiveTimeStamp = Date.now()
+      var second = (this.receiveTimeStamp - this.requestTimeStamp) / 1000.0
+      this.makeLogInfo('管控响应用户查询资源，资源查询成功 ( 时延' + second.toString() + 's)')
       let type = replyJson['type']
       this.items = []
       if (type === 'result') {
@@ -829,12 +910,28 @@ export default {
           obj.resourceLevel = data[2]
           obj.fatherCode = data[3]
           obj.url = data[4]
-          obj.taskId = data[5]
+          let taskId = -1
+          if (data.length === 5) {
+            taskId = -1
+          } else {
+            taskId = parseInt(data[5])
+          }
+          obj.taskid = taskId
           // TODO add updateTime
           obj.updateTime = this.getNowDate()
           let find = false
           for (let i in this.subResource) {
             if (this.subResource[i].resourceId === parseInt(data[0])) {
+              this.$set(this.subResource[i], 'url', data[4])
+              this.$set(this.subResource[i], 'taskid', taskId)
+              // console.log('=================data===================')
+              // console.log(data)
+              this.$http.updateResource(taskId, data[4], this.subResource[i].resourceId, 'update').then((result) => {
+                console.log('资源更新成功')
+              }).catch((reason) => {
+                console.log('资源更新失败')
+              })
+
               find = true
               break
             }
@@ -848,12 +945,12 @@ export default {
     // 新建处理任务响应  pass
     handleMakeTask (replyJson) {
       this.fullLoading = false
-      this.makeLogInfo('管控响应用户新建任务，用户新建任务成功')
+      this.receiveTimeStamp = Date.now()
+      var second = (this.receiveTimeStamp - this.requestTimeStamp) / 1000.0
+      this.makeLogInfo('管控响应用户新建任务，用户新建任务成功 ( 时延' + second.toString() + ')')
       let taskId = replyJson['taskid']
       let result = replyJson['result']
       if (result === 1) {
-        this.$message('创建任务成功')
-        // TODO 页面中进行更新任务列表
         // Fixed 完成任务新建测试
         console.log(this.taskForm)
         let date = new Date(this.taskForm.startDate)
@@ -934,11 +1031,16 @@ export default {
       czml.changeSpeed(speed)
     },
     onMessage (msg) {
+      console.log(msg)
       let fromJid = msg.getAttribute('from')
       let index = fromJid.indexOf('/')
       fromJid = fromJid.substr(0, index)
       if (fromJid !== this.$xmpp.gkName) {
-        console.log('发送方非管控中心，无法读取数据')
+        let elems = msg.getElementsByTagName('body')
+        let msgContent = Strophe.Strophe.getText(elems[0])
+        msgContent = msgContent.replace(/&apos;/g, '"')
+        msgContent = msgContent.replace(/&quot;/g, '"')
+        console.log('发送方非管控中心，无法读取数据, 数据内容为', msgContent)
       } else {
         let type = msg.getAttribute('type')
         let elems = msg.getElementsByTagName('body')
@@ -1006,19 +1108,20 @@ export default {
           this.$message('登陆成功')
           this.$xmpp.connFlag = true
           // 首先要发送一个<presence>给服务器（initial presence）
+          // var status = Strophe.$pres().c('show').t(Strophe.$pres.)
+          // this.$xmpp.conn.send(status)
+          console.log('发送 presence')
           this.$xmpp.conn.send(Strophe.$pres().tree())
 
           let name = this.$xmpp.getCookie('userCode')
           let password = this.$xmpp.getCookie('password')
-          let domain = this.$xmpp.getCookie('domain')
           this.userName = name
-          this.userDomain = domain
           this.$xmpp.userCode = name
           this.$xmpp.password = password
-          this.$xmpp.domain = domain
-          this.$xmpp.gkName = this.$xmpp.gkBaseName + '@' + domain
+          this.$xmpp.gkName = this.$xmpp.gkBaseName + '@' + this.$xmpp.domain
           console.log(this.$xmpp.userCode)
           this.init()
+          this.$xmpp.SendMessage('test')
           break
         case Strophe.Strophe.Status.CONNECTING:
           console.log('正在登陆')
@@ -1031,7 +1134,6 @@ export default {
           this.$xmpp.connFlag = false
           this.$xmpp.delCookie('userCode')
           this.$xmpp.delCookie('password')
-          this.$xmpp.delCookie('domain')
           this.$router.push({name: 'Login'})
           break
         default:
@@ -1089,27 +1191,7 @@ export default {
       // return nearPos
     },
     test () {
-      // const date = new Date()
-      // const nowDate = new Date(2020, 5, 30, 8, 0, 0)
-      // // console.log(date.toLocaleDateString(), 'lllll')
-      // this.viewer.clock.currentTime = this.Cesium.JulianDate.fromDate(nowDate).clone()
-      // console.log(new Date(this.viewer.clock.currentTime).toLocaleDateString(), 'Viewer.clock.currentTime')
-
-      // let allData = czml.GetAllSatellite()
-      // let data = allData['A11']
-      //
-      // const nowDate = new Date(2020, 5, 27, 10, 0, 0)
-      // // const positionA11 = data[0].position.getValue(this.Cesium.JulianDate.fromDate(nowDate))
-      //
-      // this.viewer.clock.currentTime = this.Cesium.JulianDate.fromDate(nowDate).clone()
-      // setTimeout(() => {
-      //   const positionA11 = data[0].position.getValue(this.viewer.clock.currentTime)
-      //   console.log(positionA11, 'positionA11')
-      // }, 0)
-      // this.getDealStarNodeList('2020-11-2 11:40:00', '2020-11-2 12:40:00', '30', '121.30')
-      // czml.GetNearestStarList('2020-11-2 02:20:00', '2020-11-2 04:20:00', '25', '121.30').then((result) => {
-      //   console.log(result, 'result')
-      // })
+      this.czml.openStar(true)
     },
     Logout () {
       // Fixed 退网
@@ -1153,7 +1235,7 @@ export default {
     position: absolute;
     top:0;
     left:0;
-    width: 100vw;
+    width: 100%;
     height: 100vh;
     z-index: 12;
   }
@@ -1229,8 +1311,8 @@ export default {
   }
   .resourceS{
     background-color: white;
-    opacity: 0.8;
-    z-index: 16;
+    opacity: 0.6;
+    z-index: 12;
     position: absolute;
     padding: 1vw;
     top:10vh;
@@ -1249,8 +1331,8 @@ export default {
   }
   .taskS{
     background-color: white;
-    opacity: 0.8;
-    z-index: 16;
+    opacity: 0.6;
+    z-index: 12;
     position: absolute;
     padding: 1vw;
     top:10vh;

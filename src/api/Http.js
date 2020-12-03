@@ -77,7 +77,6 @@ class HttpPort {
   // 资源订阅\取阅同步 pass
   setResourceSubscribe (data, userCode, type) {
     console.log(JSON.stringify(data))
-    console.log('over')
     let formData = new FormData()
     formData.append('resource', JSON.stringify(data))
     formData.append('userCode', userCode)
@@ -96,6 +95,29 @@ class HttpPort {
     })
     return p
   }
+  // 资源内容更新
+  updateResource (taskId, resourceUrl, resourceId, type) {
+    console.log('update resource content')
+    let formData = new FormData()
+    formData.append('resourceId', resourceId)
+    formData.append('taskId', taskId)
+    formData.append('url', resourceUrl)
+    let base = this
+    let url = '/resourceOp?type={0}'
+    url = String.format(url, type)
+    let p = new Promise(function (resolve, reject) {
+      base.http.post(url, formData)
+        .then(res => {
+          if (res.data.type === 'success') {
+            resolve('success')
+          } else {
+            reject(new Error('error'))
+          }
+        })
+    })
+    return p
+  }
+
   // 任务添加,状态更新
   dealTask (data, userCode, type) {
     let base = this

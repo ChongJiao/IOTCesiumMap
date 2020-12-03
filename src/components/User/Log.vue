@@ -27,10 +27,21 @@ export default {
   mounted () {
   },
   methods: {
+    formatDate (date) {
+      var y = date.getFullYear()
+      var m = date.getMonth() + 1
+      m = m < 10 ? ('0' + m) : m
+      var d = date.getDate()
+      d = d < 10 ? ('0' + d) : d
+      var h = date.getHours()
+      var minute = date.getMinutes()
+      minute = minute < 10 ? ('0' + minute) : minute
+      var second = date.getSeconds()
+      second = second < 10 ? ('0' + second) : second
+      return y + '-' + m + '-' + d + ' ' + h + ':' + minute + ':' + second
+    },
     addLogInfo (content) {
-      let date = new Date()
-      let month = date.getMonth() + 1
-      var dateStr = date.getFullYear() + '-' + month + '-' + date.getDate() + ' ' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds()
+      var dateStr = this.formatDate(new Date())
       var obj = {}
       obj['date'] = dateStr
       obj['content'] = content
@@ -46,12 +57,14 @@ export default {
 
 <style scoped>
 .log{
+  user-select: none;
+  pointer-events: none;
   color: #ffffff;
   padding: 2vh;
   position: absolute;
-  z-index: 14;
+  z-index: 12;
   background-color: transparent;
-  top: 67vh;
+  top: 60vh;
   left: 30vw;
   width: 40vw;
   display: inline-block;

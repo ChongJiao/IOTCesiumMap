@@ -153,8 +153,14 @@ class HibernateSqlMap {
         data[i].userCode = userCode
         data[i].status = 1
         let tmp = "(%d, '%s', %d, %d, %d, '%s', '%s', '%s', '%d'),"
+        var taskId = -1
+        if (data[i].taskId === undefined) {
+          taskId = -1
+        } else {
+          taskId = data[i].taskId
+        }
         tmp = util.format(tmp, data[i].resourceId, data[i].resourceName, data[i].resourceLevel,
-          data[i].fatherCode, data[i].status, data[i].userCode, data[i].updateTime, data[i].url, data[i].taskId)
+          data[i].fatherCode, data[i].status, data[i].userCode, data[i].updateTime, data[i].url, taskId)
         sql += tmp
       }
       sql = sql.substr(0, sql.length - 1)
@@ -193,6 +199,27 @@ class HibernateSqlMap {
       }).catch(function (error) {
         reject(new Error('-1'))
         console.log('Error' + error)
+      })
+    })
+    return p
+  }
+
+  // 更新资源信息
+  updateResource (resourceId, taskId, url) {
+    let p = new Promise((resolve, reject) => {
+      let sql = "update %s set %s = %d, %s='%s' where %s = %d"
+      sql = util.format(sql,
+        this.resourceMap.table,
+        this.resourceMap.taskId.columnName, taskId,
+        this.resourceMap.url.columnName, url,
+        this.resourceMap.resourceId.columnName, resourceId)
+      console.log('update resource is ' + sql)
+      let update = this.session.executeSql(sql)
+      update.then(function (result) {
+        resolve(result)
+      }).catch(function (error) {
+        console.log('error: ' + error)
+        reject(new Error('-1'))
       })
     })
     return p

@@ -1,11 +1,11 @@
 <template>
   <div class="body">
     <div class = "head">{{describeText}}数 据 统 计</div>
-    <el-row :gutter="20" style="margin-bottom: 2vh; text-align: left">
+    <el-row :gutter="20" style="text-align: left">
       <el-col :span="16"><div class="grid-content bg-purple">{{describeText}} 总 数</div></el-col>
       <el-col :span="8"><div class="grid-content bg-purple number">{{totalNumber}}</div></el-col>
     </el-row>
-    <el-row :gutter="20" style="margin-bottom: 2vh; text-align: left">
+    <el-row :gutter="20" style=" text-align: left">
       <el-col :span="16"><div class="grid-content bg-purple">已 {{statusText}}</div></el-col>
       <el-col :span="8"><div class="grid-content bg-purple number">{{finishedNumber}}</div></el-col>
     </el-row>
@@ -13,10 +13,12 @@
       <el-col :span="16"><div class="grid-content bg-purple">未 {{statusText}}</div></el-col>
       <el-col :span="8"><div class="grid-content bg-purple number">{{totalNumber - finishedNumber}}</div></el-col>
     </el-row>
-
-    <v-chart ref="chart1" :options="trHisOptions" :autoresize="true" class="myEchart"></v-chart>
-    <v-chart ref="chart2" :options="orgOptions" :autoresize="true" class="myEchart"></v-chart>
-
+    <div class="myEchart">
+      <v-chart ref="chart1" :options="trHisOptions" :autoresize="true" class="CharContent"></v-chart>
+    </div>
+    <div class="myEchart">
+      <v-chart ref="chart2" :options="orgOptions" :autoresize="true" class="CharContent"></v-chart>
+    </div>
   </div>
 </template>
 
@@ -91,14 +93,13 @@ export default {
 
     this.orgOptions = {
       title: {
-        show: true,
-        text: this.describeText + '记录'
+        show: true
       },
       grid: {
         left: '3%',
         right: '3%',
-        bottom: '15%',
-        top: '5%',
+        bottom: '7%',
+        top: '10%',
         containLabel: true
       },
       xAxis: [
@@ -137,7 +138,12 @@ export default {
     this.trHisOptions = {
       title: {
         show: true,
-        text: this.describeText + this.statusText + '统计'
+        text: this.describeText + '统计'
+      },
+      grid: {
+        left: '10%',
+        right: '10%',
+        containLabel: true
       },
       series: [
         {
@@ -170,24 +176,27 @@ export default {
 .head{
   color: #d54d7b;
   font-family: 'Helvetica Neue', sans-serif;
-  font-size: 2.2rem;
+  font-size: 1.8rem;
   font-weight: normal;
   text-align: center;
   text-shadow: 0 1px 1px #fff;
 }
 .number{
-  color: white;
+  color: black;
   font-family: 'Rouge Script', cursive;
   font-size: 2rem;
   font-weight: normal;
   text-shadow: 2px 2px 4px #082b34;
 }
 .myEchart{
-  width: 30vh;
-  height: 30vh;
+  display: block;
+  width: 100%;
+  height: 40%;
   opacity: 1;
-  margin-left: auto;
-  margin-right: auto;
-  margin-top: 2vh;
+}
+.CharContent {
+  margin: auto;
+  width: 90%;
+  height: 90%;
 }
 </style>

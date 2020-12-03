@@ -9,9 +9,9 @@
         <el-form-item label="密码" prop="password">
           <el-input v-model="LoginForm.password" type="password" placeholder="请输入密码" prefix-icon="el-icon-lock"></el-input>
         </el-form-item>
-        <el-form-item label="域名" prop="domain">
-          <el-input v-model="LoginForm.domain" placeholder="请输入域名" prefix-icon="el-icon-position"></el-input>
-        </el-form-item>
+<!--        <el-form-item label="域名" prop="domain">-->
+<!--          <el-input v-model="LoginForm.domain" placeholder="请输入域名" prefix-icon="el-icon-position"></el-input>-->
+<!--        </el-form-item>-->
 <!--        <el-form-item label="IP" prop="ip">-->
 <!--          <el-input v-model="LoginForm.ip" placeholder="请输入ip" prefix-icon="el-icon-coordinate"></el-input>-->
 <!--        </el-form-item>-->
@@ -35,7 +35,6 @@ export default {
       LoginForm: {
         username: '',
         password: '',
-        domain: '',
         ip: '192.168.10.120'
       },
       rules: {
@@ -45,11 +44,11 @@ export default {
         password: [
           { required: true, message: '请输入密码', trigger: 'blur' },
           { min: 0, max: 20, message: '长度在 0 到 20 个字符', trigger: 'blur' }
-        ],
-        domain: [
-          { required: true, message: '请输入服务器域名', trigger: 'blur' },
-          { min: 0, max: 30, message: '长度在 0 到 30 个字符', trigger: 'blur' }
         ]
+        // domain: [
+        //   { required: true, message: '请输入服务器域名', trigger: 'blur' },
+        //   { min: 0, max: 30, message: '长度在 0 到 30 个字符', trigger: 'blur' }
+        // ]
       }
     }
   },
@@ -89,21 +88,21 @@ export default {
       switch (status) {
         case Strophe.Strophe.Status.CONNECTED:
           this.$message('登陆成功')
+          console.log('发送 presence')
+          this.$xmpp.conn.send(Strophe.$pres().tree())
           this.$xmpp.connFlag = true
           this.fullscreenLoading = true
           // 首先要发送一个<presence>给服务器（initial presence）
           this.$xmpp.conn.send(Strophe.$pres().tree())
+          this.$xmpp.SendMessage('test')
           let index = this.LoginForm.username.indexOf('@')
           if (index !== -1) this.LoginForm.username = this.LoginForm.username.substr(0, index)
           this.$xmpp.userCode = this.LoginForm.username
           this.$xmpp.password = this.LoginForm.password
-          this.$xmpp.domain = this.LoginForm.domain
 
           // fixed 记录到cookie中
           this.$xmpp.setCookie('userCode', this.LoginForm.username)
           this.$xmpp.setCookie('password', this.LoginForm.password)
-          this.$xmpp.setCookie('domain', this.LoginForm.domain)
-          this.$xmpp.setCookie('ip', this.LoginForm.ip)
 
           this.$router.push({name: 'CesiumMap'})
           break
@@ -117,7 +116,6 @@ export default {
           this.$xmpp.delCookie('userCode')
           this.$xmpp.delCookie('password')
           this.$xmpp.delCookie('domain')
-          this.$xmpp.delCookie('ip')
           location.reload()
           break
         default:
@@ -131,12 +129,15 @@ export default {
       this.fullscreenLoading = true
       this.$xmpp.BOSH_SERVER = 'http://' + this.LoginForm.ip + ':7070/http-bind/'
       this.$xmpp.httpServer = 'http://' + this.LoginForm.ip + ':8000/GFData/'
-      this.$xmpp.gkName = this.$xmpp.gkBaseName + '@' + this.LoginForm.domain
+      this.$xmpp.gkName = this.$xmpp.gkBaseName + '@' + this.$xmpp.domain
       console.log('login the gkname is ' + this.$xmpp.gkName)
       console.log(this.$xmpp.BOSH_SERVER)
       console.log(this.$xmpp.httpServer)
       this.$xmpp.initial()
-      this.$xmpp.conn.connect(this.LoginForm.username + '@' + this.LoginForm.domain, this.LoginForm.password, this.connectedCallback)
+      console.log(this.LoginForm.username)
+      console.log(this.$xmpp.domain)
+      console.log(this.LoginForm.password)
+      this.$xmpp.conn.connect(this.LoginForm.username + '@' + this.$xmpp.domain, this.LoginForm.password, this.connectedCallback)
     },
     resetForm (formName) {
       this.$refs[formName].resetFields()

@@ -150,6 +150,16 @@ export default {
     }
     return p
   },
+  // 显示轨道
+  openStar (flag) {
+    let allData = this.GetAllSatellite()
+    for (let key in allData) {
+      if (key === 'G1' || key === 'G2' || key === 'G3' || key === 'G4' || key === 'G5') {
+        continue
+      }
+      allData[key][0].show = flag
+    }
+  },
   // 控制倍速
   changeSpeed (speed) {
     runSpeed = speed

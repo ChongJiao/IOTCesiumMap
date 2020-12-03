@@ -6,10 +6,8 @@ class StropheConn {
   // userPassword = '123456'
   userLongitude='88'
   userLatitude='86'
-  // domain = 'desktop-98tu7o0'
-  // userCode = 'user_001'
-  // userPassword = 'user_001'BOSH_SERVER
-  domain = ''
+  domain = 'skh'
+  ip = '192.168.10.120'
   userCode = ''
   userPassword = ''
   BOSH_SERVER = ''
@@ -148,6 +146,7 @@ class StropheConn {
     console.log(msgContent)
     this.SendMessage(msgContent)
   }
+  // 轮询状态
   replyStatus (accessnode) {
     let msgContent = '{"typeid": 21215, "usercode":"{0}", "latitude": "{1}", "longitude": "{2}", "accessnode": "{3}"}'
     // let pos = parseInt(Math.random() * (this.virtualPosition.length - 1), 10)

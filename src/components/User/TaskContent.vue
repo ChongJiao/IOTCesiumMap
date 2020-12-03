@@ -66,7 +66,7 @@
                        min-width="10%">
         <template slot-scope="scope">
           <div v-if="scope.row.status === 1">
-            <div v-if="scope.row.type === 2 || scope.row.type === 4">
+            <div v-if="scope.row.type === 2 || scope.row.type === 4 || scope.row.type === 5">
               <el-button @click="handleViewRes(scope.row)" type="text" size="small">查看结果</el-button>
               <br>
               <el-button @click="handleLinkDownload(scope.row)" type="text" size="small">下载结果</el-button>
